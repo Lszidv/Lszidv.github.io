@@ -1,10 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>芜尽</title><link>https://Lszidv.github.io</link><description>Only love can set us free</description><copyright>芜尽</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/160511559?s=400&amp;u=68ec73daff523efd8652079b221d42e446d01cb6&amp;v=4</url><title>avatar</title><link>https://Lszidv.github.io</link></image><lastBuildDate>Mon, 28 Oct 2024 09:40:49 +0000</lastBuildDate><managingEditor>芜尽</managingEditor><ttl>60</ttl><webMaster>芜尽</webMaster><item><title>[Literature Reading] Classification of Teleseismic Shear Wave Splitting Measurements: A Convolutional Neural Network Approach</title><link>https://Lszidv.github.io/post/%5BLiterature%20Reading%5D%20Classification%20of%20Teleseismic%20Shear%20Wave%20Splitting%20Measurements-%20A%20Convolutional%20Neural%20Network%20Approach.html</link><description>### Classification of Teleseismic Shear Wave Splitting Measurements: A Convolutional Neural Network Approach&#13;
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>芜尽</title><link>https://Lszidv.github.io</link><description>Only love can set us free</description><copyright>芜尽</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/160511559?s=400&amp;u=68ec73daff523efd8652079b221d42e446d01cb6&amp;v=4</url><title>avatar</title><link>https://Lszidv.github.io</link></image><lastBuildDate>Mon, 28 Oct 2024 09:49:17 +0000</lastBuildDate><managingEditor>芜尽</managingEditor><ttl>60</ttl><webMaster>芜尽</webMaster><item><title>[Literature Reading] Classification of Teleseismic Shear Wave Splitting Measurements: A Convolutional Neural Network Approach</title><link>https://Lszidv.github.io/post/%5BLiterature%20Reading%5D%20Classification%20of%20Teleseismic%20Shear%20Wave%20Splitting%20Measurements-%20A%20Convolutional%20Neural%20Network%20Approach.html</link><description>### Classification of Teleseismic Shear Wave Splitting Measurements: A Convolutional Neural Network Approach&#13;
 # Abstract&#13;
   剪切波分裂&#13;
   问题：需要可靠的分裂测量数据，目视效率低&#13;
   方法：CNN 人工识别数据训练，合成数据测试，实际数据对比&#13;
   应用：Boardband seismic data recorded in south central Alaska&#13;
+&#13;
+# Introduction&#13;
+  &#13;
 &#13;
 &#13;
   &#13;
