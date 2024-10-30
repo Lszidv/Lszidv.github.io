@@ -58,11 +58,15 @@
 ![training history](https://github.com/user-attachments/assets/e625fb4d-5eaf-48cc-b6bf-e92368d059dd)
 
 #  4. Testing With Synthetic SWS Measurements
-    使用合成数据了解CNN在不同参数下的表现
-    
+  使用合成数据了解CNN在不同参数下的表现（SWS合成数据集   Kong et al.  
+https://doi.org/10.1785/0120140108） 
+   ![公式](https://latex.codecogs.com/png.latex?R(t)%20%3D%20A_0%20%5Csin(2%5Cpi%20f%20t)%20e%5E%7B-%5Calpha%20t%7D)
+
+
 
 
   
 
+# 5. Application to SWS Measurements in South Central Alaska
 
 [Geophysical Research Letters - 2022 - Zhang - Classification of Teleseismic Shear Wave Splitting Measurements  A.pdf](https://github.com/user-attachments/files/17540440/Geophysical.Research.Letters.-.2022.-.Zhang.-.Classification.of.Teleseismic.Shear.Wave.Splitting.Measurements.A.pdf)
