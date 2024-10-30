@@ -142,11 +142,13 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 模型设计：8个一维卷积层和一个全连接层。（Following Perol et al. (2018)）<br>
 层间使用Relu激活函数，缓解梯度消失<br>
 输出参数组合能否被接受的概率<br>
-交叉熵函数作为损失函数 （#）<br>
+交叉熵函数作为损失函数 （#..）<br>
 batch_size = 100, epochs = 64  --&gt; “In each iteration, 100 measurements are randomly selected to train the CNN and each measurement in the training data set is used for 64 times.”</p>
 <p>The training history of accuracy and loss:</p>
 <p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/e625fb4d-5eaf-48cc-b6bf-e92368d059dd"><img src="https://github.com/user-attachments/assets/e625fb4d-5eaf-48cc-b6bf-e92368d059dd" alt="training history" style="max-width: 100%;"></a></p>
 <h1>4. Testing With Synthetic SWS Measurements</h1>
+<pre class="notranslate"><code class="notranslate">使用合成数据了解CNN在不同参数下的表现
+</code></pre>
 <p><a href="https://github.com/user-attachments/files/17540440/Geophysical.Research.Letters.-.2022.-.Zhang.-.Classification.of.Teleseismic.Shear.Wave.Splitting.Measurements.A.pdf">Geophysical Research Letters - 2022 - Zhang - Classification of Teleseismic Shear Wave Splitting Measurements  A.pdf</a></p></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 

@@ -50,7 +50,7 @@
   模型设计：8个一维卷积层和一个全连接层。（Following Perol et al. (2018)）
   层间使用Relu激活函数，缓解梯度消失
   输出参数组合能否被接受的概率
-  交叉熵函数作为损失函数 （#）
+  交叉熵函数作为损失函数 （#..）
   batch_size = 100, epochs = 64  --> “In each iteration, 100 measurements are randomly selected to train the CNN and each measurement in the training data set is used for 64 times.”
   
    The training history of accuracy and loss:   
@@ -58,7 +58,8 @@
 ![training history](https://github.com/user-attachments/assets/e625fb4d-5eaf-48cc-b6bf-e92368d059dd)
 
 #  4. Testing With Synthetic SWS Measurements
-  
+    使用合成数据了解CNN在不同参数下的表现
+    
 
 
   
