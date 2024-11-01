@@ -60,10 +60,28 @@
 #  4. Testing With Synthetic SWS Measurements
   使用合成数据了解CNN在不同参数下的表现（SWS合成数据集   Kong et al.  
 https://doi.org/10.1785/0120140108）
-   
-   ![公式](https://latex.codecogs.com/png.latex?R(t)%20%3D%20A_0%20%5Csin(2%5Cpi%20f%20t)%20e%5E%7B-%5Calpha%20t%7D)
+   定义未分裂的XKS波在时间t上的径向分量：
 
+  $$ R(t) = A_0 \sin(2 \pi f t) e^{-\alpha t} $$
 
+  A ：这是未分裂的XKS波的振幅，给定为5000。
+  f ：频率，取值为0.125 Hz。
+  α：衰减因子，随机在0.1到0.5之间变化。
+
+  快波分量，即未分裂径向分量R(t)旋转角度𝜃后得到：
+
+  $$ S_f(t) = R(t) \cos(\theta) $$
+
+  慢波分量，即时间延迟后未分裂径向分量R(t-δt)旋转角度𝜃后得到：
+
+  $$ S_s(t) = -R(t - \delta t) \sin(\theta) $$
+
+  ```
+   分裂的两个波相互正交，使用sin和cos表示，相差90°的相位
+   𝜃是快波极化方向 𝜙和后方位角（）的夹角
+
+  ```
+  
 
 
   

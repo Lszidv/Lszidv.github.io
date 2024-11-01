@@ -148,8 +148,20 @@ batch_size = 100, epochs = 64  --&gt; “In each iteration, 100 measurements are
 <p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/e625fb4d-5eaf-48cc-b6bf-e92368d059dd"><img src="https://github.com/user-attachments/assets/e625fb4d-5eaf-48cc-b6bf-e92368d059dd" alt="training history" style="max-width: 100%;"></a></p>
 <h1>4. Testing With Synthetic SWS Measurements</h1>
 <p>使用合成数据了解CNN在不同参数下的表现（SWS合成数据集   Kong et al.<br>
-<a href="https://doi.org/10.1785/0120140108%EF%BC%89" rel="nofollow">https://doi.org/10.1785/0120140108）</a></p>
-<p><a target="_blank" rel="noopener noreferrer nofollow" href="https://camo.githubusercontent.com/de02db665fa24833e4850092e139541347dff103133187a07c16317cf2fb1d90/68747470733a2f2f6c617465782e636f6465636f67732e636f6d2f706e672e6c617465783f52287429253230253344253230415f3025323025354373696e28322535437069253230662532307429253230652535452537422d253543616c70686125323074253744"><img src="https://camo.githubusercontent.com/de02db665fa24833e4850092e139541347dff103133187a07c16317cf2fb1d90/68747470733a2f2f6c617465782e636f6465636f67732e636f6d2f706e672e6c617465783f52287429253230253344253230415f3025323025354373696e28322535437069253230662532307429253230652535452537422d253543616c70686125323074253744" alt="公式" data-canonical-src="https://latex.codecogs.com/png.latex?R(t)%20%3D%20A_0%20%5Csin(2%5Cpi%20f%20t)%20e%5E%7B-%5Calpha%20t%7D" style="max-width: 100%;"></a></p>
+<a href="https://doi.org/10.1785/0120140108%EF%BC%89" rel="nofollow">https://doi.org/10.1785/0120140108）</a><br>
+定义未分裂的XKS波在时间t上的径向分量：</p>
+<p>$$ R(t) = A_0 \sin(2 \pi f t) e^{-\alpha t} $$</p>
+<p>A ：这是未分裂的XKS波的振幅，给定为5000。<br>
+f ：频率，取值为0.125 Hz。<br>
+α：衰减因子，随机在0.1到0.5之间变化。</p>
+<p>快波分量，即未分裂径向分量R(t)旋转角度𝜃后得到：</p>
+<p>$$ S_f(t) = R(t) \cos(\theta) $$</p>
+<p>慢波分量，即时间延迟后未分裂径向分量R(t-δt)旋转角度𝜃后得到：</p>
+<p>$$ S_s(t) = -R(t - \delta t) \sin(\theta) $$</p>
+<pre class="notranslate"><code class="notranslate"> 分裂的两个波相互正交，使用sin和cos表示，相差90°的相位
+ 𝜃是快波极化方向 𝜙和后方位角（）的夹角
+
+</code></pre>
 <h1>5. Application to SWS Measurements in South Central Alaska</h1>
 <p><a href="https://github.com/user-attachments/files/17540440/Geophysical.Research.Letters.-.2022.-.Zhang.-.Classification.of.Teleseismic.Shear.Wave.Splitting.Measurements.A.pdf">Geophysical Research Letters - 2022 - Zhang - Classification of Teleseismic Shear Wave Splitting Measurements  A.pdf</a></p></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
@@ -210,7 +222,11 @@ console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 
 <script>
 document.getElementById("pathHome").setAttribute("d",IconList["home"]);
 document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
-
+cmButton=document.getElementById("cmButton");
+    span=document.createElement("span");
+    span.setAttribute("class","Counter");
+    span.innerHTML="1";
+    cmButton.appendChild(span);
 
 
 function openComments(){
@@ -315,6 +331,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 </script>
-
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 </html>
