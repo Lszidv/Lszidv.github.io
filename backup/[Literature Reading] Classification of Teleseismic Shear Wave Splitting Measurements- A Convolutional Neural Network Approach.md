@@ -59,7 +59,8 @@
 
 #  4. Testing With Synthetic SWS Measurements
   使用合成数据了解CNN在不同参数下的表现（SWS合成数据集   Kong et al.  
-https://doi.org/10.1785/0120140108） 
+https://doi.org/10.1785/0120140108）
+   
    ![公式](https://latex.codecogs.com/png.latex?R(t)%20%3D%20A_0%20%5Csin(2%5Cpi%20f%20t)%20e%5E%7B-%5Calpha%20t%7D)
 
 
