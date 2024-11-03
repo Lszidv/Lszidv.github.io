@@ -181,15 +181,23 @@ f ：频率，取值为0.125 Hz。<br>
 <p>将训练好的CNN应用于阿拉斯加中南部地区的宽频地震数据<br>
 数据来自IRIS,预处理流程（#）<br>
 从127个台站的地震数据获得19960对剪切波分裂参数（图a）<br>
-根据信噪比自动排序方法（）筛选出6314对“potentially acceptable“参数（图b）<br>
-使用CNN进行分类标记（图c）<br>
+根据信噪比自动排序方法（Liu et al. (2008)）筛选出6314对“potentially acceptable“参数（图b）<br>
+使用CNN进行分类标记，CNN 判定 124 个台站中的 2,668 对测量为“可接受”（图c）<br>
 <strong>·对CNN结果进行筛选</strong><br>
 （1）排除BAZ与快波极化方向小于15°的测量（图d）<br>
 （2）排除快波极化方向和延迟时间标准差较大的测量(图e)<br>
 （3）排除分裂时间大于2s的测量（图f）<br>
-最后剩余115个台站的1530对测量数据<br>
+最后剩余115个台站的1530对测量数据，经过筛选，测量数据逐渐减少，但是同一台站的测量结果一致性得到提升。<br>
 <a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/93944b5f-beef-4865-9c65-ab7a995a79f8"><img src="https://github.com/user-attachments/assets/93944b5f-beef-4865-9c65-ab7a995a79f8" alt="筛选" style="max-width: 100%;"></a></p>
 <h1>6. Discussion</h1>
+<p><strong>·与人工测量相对比</strong><br>
+在图3b步骤后，人工进行验证，得到106 个台站中得971 条确认的有效测量，其中，98.1%被CNN识别为可接受。因此，可以将人工验证的步骤置于CNN识别之后。<br>
+对人工验证的测量采用相同(1)(2)(3)筛选步骤,相比之下CNN仅遗漏5.7%，遗漏的测量数据集中在区域 B，“where the interaction of two flow systems with nearly orthogonal directions”(Yang et al., 2021).</p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/d240cc06-2771-435e-84a5-b381cc61bdec"><img src="https://github.com/user-attachments/assets/d240cc06-2771-435e-84a5-b381cc61bdec" alt="结果" style="max-width: 100%;"></a></p>
+<pre class="notranslate"><code class="notranslate">图 (b) 和图 (c) 表明，CNN 和人工操作员的结果在台站平均快波方向和分裂时间上高度相似，但快波方向的相似性更高
+图 (d) 和图 (e) 显示了 CNN 可能误判了一些质量不佳的测量为“可接受”，特别是在 B 区域，这些误判导致了 CNN 和人工结果在分裂时间上的相关性下降。
+</code></pre>
+<p><strong>· CNN 方法与非机器学习的全自动剪切波分裂测量方法（SplitRacerAUTO）的对比</strong></p>
 <p><a href="https://github.com/user-attachments/files/17540440/Geophysical.Research.Letters.-.2022.-.Zhang.-.Classification.of.Teleseismic.Shear.Wave.Splitting.Measurements.A.pdf">Geophysical Research Letters - 2022 - Zhang - Classification of Teleseismic Shear Wave Splitting Measurements  A.pdf</a></p></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
