@@ -10,7 +10,7 @@
         let theme = localStorage.getItem("meek_theme") || "light";
         document.documentElement.setAttribute("data-color-mode", theme);
     </script>
-<meta name="description" content="### Classification of Teleseismic Shear Wave Splitting Measurements: A Convolutional Neural Network Approach
+<meta name="description" content="## Classification of Teleseismic Shear Wave Splitting Measurements: A Convolutional Neural Network Approach
 # Abstract
   剪切波分裂
   问题：需要可靠的分裂测量数据，目视效率低
@@ -20,7 +20,7 @@
 # 1.Introduction
   XKS波在各向异性介质中会分裂成两个正交极化的快波和慢波。">
 <meta property="og:title" content="[Literature Reading] Classification of Teleseismic Shear Wave Splitting Measurements: A Convolutional Neural Network Approach">
-<meta property="og:description" content="### Classification of Teleseismic Shear Wave Splitting Measurements: A Convolutional Neural Network Approach
+<meta property="og:description" content="## Classification of Teleseismic Shear Wave Splitting Measurements: A Convolutional Neural Network Approach
 # Abstract
   剪切波分裂
   问题：需要可靠的分裂测量数据，目视效率低
@@ -99,7 +99,7 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </div>
 </div>
     <div id="content">
-<div class="markdown-body" id="postBody"><h3>Classification of Teleseismic Shear Wave Splitting Measurements: A Convolutional Neural Network Approach</h3>
+<div class="markdown-body" id="postBody"><h2>Classification of Teleseismic Shear Wave Splitting Measurements: A Convolutional Neural Network Approach</h2>
 <h1>Abstract</h1>
 <p>剪切波分裂<br>
 问题：需要可靠的分裂测量数据，目视效率低<br>
@@ -149,6 +149,7 @@ batch_size = 100, epochs = 64  --&gt; “In each iteration, 100 measurements are
 <h1>4. Testing With Synthetic SWS Measurements</h1>
 <p>使用合成数据了解CNN在不同参数下的表现（SWS合成数据集   Kong et al.<br>
 <a href="https://doi.org/10.1785/0120140108%EF%BC%89" rel="nofollow">https://doi.org/10.1785/0120140108）</a><br>
+<strong>·  定义快慢波：</strong><br>
 定义未分裂的XKS波在时间t上的径向分量：</p>
 <p>$$ R(t) = A_0 \sin(2 \pi f t) e^{-\alpha t} $$</p>
 <p>A ：这是未分裂的XKS波的振幅，给定为5000。<br>
@@ -159,10 +160,36 @@ f ：频率，取值为0.125 Hz。<br>
 <p>慢波分量，即时间延迟后未分裂径向分量R(t-δt)旋转角度𝜃后得到：</p>
 <p>$$ S_s(t) = -R(t - \delta t) \sin(\theta) $$</p>
 <pre class="notranslate"><code class="notranslate"> 分裂的两个波相互正交，使用sin和cos表示，相差90°的相位
- 𝜃是快波极化方向 𝜙和后方位角（）的夹角
-
+ 𝜃是快波极化方向 𝜙和后方位角（台站到地震事件与地理北向的夹角）的夹角
 </code></pre>
+<p><strong>·震中距离和震源深度的随机设定：</strong><br>
+震中距随机设定到90°到120°，对应远震<br>
+震源深度随机设定到20到50km，对应浅源地震<br>
+<strong>·分量投影与随机噪声的添加：</strong><br>
+将快慢波分量投影到N-S和E-W方向上，添加随机噪声，模拟真实地震信号<br>
+信噪比（SNR) = maxR(t) / maxN(t)<br>
+<strong>·角度𝜃与测量准确性之间的关系：</strong><br>
+数学上证明原始横向分量上的能量和分裂参数的可靠性都依赖于角度𝜃(Silver &amp; Chan, 1991 <a href="https://doi.org/10.1029/91JB00899" rel="nofollow">https://doi.org/10.1029/91JB00899</a> )<br>
+以90°为周期，当𝜃小于15°或者大于75°时，快慢波分裂微弱<br>
+<strong>·通过合成数据，进一步量化角度𝜃与测量可靠性之间的关系</strong><br>
+生成72组合成地震记录，SNR在4到10之间变化，每组包含1000条测量数据，每组的baz为(n-1)×5，确保从0°开始，包含了全范围。<br>
+快波极化方向设定为0，baz等同于角度𝜃<br>
+当baz与快或慢波角度相差15°以内（即接近0°或者90°）时，CNN识别为可接受的分类迅速减少<br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/f34dd2d2-c719-4e70-8602-07d748564bf2"><img src="https://github.com/user-attachments/assets/f34dd2d2-c719-4e70-8602-07d748564bf2" alt="baz,snr" style="max-width: 100%;"></a><br>
+当信噪比≥2.5时，CNN的准确率在90%以上，当信噪比≥6.5时，在97%以上。</p>
 <h1>5. Application to SWS Measurements in South Central Alaska</h1>
+<p>将训练好的CNN应用于阿拉斯加中南部地区的宽频地震数据<br>
+数据来自IRIS,预处理流程（#）<br>
+从127个台站的地震数据获得19960对剪切波分裂参数（图a）<br>
+根据信噪比自动排序方法（）筛选出6314对“potentially acceptable“参数（图b）<br>
+使用CNN进行分类标记（图c）<br>
+<strong>·对CNN结果进行筛选</strong><br>
+（1）排除BAZ与快波极化方向小于15°的测量（图d）<br>
+（2）排除快波极化方向和延迟时间标准差较大的测量(图e)<br>
+（3）排除分裂时间大于2s的测量（图f）<br>
+最后剩余115个台站的1530对测量数据<br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/93944b5f-beef-4865-9c65-ab7a995a79f8"><img src="https://github.com/user-attachments/assets/93944b5f-beef-4865-9c65-ab7a995a79f8" alt="筛选" style="max-width: 100%;"></a></p>
+<h1>6. Discussion</h1>
 <p><a href="https://github.com/user-attachments/files/17540440/Geophysical.Research.Letters.-.2022.-.Zhang.-.Classification.of.Teleseismic.Shear.Wave.Splitting.Measurements.A.pdf">Geophysical Research Letters - 2022 - Zhang - Classification of Teleseismic Shear Wave Splitting Measurements  A.pdf</a></p></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 

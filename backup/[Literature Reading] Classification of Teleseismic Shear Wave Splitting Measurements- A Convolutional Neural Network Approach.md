@@ -1,4 +1,4 @@
-### Classification of Teleseismic Shear Wave Splitting Measurements: A Convolutional Neural Network Approach
+## Classification of Teleseismic Shear Wave Splitting Measurements: A Convolutional Neural Network Approach
 # Abstract
   剪切波分裂
   问题：需要可靠的分裂测量数据，目视效率低
@@ -60,6 +60,7 @@
 #  4. Testing With Synthetic SWS Measurements
   使用合成数据了解CNN在不同参数下的表现（SWS合成数据集   Kong et al.  
 https://doi.org/10.1785/0120140108）
+ **·  定义快慢波：**
    定义未分裂的XKS波在时间t上的径向分量：
 
   $$ R(t) = A_0 \sin(2 \pi f t) e^{-\alpha t} $$
@@ -78,14 +79,39 @@ https://doi.org/10.1785/0120140108）
 
   ```
    分裂的两个波相互正交，使用sin和cos表示，相差90°的相位
-   𝜃是快波极化方向 𝜙和后方位角（）的夹角
-
+   𝜃是快波极化方向 𝜙和后方位角（台站到地震事件与地理北向的夹角）的夹角
   ```
-  
-
-
-  
+ **·震中距离和震源深度的随机设定：**
+  震中距随机设定到90°到120°，对应远震
+  震源深度随机设定到20到50km，对应浅源地震
+ **·分量投影与随机噪声的添加：**
+  将快慢波分量投影到N-S和E-W方向上，添加随机噪声，模拟真实地震信号
+  信噪比（SNR) = maxR(t) / maxN(t)
+  **·角度𝜃与测量准确性之间的关系：**
+  数学上证明原始横向分量上的能量和分裂参数的可靠性都依赖于角度𝜃(Silver & Chan, 1991 https://doi.org/10.1029/91JB00899 )
+  以90°为周期，当𝜃小于15°或者大于75°时，快慢波分裂微弱
+  **·通过合成数据，进一步量化角度𝜃与测量可靠性之间的关系**
+   生成72组合成地震记录，SNR在4到10之间变化，每组包含1000条测量数据，每组的baz为(n-1)×5，确保从0°开始，包含了全范围。
+  快波极化方向设定为0，baz等同于角度𝜃
+  当baz与快或慢波角度相差15°以内（即接近0°或者90°）时，CNN识别为可接受的分类迅速减少
+![baz,snr](https://github.com/user-attachments/assets/f34dd2d2-c719-4e70-8602-07d748564bf2)
+    当信噪比≥2.5时，CNN的准确率在90%以上，当信噪比≥6.5时，在97%以上。
 
 # 5. Application to SWS Measurements in South Central Alaska
+  将训练好的CNN应用于阿拉斯加中南部地区的宽频地震数据
+  数据来自IRIS,预处理流程（#）
+  从127个台站的地震数据获得19960对剪切波分裂参数（图a）
+  根据信噪比自动排序方法（）筛选出6314对“potentially acceptable“参数（图b）
+  使用CNN进行分类标记（图c）
+  **·对CNN结果进行筛选**
+      （1）排除BAZ与快波极化方向小于15°的测量（图d）
+      （2）排除快波极化方向和延迟时间标准差较大的测量(图e)
+      （3）排除分裂时间大于2s的测量（图f）
+   最后剩余115个台站的1530对测量数据
+![筛选](https://github.com/user-attachments/assets/93944b5f-beef-4865-9c65-ab7a995a79f8)
+
+# 6. Discussion
+
+
 
 [Geophysical Research Letters - 2022 - Zhang - Classification of Teleseismic Shear Wave Splitting Measurements  A.pdf](https://github.com/user-attachments/files/17540440/Geophysical.Research.Letters.-.2022.-.Zhang.-.Classification.of.Teleseismic.Shear.Wave.Splitting.Measurements.A.pdf)
