@@ -1,4 +1,4 @@
-## Classification of Teleseismic Shear Wave Splitting Measurements: A Convolutional Neural Network Approach
+# Classification of Teleseismic Shear Wave Splitting Measurements: A Convolutional Neural Network Approach
 # Abstract
   剪切波分裂
   问题：需要可靠的分裂测量数据，目视效率低
