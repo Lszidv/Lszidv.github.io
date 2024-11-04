@@ -122,7 +122,7 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 设计CNN，用于验证分裂参数是否有效（“good”,“fair” ,“unacceptable” and “null” ）</p>
 <h1>2. Training Data Set and Preprocessing</h1>
 <p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/0ded0b27-4840-42a7-9c7a-d7faf384e17d"><img src="https://github.com/user-attachments/assets/0ded0b27-4840-42a7-9c7a-d7faf384e17d" alt="台站" style="max-width: 100%;"></a></p>
-<p>数据：美国本土及其周边区域的1,108个观测台站86,903个已发表的、经过人工标注的XKS剪切波分裂（SWS）测量数据，人工测量并分级<br>
+<p>数据：美国本土及其周边区域的1,108个观测台站86,903个已发表的、经过人工标注的XKS剪切波分裂（SWS）测量数据，人工测量并分级（ <a href="https://doi.org/10.1002/2014GC005267%EF%BC%89" rel="nofollow">https://doi.org/10.1002/2014GC005267）</a><br>
 #1<br>
 标准：</p>
 <pre class="notranslate"><code class="notranslate">1.快慢波在矫正过程中的拟合程度[波形叠加和频谱匹配（分裂后的快慢波频谱应相似，即频谱形状和峰值频率一致）]
@@ -197,7 +197,31 @@ f ：频率，取值为0.125 Hz。<br>
 <pre class="notranslate"><code class="notranslate">图 (b) 和图 (c) 表明，CNN 和人工操作员的结果在台站平均快波方向和分裂时间上高度相似，但快波方向的相似性更高
 图 (d) 和图 (e) 显示了 CNN 可能误判了一些质量不佳的测量为“可接受”，特别是在 B 区域，这些误判导致了 CNN 和人工结果在分裂时间上的相关性下降。
 </code></pre>
-<p><strong>· CNN 方法与非机器学习的全自动剪切波分裂测量方法（SplitRacerAUTO）的对比</strong></p>
+<p><strong>· CNN 方法与非机器学习的全自动剪切波分裂测量方法（SplitRacerAUTO）的对比</strong><br>
+将CNN结果与非机器学习的自动化方法 SplitRacerAUTO（<a href="https://doi.org/10.1016/j.cageo.2021.104961)%E5%AF%B9%E6%AF%94" rel="nofollow">https://doi.org/10.1016/j.cageo.2021.104961)对比</a><br>
+相同数据集与预处理步骤，CNN效果更好 [ 绘制与图3相同样式的SWS测量参数图 ，置于补充信息中]</p>
+<p><strong>· CNN 的局限与进一步工作</strong><br>
+CNN无法自动选择时窗的开始与结束时间，带通滤波频率范围<br>
+当震中距（D = 𝜃×R）小于90°时，S波到达台站较早，可能会混入XKS时窗<br>
+解决思路：①在预处理阶段设计一个CNN，用于拾取XKS波到时，从而准确设置XKS波时窗起点；②非 CNN 方法确定最佳 XKS 窗口，例如 Link 等人（2022）提出的时频谱技术。</p>
+<h1>7.Conclusions</h1>
+<p>研究基于已发表的人工标记数据集建立的 CNN 模型在自动分类剪切波分裂测量中的应用，强调了其在高信噪比条件下的优异性能，以及在阿拉斯加数据上的成功应用，表明基于 CNN 的方法在提高测量效率方面的潜力。</p>
+<h1>7.Data Availability Statement</h1>
+<p>程序和模型： <a href="https://github.com/YW-Zhang94/CNN-SWS.git">https://github.com/YW-Zhang94/CNN-SWS.git</a><br>
+地震数据（SAC）：<a href="https://figshare.com/articles/dataset/CNN_SWS_data/19904833.%EF%BC%882.1G%EF%BC%89" rel="nofollow">https://figshare.com/articles/dataset/CNN_SWS_data/19904833.（2.1G）</a><br>
+波形数据：(<a href="https://ds.iris.edu/ds/nodes/dmc/" rel="nofollow">https://ds.iris.edu/ds/nodes/dmc/</a>, last accessed March 2019)，从IRIS获取<br>
+under the main network codes of<br>
+AK (<a href="https://doi.org/10.7914/SN/AK" rel="nofollow">https://doi.org/10.7914/SN/AK</a>),<br>
+AT (<a href="https://doi.org/10.7914/SN/AT" rel="nofollow">https://doi.org/10.7914/SN/AT</a>),<br>
+DW (<a href="https://doi.org/10.7914/SN/DW" rel="nofollow">https://doi.org/10.7914/SN/DW</a>),<br>
+IM (International Miscellaneous Stations),<br>
+IU (<a href="https://doi.org/10.7914/SN/IU" rel="nofollow">https://doi.org/10.7914/SN/IU</a>),<br>
+TA (<a href="https://doi.org/10.7914/SN/TA" rel="nofollow">https://doi.org/10.7914/SN/TA</a>),<br>
+XE (<a href="https://doi.org/10.7914/SN/XE_1999" rel="nofollow">https://doi.org/10.7914/SN/XE_1999</a>),<br>
+XR (<a href="https://doi.org/10.7914/SN/XR_2004" rel="nofollow">https://doi.org/10.7914/SN/XR_2004</a>),<br>
+XV (<a href="https://doi.org/10.7914/SN/XV_2014" rel="nofollow">https://doi.org/10.7914/SN/XV_2014</a>),<br>
+YE (<a href="https://doi.org/10.7914/SN/YE_2011" rel="nofollow">https://doi.org/10.7914/SN/YE_2011</a>),<br>
+YV (<a href="https://doi.org/10.7914/SN/YV_2006" rel="nofollow">https://doi.org/10.7914/SN/YV_2006</a>).</p>
 <p><a href="https://github.com/user-attachments/files/17540440/Geophysical.Research.Letters.-.2022.-.Zhang.-.Classification.of.Teleseismic.Shear.Wave.Splitting.Measurements.A.pdf">Geophysical Research Letters - 2022 - Zhang - Classification of Teleseismic Shear Wave Splitting Measurements  A.pdf</a></p></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 

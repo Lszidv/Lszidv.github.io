@@ -28,7 +28,7 @@
 # 2. Training Data Set and Preprocessing
 ![台站](https://github.com/user-attachments/assets/0ded0b27-4840-42a7-9c7a-d7faf384e17d)
 
-  数据：美国本土及其周边区域的1,108个观测台站86,903个已发表的、经过人工标注的XKS剪切波分裂（SWS）测量数据，人工测量并分级
+  数据：美国本土及其周边区域的1,108个观测台站86,903个已发表的、经过人工标注的XKS剪切波分裂（SWS）测量数据，人工测量并分级（ https://doi.org/10.1002/2014GC005267）
   #1
   标准：
   ```
@@ -121,18 +121,33 @@ https://doi.org/10.1785/0120140108）
     图 (d) 和图 (e) 显示了 CNN 可能误判了一些质量不佳的测量为“可接受”，特别是在 B 区域，这些误判导致了 CNN 和人工结果在分裂时间上的相关性下降。
 
   **· CNN 方法与非机器学习的全自动剪切波分裂测量方法（SplitRacerAUTO）的对比**
+  将CNN结果与非机器学习的自动化方法 SplitRacerAUTO（https://doi.org/10.1016/j.cageo.2021.104961)对比
+  相同数据集与预处理步骤，CNN效果更好 [ 绘制与图3相同样式的SWS测量参数图 ，置于补充信息中]
+  
+  **· CNN 的局限与进一步工作**
+    CNN无法自动选择时窗的开始与结束时间，带通滤波频率范围
+    当震中距（D = 𝜃×R）小于90°时，S波到达台站较早，可能会混入XKS时窗
+    解决思路：①在预处理阶段设计一个CNN，用于拾取XKS波到时，从而准确设置XKS波时窗起点；②非 CNN 方法确定最佳 XKS 窗口，例如 Link 等人（2022）提出的时频谱技术。
 
+# 7.Conclusions    
+  研究基于已发表的人工标记数据集建立的 CNN 模型在自动分类剪切波分裂测量中的应用，强调了其在高信噪比条件下的优异性能，以及在阿拉斯加数据上的成功应用，表明基于 CNN 的方法在提高测量效率方面的潜力。
 
-
-
-
-
-
-
-
-
-
-
+# 7.Data Availability Statement 
+  程序和模型： https://github.com/YW-Zhang94/CNN-SWS.git
+  地震数据（SAC）：https://figshare.com/articles/dataset/CNN_SWS_data/19904833.（2.1G）
+  波形数据：(https://ds.iris.edu/ds/nodes/dmc/, last accessed March 2019)，从IRIS获取
+    under the main network codes of 
+    AK (https://doi.org/10.7914/SN/AK),
+    AT (https://doi.org/10.7914/SN/AT), 
+    DW (https://doi.org/10.7914/SN/DW), 
+    IM (International Miscellaneous Stations),
+    IU (https://doi.org/10.7914/SN/IU),
+    TA (https://doi.org/10.7914/SN/TA), 
+    XE (https://doi.org/10.7914/SN/XE_1999), 
+    XR (https://doi.org/10.7914/SN/XR_2004),
+    XV (https://doi.org/10.7914/SN/XV_2014),
+     YE (https://doi.org/10.7914/SN/YE_2011), 
+    YV (https://doi.org/10.7914/SN/YV_2006).
 
 
 [Geophysical Research Letters - 2022 - Zhang - Classification of Teleseismic Shear Wave Splitting Measurements  A.pdf](https://github.com/user-attachments/files/17540440/Geophysical.Research.Letters.-.2022.-.Zhang.-.Classification.of.Teleseismic.Shear.Wave.Splitting.Measurements.A.pdf)
