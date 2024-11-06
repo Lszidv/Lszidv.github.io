@@ -260,7 +260,7 @@ for k in range(3):
                         nev_bad.append(nev)
 ```
 ```
-# 数据处理
+# 数据增强（通过倍增来平衡数据集中的类别数量）
 npts = int(len(X_bad) / len(X_good))
 class_weight = {0: ac, 1: uc}
 if byn == 0: npts = 1
@@ -278,10 +278,10 @@ for i in range(len(X_bad)):
     X_nst.append(nst_bad[i])
     Y_nev.append(nev_bad[i])
 
+# 数据随机化与划分
 rann0 = random.sample(range(len(X)), len(X))
 X_rand = [X[i] for i in rann0]
 Y_rand = [Y[i] for i in rann0]
-
 x_train, y_train = np.array(X_rand[:int(len(X) * 0.8)]), np.array(Y_rand[:int(len(Y) * 0.8)])
 x_test, y_test = np.array(X_rand[int(len(X) * 0.8):]), np.array(Y_rand[int(len(Y) * 0.8):])
 
@@ -297,6 +297,7 @@ model.add(Dense(2, activation='softmax'))
 model.compile(loss='categorical_crossentropy', optimizer=keras.optimizers.Adam(lr=0.001), metrics=['accuracy'])
 H = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, class_weight=class_weight, validation_data=(x_test, y_test))
 
+# 可视化训练和验证精度
 fig, ax = plt.subplots()
 plt.plot(H.history['acc'], label='train_acc')
 plt.plot(H.history['val_acc'], label='val_acc')
