@@ -10,35 +10,627 @@
         let theme = localStorage.getItem("meek_theme") || "light";
         document.documentElement.setAttribute("data-color-mode", theme);
     </script>
-<meta name="description" content="## 关于论文“Classification of Teleseismic Shear Wave Splitting Measurements: A Convolutional Neural Network Approach”代码部分的讨论
+<meta name="description" content="## 论文“Classification of Teleseismic Shear Wave Splitting Measurements: A Convolutional Neural Network Approach”代码部分
 
 ### 文件结构
+```
+CNN-SWS-main/
+├── 1_data/                                # 数据文件夹
+│   ├── Out_Bin/                           # 存储 XKS.out 文件，.out文件包含三列，台站和网络名称（stname_NW）、事件名称（EQ123456789）、测量质量（A 和 B 表示可接受，其余表示不可接受）      
+│   │   ├── PKS.out                       
+│   │   ├── SKK.out
+│   │   └── SKS.out
+│   └── PKSOut/                            # 存储不同台站和事件的波形数据
+│       ├── 109Cxx_TA/                     # 台站文件夹
+│       │   ├── EQ140250514/               # 事件文件夹
+│       │   │   ├── 109Cxx_TA.rl           # 校正径向分量
+│       │   │   ├── 109Cxx_TA.ro           # 原始径向分量
+│       │   │   ├── 109Cxx_TA.tl           # 校正横向分量
+│       │   │   └── 109Cxx_TA.to           # 原始横向分量
+│       │   ├── EQ********/               #其他事件
+│       ├── **************                   # 其他台站文件夹
+│   ├── PKS.list                               # Out_Bin/PKS.out
+│   ├── SKK.list                               # Out_Bin/SKK.out
+│   └── SKS.list                               # Out_Bin/SKS.out
+│
+├── load/                                   # 数据加载和预测文件夹
+│   ├── 2_load/                             # 加载输出文件夹
+│   │   └── Outp/                           # 存放加载预测结果
+│   ├── load.py                             # 数据加载和预测脚本
+│   └── parameter.list                      # 加载过程参数
+│
+├── model/                                  # 模型文件夹
+│   └── CNN_XKS.h5                          # 已训练好的模型权重
+│
+├── train/                                  # 模型训练文件夹
+│   ├── 2_train/                            # 训练输出文件夹
+│   │   ├── CNN_XKS.h5                      # 训练后的模型权重
+│   │   ├── parameters.list                 # 训练过程参数(单独写出来，方便改动)
+│   │   ├── train_64.acc                    # 训练精度记录
+│   │   ├── train_64.loss                   # 训练损失记录
+│   │   ├── train_64.val_acc                # 验证精度记录
+│   │   └── train_64.val_loss               # 验证损失记录
+│   └── train.py                            # 模型训练脚本
+│
+├── test/                                   # 测试文件夹
+│   └── test.py                             # 模型可视化和测试脚本
+│
+├── Do_load.cmd                             # 加载命令脚本
+├── Do_train.cmd                            # 训练命令脚本
+└── README.txt                              # 项目说明文件
+
+
+```
+
+### load.py
+  ```
+import os
+import numpy as np
+from obspy import read
+from keras.models import Sequential
+from keras.layers import Conv1D, ZeroPadding1D, Flatten, Dense
+
+X = []                                                                        # 数据列表
+Y = []                                                                        # 标签列表
+X_nst, Y_nev = [], []                                                       # 台站名和事件名
+input_length = 1000
+
+# 数据和模型加载
+nrt = os.path.normpath('C:/Users/~/S-wave spliting/CNN-SWS-main/1_data')
+nmodel = os.path.normpath('C:/Users/~/S-wave spliting/CNN-SWS-main/model/CNN_XKS.h5')
+# 路径检查
+if not os.path.exists(nrt):
+    raise FileNotFoundError(f'The data root path {nrt} does not exist.')
+if not os.path.exists(nmodel):
+    raise FileNotFoundError(f'The model path {nmodel} does not exist.')
+```
+
+```
+# 读取SAC数据
+XKS = ['PKS', 'SKS', 'SKK']
+
+for k in range(3):
+    XKS_rout = os.path.join(nrt, f'{XKS[k]}.list')               # C:/Users/~/main/1_data/Out_Bin/*.out
+    print(f'Reading {XKS_rout}')
+
+    if not os.path.exists(XKS_rout):
+        raise FileNotFoundError(f'The file {XKS_rout} does not exist.')
+
+# 逐行读取数据
+with open(XKS_rout, 'r') as Pl:
+    for line_Pl in Pl:
+        vals = line_Pl.split()
+        P_rout = os.path.join(nrt, vals[0])                       # 数据根目录nrt ＋ .out文件第一列
+        print(f'Doing: {XKS[k]} {vals[0]}')
+
+        if not os.path.exists(P_rout):
+            raise FileNotFoundError(f'The file {P_rout} does not exist.')
+```
+```
+PKS, y = [], []                                                              # PKS用于储存波形数据，y储存分类标签
+with open(P_rout, 'r') as P:
+    for line in P:
+        vals = line.split()
+        nst = vals[0]                                                       # station name
+        nev = vals[1]                                                      # event name
+
+        # 处理分类标签
+        if vals[2] in ['A', 'B']:
+            y.append(1)
+            y.append(0)
+        else:
+            y.append(0)
+            y.append(1)
+
+```
+```
+
+ncom = ['.ro', '.to', '.rl', '.tl']                                    # 4分量列表    
+components = []
+for i in range(4):
+    ro_rout = os.path.join(nrt, f'{XKS[k]}Out', nst, nev, f'{nst}{ncom[i]}')
+    print(f'Reading file: {ro_rout}')
+
+    if os.path.exists(ro_rout):
+        st = read(ro_rout)
+        components.append(st[0].data[:input_length])   # 截取前input_length个数据
+    else:
+        raise FileNotFoundError(f'The file {ro_rout} does not exist.')
+
+for i in range(input_length):
+    PKS.append(np.array([comp[i] for comp in components]))
+
+X.append(np.array(PKS))                                            # 将4个分量组成的PKS保存到列表X中
+Y.append(np.array(y))                                                # 分类标签保存到Y中
+X_nst.append(f'{nst}_{XKS[k]}_')                                # 台站信息
+Y_nev.append(nev)                                                    # 事件信息
+
+```
+
+```
+# 定义模型
+input_shape = (input_length, 4)
+model = Sequential()
+   # 添加卷积层
+model.add(Conv1D(kernel_size=3, filters=32, input_shape=input_shape, strides=2, activation='relu'))
+model.add(ZeroPadding1D(padding=1))
+model.add(Conv1D(kernel_size=3, filters=32, strides=2, activation='relu'))
+model.add(ZeroPadding1D(padding=1))
+model.add(Conv1D(kernel_size=3, filters=32, strides=2, activation='relu'))
+model.add(ZeroPadding1D(padding=1))
+model.add(Conv1D(kernel_size=3, filters=32, strides=2, activation='relu'))
+model.add(ZeroPadding1D(padding=1))
+model.add(Conv1D(kernel_size=3, filters=32, strides=2, activation='relu'))
+model.add(Flatten())
+model.add(Dense(units=2, activation='softmax'))
+
+# 加载模型权重并进行预测
+model.load_weights(nmodel)
+result = model.predict(np.array(X))
+
+# 保存预测结果
+output_dir = os.path.join('C:/Users/~/S-wave spliting/CNN-SWS-main/load/2_load/Outp')
+os.makedirs(output_dir, exist_ok=True)
+for i in range(len(result)):
+    nst = X_nst[i]                                                                        
+    nev = Y_nev[i]                                                                      
+    res_name = os.path.join(output_dir, f'{nst}_{nev}.res')         
+    y_name = os.path.join(output_dir, f'{nst}_{nev}.y')
+
+    np.savetxt(res_name, result[i])
+    np.savetxt(y_name, Y[i])
+
+print('finish')
+```
 
 
 
+### train.py
 
+```
+import numpy as np
+import matplotlib.pyplot as plt
+import obspy
+import csv
+from obspy import read
+from obspy.taup import TauPyModel
+import os
+from pathlib import Path
+import random
+import keras
+from keras import regularizers
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Flatten, Conv2D, Conv1D, MaxPooling1D, UpSampling1D, ZeroPadding1D
 
+# 初始化
+X_good, Y_good = [], []
+X_bad, Y_bad = [], []
+X, Y = [], []
+X_rand, Y_rand = [], []
+nst_good, nev_good = [], []
+nst_bad, nev_bad = [], []
+X_nst, Y_nev = [], []
+nst_rand, nev_rand = [], []
+```
 
+```
+# 读取参数文件
+n=0
+with open('parameters.list') as p:
+    for line in p:
+        n += 1
+        vals = line.split()
+        if n == 1: nrt = str(vals[0])
+        if n == 2: batch_size = int(vals[0])
+        if n == 3: epochs = int(vals[0])
+        if n == 4: byn = int(vals[0])
+        if n == 5:
+            ac = int(vals[0])
+            uc = int(vals[1])
 
+```
 
+```
+# 读取SAC数据
+input_length = 1000
+XKS = ['PKS', 'SKS', 'SKK']
 
+for k in range(3):
+    XKS_rout = nrt + str(XKS[k]) + '.list'
+    with open(XKS_rout) as Pl:
+        for line_Pl in Pl:
+            vals = line_Pl.split()
+            P_rout = nrt + str(vals[0])
+            with open(P_rout) as P:
+                for line in P:
+                    PKS, y = [], []
+                    vals = line.split()
+                    nst = vals[0]  # station name
+                    nev = vals[1]  # event name
+                    y = [1, 0] if vals[2] in ['A', 'B'] else [0, 1]
+                    
+                    ncom = ['.ro', '.to', '.rl', '.tl']
+                    for i in range(4):
+                        ro_rout = f'{nrt}{XKS[k]}Out/{nst}/{nev}/{nst}{ncom[i]}'
+                        st = read(ro_rout)
+                        if i == 0: ro = st[0].data
+                        if i == 1: to = st[0].data
+                        if i == 2: rl = st[0].data
+                        if i == 3: tl = st[0].data
+                        
+                    for i in range(input_length):
+                        PKS.append(np.array([ro[i], to[i], rl[i], tl[i]]))
+                    if y[0] == 1:
+                        X_good.append(PKS)
+                        Y_good.append(y)
+                        nst_good.append(f'{nst}_{XKS[k]}_')
+                        nev_good.append(nev)
+                    else:
+                        X_bad.append(PKS)
+                        Y_bad.append(y)
+                        nst_bad.append(f'{nst}_{XKS[k]}_')
+                        nev_bad.append(nev)
+```
+```
+# 数据处理
+npts = int(len(X_bad) / len(X_good))
+class_weight = {0: ac, 1: uc}
+if byn == 0: npts = 1
 
+for i in range(npts):
+    for ii in range(len(X_good)):
+        X.append(X_good[ii])
+        Y.append(Y_good[ii])
+        X_nst.append(nst_good[ii])
+        Y_nev.append(nev_good[ii])
+
+for i in range(len(X_bad)):
+    X.append(X_bad[i])
+    Y.append(Y_bad[i])
+    X_nst.append(nst_bad[i])
+    Y_nev.append(nev_bad[i])
+
+rann0 = random.sample(range(len(X)), len(X))
+X_rand = [X[i] for i in rann0]
+Y_rand = [Y[i] for i in rann0]
+
+x_train, y_train = np.array(X_rand[:int(len(X) * 0.8)]), np.array(Y_rand[:int(len(Y) * 0.8)])
+x_test, y_test = np.array(X_rand[int(len(X) * 0.8):]), np.array(Y_rand[int(len(Y) * 0.8):])
+
+```
+```
+model = Sequential()
+model.add(Conv1D(32, kernel_size=3, strides=2, activation='relu', input_shape=(input_length, 4)))
+model.add(ZeroPadding1D(1))
+# 添加多个卷积层，最终展平成向量并连接到 softmax 输出层
+model.add(Flatten())
+model.add(Dense(2, activation='softmax'))
+
+model.compile(loss='categorical_crossentropy', optimizer=keras.optimizers.Adam(lr=0.001), metrics=['accuracy'])
+H = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, class_weight=class_weight, validation_data=(x_test, y_test))
+
+fig, ax = plt.subplots()
+plt.plot(H.history['acc'], label='train_acc')
+plt.plot(H.history['val_acc'], label='val_acc')
+plt.legend()
+plt.show()
+
+model.save_weights('CNN_XKS.h5')
+print('Finish')
+
+```
 
 。">
 <meta property="og:title" content="CNN-SWS">
-<meta property="og:description" content="## 关于论文“Classification of Teleseismic Shear Wave Splitting Measurements: A Convolutional Neural Network Approach”代码部分的讨论
+<meta property="og:description" content="## 论文“Classification of Teleseismic Shear Wave Splitting Measurements: A Convolutional Neural Network Approach”代码部分
 
 ### 文件结构
+```
+CNN-SWS-main/
+├── 1_data/                                # 数据文件夹
+│   ├── Out_Bin/                           # 存储 XKS.out 文件，.out文件包含三列，台站和网络名称（stname_NW）、事件名称（EQ123456789）、测量质量（A 和 B 表示可接受，其余表示不可接受）      
+│   │   ├── PKS.out                       
+│   │   ├── SKK.out
+│   │   └── SKS.out
+│   └── PKSOut/                            # 存储不同台站和事件的波形数据
+│       ├── 109Cxx_TA/                     # 台站文件夹
+│       │   ├── EQ140250514/               # 事件文件夹
+│       │   │   ├── 109Cxx_TA.rl           # 校正径向分量
+│       │   │   ├── 109Cxx_TA.ro           # 原始径向分量
+│       │   │   ├── 109Cxx_TA.tl           # 校正横向分量
+│       │   │   └── 109Cxx_TA.to           # 原始横向分量
+│       │   ├── EQ********/               #其他事件
+│       ├── **************                   # 其他台站文件夹
+│   ├── PKS.list                               # Out_Bin/PKS.out
+│   ├── SKK.list                               # Out_Bin/SKK.out
+│   └── SKS.list                               # Out_Bin/SKS.out
+│
+├── load/                                   # 数据加载和预测文件夹
+│   ├── 2_load/                             # 加载输出文件夹
+│   │   └── Outp/                           # 存放加载预测结果
+│   ├── load.py                             # 数据加载和预测脚本
+│   └── parameter.list                      # 加载过程参数
+│
+├── model/                                  # 模型文件夹
+│   └── CNN_XKS.h5                          # 已训练好的模型权重
+│
+├── train/                                  # 模型训练文件夹
+│   ├── 2_train/                            # 训练输出文件夹
+│   │   ├── CNN_XKS.h5                      # 训练后的模型权重
+│   │   ├── parameters.list                 # 训练过程参数(单独写出来，方便改动)
+│   │   ├── train_64.acc                    # 训练精度记录
+│   │   ├── train_64.loss                   # 训练损失记录
+│   │   ├── train_64.val_acc                # 验证精度记录
+│   │   └── train_64.val_loss               # 验证损失记录
+│   └── train.py                            # 模型训练脚本
+│
+├── test/                                   # 测试文件夹
+│   └── test.py                             # 模型可视化和测试脚本
+│
+├── Do_load.cmd                             # 加载命令脚本
+├── Do_train.cmd                            # 训练命令脚本
+└── README.txt                              # 项目说明文件
+
+
+```
+
+### load.py
+  ```
+import os
+import numpy as np
+from obspy import read
+from keras.models import Sequential
+from keras.layers import Conv1D, ZeroPadding1D, Flatten, Dense
+
+X = []                                                                        # 数据列表
+Y = []                                                                        # 标签列表
+X_nst, Y_nev = [], []                                                       # 台站名和事件名
+input_length = 1000
+
+# 数据和模型加载
+nrt = os.path.normpath('C:/Users/~/S-wave spliting/CNN-SWS-main/1_data')
+nmodel = os.path.normpath('C:/Users/~/S-wave spliting/CNN-SWS-main/model/CNN_XKS.h5')
+# 路径检查
+if not os.path.exists(nrt):
+    raise FileNotFoundError(f'The data root path {nrt} does not exist.')
+if not os.path.exists(nmodel):
+    raise FileNotFoundError(f'The model path {nmodel} does not exist.')
+```
+
+```
+# 读取SAC数据
+XKS = ['PKS', 'SKS', 'SKK']
+
+for k in range(3):
+    XKS_rout = os.path.join(nrt, f'{XKS[k]}.list')               # C:/Users/~/main/1_data/Out_Bin/*.out
+    print(f'Reading {XKS_rout}')
+
+    if not os.path.exists(XKS_rout):
+        raise FileNotFoundError(f'The file {XKS_rout} does not exist.')
+
+# 逐行读取数据
+with open(XKS_rout, 'r') as Pl:
+    for line_Pl in Pl:
+        vals = line_Pl.split()
+        P_rout = os.path.join(nrt, vals[0])                       # 数据根目录nrt ＋ .out文件第一列
+        print(f'Doing: {XKS[k]} {vals[0]}')
+
+        if not os.path.exists(P_rout):
+            raise FileNotFoundError(f'The file {P_rout} does not exist.')
+```
+```
+PKS, y = [], []                                                              # PKS用于储存波形数据，y储存分类标签
+with open(P_rout, 'r') as P:
+    for line in P:
+        vals = line.split()
+        nst = vals[0]                                                       # station name
+        nev = vals[1]                                                      # event name
+
+        # 处理分类标签
+        if vals[2] in ['A', 'B']:
+            y.append(1)
+            y.append(0)
+        else:
+            y.append(0)
+            y.append(1)
+
+```
+```
+
+ncom = ['.ro', '.to', '.rl', '.tl']                                    # 4分量列表    
+components = []
+for i in range(4):
+    ro_rout = os.path.join(nrt, f'{XKS[k]}Out', nst, nev, f'{nst}{ncom[i]}')
+    print(f'Reading file: {ro_rout}')
+
+    if os.path.exists(ro_rout):
+        st = read(ro_rout)
+        components.append(st[0].data[:input_length])   # 截取前input_length个数据
+    else:
+        raise FileNotFoundError(f'The file {ro_rout} does not exist.')
+
+for i in range(input_length):
+    PKS.append(np.array([comp[i] for comp in components]))
+
+X.append(np.array(PKS))                                            # 将4个分量组成的PKS保存到列表X中
+Y.append(np.array(y))                                                # 分类标签保存到Y中
+X_nst.append(f'{nst}_{XKS[k]}_')                                # 台站信息
+Y_nev.append(nev)                                                    # 事件信息
+
+```
+
+```
+# 定义模型
+input_shape = (input_length, 4)
+model = Sequential()
+   # 添加卷积层
+model.add(Conv1D(kernel_size=3, filters=32, input_shape=input_shape, strides=2, activation='relu'))
+model.add(ZeroPadding1D(padding=1))
+model.add(Conv1D(kernel_size=3, filters=32, strides=2, activation='relu'))
+model.add(ZeroPadding1D(padding=1))
+model.add(Conv1D(kernel_size=3, filters=32, strides=2, activation='relu'))
+model.add(ZeroPadding1D(padding=1))
+model.add(Conv1D(kernel_size=3, filters=32, strides=2, activation='relu'))
+model.add(ZeroPadding1D(padding=1))
+model.add(Conv1D(kernel_size=3, filters=32, strides=2, activation='relu'))
+model.add(Flatten())
+model.add(Dense(units=2, activation='softmax'))
+
+# 加载模型权重并进行预测
+model.load_weights(nmodel)
+result = model.predict(np.array(X))
+
+# 保存预测结果
+output_dir = os.path.join('C:/Users/~/S-wave spliting/CNN-SWS-main/load/2_load/Outp')
+os.makedirs(output_dir, exist_ok=True)
+for i in range(len(result)):
+    nst = X_nst[i]                                                                        
+    nev = Y_nev[i]                                                                      
+    res_name = os.path.join(output_dir, f'{nst}_{nev}.res')         
+    y_name = os.path.join(output_dir, f'{nst}_{nev}.y')
+
+    np.savetxt(res_name, result[i])
+    np.savetxt(y_name, Y[i])
+
+print('finish')
+```
 
 
 
+### train.py
 
+```
+import numpy as np
+import matplotlib.pyplot as plt
+import obspy
+import csv
+from obspy import read
+from obspy.taup import TauPyModel
+import os
+from pathlib import Path
+import random
+import keras
+from keras import regularizers
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Flatten, Conv2D, Conv1D, MaxPooling1D, UpSampling1D, ZeroPadding1D
 
+# 初始化
+X_good, Y_good = [], []
+X_bad, Y_bad = [], []
+X, Y = [], []
+X_rand, Y_rand = [], []
+nst_good, nev_good = [], []
+nst_bad, nev_bad = [], []
+X_nst, Y_nev = [], []
+nst_rand, nev_rand = [], []
+```
 
+```
+# 读取参数文件
+n=0
+with open('parameters.list') as p:
+    for line in p:
+        n += 1
+        vals = line.split()
+        if n == 1: nrt = str(vals[0])
+        if n == 2: batch_size = int(vals[0])
+        if n == 3: epochs = int(vals[0])
+        if n == 4: byn = int(vals[0])
+        if n == 5:
+            ac = int(vals[0])
+            uc = int(vals[1])
 
+```
 
+```
+# 读取SAC数据
+input_length = 1000
+XKS = ['PKS', 'SKS', 'SKK']
 
+for k in range(3):
+    XKS_rout = nrt + str(XKS[k]) + '.list'
+    with open(XKS_rout) as Pl:
+        for line_Pl in Pl:
+            vals = line_Pl.split()
+            P_rout = nrt + str(vals[0])
+            with open(P_rout) as P:
+                for line in P:
+                    PKS, y = [], []
+                    vals = line.split()
+                    nst = vals[0]  # station name
+                    nev = vals[1]  # event name
+                    y = [1, 0] if vals[2] in ['A', 'B'] else [0, 1]
+                    
+                    ncom = ['.ro', '.to', '.rl', '.tl']
+                    for i in range(4):
+                        ro_rout = f'{nrt}{XKS[k]}Out/{nst}/{nev}/{nst}{ncom[i]}'
+                        st = read(ro_rout)
+                        if i == 0: ro = st[0].data
+                        if i == 1: to = st[0].data
+                        if i == 2: rl = st[0].data
+                        if i == 3: tl = st[0].data
+                        
+                    for i in range(input_length):
+                        PKS.append(np.array([ro[i], to[i], rl[i], tl[i]]))
+                    if y[0] == 1:
+                        X_good.append(PKS)
+                        Y_good.append(y)
+                        nst_good.append(f'{nst}_{XKS[k]}_')
+                        nev_good.append(nev)
+                    else:
+                        X_bad.append(PKS)
+                        Y_bad.append(y)
+                        nst_bad.append(f'{nst}_{XKS[k]}_')
+                        nev_bad.append(nev)
+```
+```
+# 数据处理
+npts = int(len(X_bad) / len(X_good))
+class_weight = {0: ac, 1: uc}
+if byn == 0: npts = 1
 
+for i in range(npts):
+    for ii in range(len(X_good)):
+        X.append(X_good[ii])
+        Y.append(Y_good[ii])
+        X_nst.append(nst_good[ii])
+        Y_nev.append(nev_good[ii])
+
+for i in range(len(X_bad)):
+    X.append(X_bad[i])
+    Y.append(Y_bad[i])
+    X_nst.append(nst_bad[i])
+    Y_nev.append(nev_bad[i])
+
+rann0 = random.sample(range(len(X)), len(X))
+X_rand = [X[i] for i in rann0]
+Y_rand = [Y[i] for i in rann0]
+
+x_train, y_train = np.array(X_rand[:int(len(X) * 0.8)]), np.array(Y_rand[:int(len(Y) * 0.8)])
+x_test, y_test = np.array(X_rand[int(len(X) * 0.8):]), np.array(Y_rand[int(len(Y) * 0.8):])
+
+```
+```
+model = Sequential()
+model.add(Conv1D(32, kernel_size=3, strides=2, activation='relu', input_shape=(input_length, 4)))
+model.add(ZeroPadding1D(1))
+# 添加多个卷积层，最终展平成向量并连接到 softmax 输出层
+model.add(Flatten())
+model.add(Dense(2, activation='softmax'))
+
+model.compile(loss='categorical_crossentropy', optimizer=keras.optimizers.Adam(lr=0.001), metrics=['accuracy'])
+H = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, class_weight=class_weight, validation_data=(x_test, y_test))
+
+fig, ax = plt.subplots()
+plt.plot(H.history['acc'], label='train_acc')
+plt.plot(H.history['val_acc'], label='val_acc')
+plt.legend()
+plt.show()
+
+model.save_weights('CNN_XKS.h5')
+print('Finish')
+
+```
 
 。">
 <meta property="og:type" content="article">
@@ -69,7 +661,17 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
     body {padding: 8px;}
     .postTitle{font-size:24px;}
 }
-
+.copy-feedback {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 50px;
+    color: var(--color-fg-on-emphasis);
+    background-color: var(--color-fg-muted);
+    border-radius: 3px;
+    padding: 5px 8px;
+    font-size: 12px;
+}
 </style>
 
 
@@ -101,8 +703,294 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </div>
 </div>
     <div id="content">
-<div class="markdown-body" id="postBody"><h2>关于论文“Classification of Teleseismic Shear Wave Splitting Measurements: A Convolutional Neural Network Approach”代码部分的讨论</h2>
-<h3>文件结构</h3></div>
+<div class="markdown-body" id="postBody"><h2>论文“Classification of Teleseismic Shear Wave Splitting Measurements: A Convolutional Neural Network Approach”代码部分</h2>
+<h3>文件结构</h3>
+<pre class="notranslate"><code class="notranslate">CNN-SWS-main/
+├── 1_data/                                # 数据文件夹
+│   ├── Out_Bin/                           # 存储 XKS.out 文件，.out文件包含三列，台站和网络名称（stname_NW）、事件名称（EQ123456789）、测量质量（A 和 B 表示可接受，其余表示不可接受）      
+│   │   ├── PKS.out                       
+│   │   ├── SKK.out
+│   │   └── SKS.out
+│   └── PKSOut/                            # 存储不同台站和事件的波形数据
+│       ├── 109Cxx_TA/                     # 台站文件夹
+│       │   ├── EQ140250514/               # 事件文件夹
+│       │   │   ├── 109Cxx_TA.rl           # 校正径向分量
+│       │   │   ├── 109Cxx_TA.ro           # 原始径向分量
+│       │   │   ├── 109Cxx_TA.tl           # 校正横向分量
+│       │   │   └── 109Cxx_TA.to           # 原始横向分量
+│       │   ├── EQ********/               #其他事件
+│       ├── **************                   # 其他台站文件夹
+│   ├── PKS.list                               # Out_Bin/PKS.out
+│   ├── SKK.list                               # Out_Bin/SKK.out
+│   └── SKS.list                               # Out_Bin/SKS.out
+│
+├── load/                                   # 数据加载和预测文件夹
+│   ├── 2_load/                             # 加载输出文件夹
+│   │   └── Outp/                           # 存放加载预测结果
+│   ├── load.py                             # 数据加载和预测脚本
+│   └── parameter.list                      # 加载过程参数
+│
+├── model/                                  # 模型文件夹
+│   └── CNN_XKS.h5                          # 已训练好的模型权重
+│
+├── train/                                  # 模型训练文件夹
+│   ├── 2_train/                            # 训练输出文件夹
+│   │   ├── CNN_XKS.h5                      # 训练后的模型权重
+│   │   ├── parameters.list                 # 训练过程参数(单独写出来，方便改动)
+│   │   ├── train_64.acc                    # 训练精度记录
+│   │   ├── train_64.loss                   # 训练损失记录
+│   │   ├── train_64.val_acc                # 验证精度记录
+│   │   └── train_64.val_loss               # 验证损失记录
+│   └── train.py                            # 模型训练脚本
+│
+├── test/                                   # 测试文件夹
+│   └── test.py                             # 模型可视化和测试脚本
+│
+├── Do_load.cmd                             # 加载命令脚本
+├── Do_train.cmd                            # 训练命令脚本
+└── README.txt                              # 项目说明文件
+
+
+</code></pre>
+<h3>load.py</h3>
+<pre class="notranslate"><code class="notranslate">import os
+import numpy as np
+from obspy import read
+from keras.models import Sequential
+from keras.layers import Conv1D, ZeroPadding1D, Flatten, Dense
+
+X = []                                                                        # 数据列表
+Y = []                                                                        # 标签列表
+X_nst, Y_nev = [], []                                                       # 台站名和事件名
+input_length = 1000
+
+# 数据和模型加载
+nrt = os.path.normpath('C:/Users/~/S-wave spliting/CNN-SWS-main/1_data')
+nmodel = os.path.normpath('C:/Users/~/S-wave spliting/CNN-SWS-main/model/CNN_XKS.h5')
+# 路径检查
+if not os.path.exists(nrt):
+  raise FileNotFoundError(f"The data root path {nrt} does not exist.")
+if not os.path.exists(nmodel):
+  raise FileNotFoundError(f"The model path {nmodel} does not exist.")
+</code></pre>
+<pre class="notranslate"><code class="notranslate"># 读取SAC数据
+XKS = ['PKS', 'SKS', 'SKK']
+
+for k in range(3):
+    XKS_rout = os.path.join(nrt, f'{XKS[k]}.list')               # C:/Users/~/main/1_data/Out_Bin/*.out
+    print(f"Reading {XKS_rout}")
+
+    if not os.path.exists(XKS_rout):
+        raise FileNotFoundError(f"The file {XKS_rout} does not exist.")
+
+# 逐行读取数据
+with open(XKS_rout, 'r') as Pl:
+    for line_Pl in Pl:
+        vals = line_Pl.split()
+        P_rout = os.path.join(nrt, vals[0])                       # 数据根目录nrt ＋ .out文件第一列
+        print(f'Doing: {XKS[k]} {vals[0]}')
+
+        if not os.path.exists(P_rout):
+            raise FileNotFoundError(f"The file {P_rout} does not exist.")
+</code></pre>
+<pre class="notranslate"><code class="notranslate">PKS, y = [], []                                                              # PKS用于储存波形数据，y储存分类标签
+with open(P_rout, 'r') as P:
+    for line in P:
+        vals = line.split()
+        nst = vals[0]                                                       # station name
+        nev = vals[1]                                                      # event name
+
+        # 处理分类标签
+        if vals[2] in ['A', 'B']:
+            y.append(1)
+            y.append(0)
+        else:
+            y.append(0)
+            y.append(1)
+
+</code></pre>
+<pre class="notranslate"><code class="notranslate">
+ncom = ['.ro', '.to', '.rl', '.tl']                                    # 4分量列表    
+components = []
+for i in range(4):
+    ro_rout = os.path.join(nrt, f'{XKS[k]}Out', nst, nev, f'{nst}{ncom[i]}')
+    print(f'Reading file: {ro_rout}')
+
+    if os.path.exists(ro_rout):
+        st = read(ro_rout)
+        components.append(st[0].data[:input_length])   # 截取前input_length个数据
+    else:
+        raise FileNotFoundError(f"The file {ro_rout} does not exist.")
+
+for i in range(input_length):
+    PKS.append(np.array([comp[i] for comp in components]))
+
+X.append(np.array(PKS))                                            # 将4个分量组成的PKS保存到列表X中
+Y.append(np.array(y))                                                # 分类标签保存到Y中
+X_nst.append(f"{nst}_{XKS[k]}_")                                # 台站信息
+Y_nev.append(nev)                                                    # 事件信息
+
+</code></pre>
+<pre class="notranslate"><code class="notranslate"># 定义模型
+input_shape = (input_length, 4)
+model = Sequential()
+   # 添加卷积层
+model.add(Conv1D(kernel_size=3, filters=32, input_shape=input_shape, strides=2, activation='relu'))
+model.add(ZeroPadding1D(padding=1))
+model.add(Conv1D(kernel_size=3, filters=32, strides=2, activation='relu'))
+model.add(ZeroPadding1D(padding=1))
+model.add(Conv1D(kernel_size=3, filters=32, strides=2, activation='relu'))
+model.add(ZeroPadding1D(padding=1))
+model.add(Conv1D(kernel_size=3, filters=32, strides=2, activation='relu'))
+model.add(ZeroPadding1D(padding=1))
+model.add(Conv1D(kernel_size=3, filters=32, strides=2, activation='relu'))
+model.add(Flatten())
+model.add(Dense(units=2, activation='softmax'))
+
+# 加载模型权重并进行预测
+model.load_weights(nmodel)
+result = model.predict(np.array(X))
+
+# 保存预测结果
+output_dir = os.path.join('C:/Users/~/S-wave spliting/CNN-SWS-main/load/2_load/Outp')
+os.makedirs(output_dir, exist_ok=True)
+for i in range(len(result)):
+    nst = X_nst[i]                                                                        
+    nev = Y_nev[i]                                                                      
+    res_name = os.path.join(output_dir, f'{nst}_{nev}.res')         
+    y_name = os.path.join(output_dir, f'{nst}_{nev}.y')
+
+    np.savetxt(res_name, result[i])
+    np.savetxt(y_name, Y[i])
+
+print('finish')
+</code></pre>
+<h3>train.py</h3>
+<pre class="notranslate"><code class="notranslate">import numpy as np
+import matplotlib.pyplot as plt
+import obspy
+import csv
+from obspy import read
+from obspy.taup import TauPyModel
+import os
+from pathlib import Path
+import random
+import keras
+from keras import regularizers
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Flatten, Conv2D, Conv1D, MaxPooling1D, UpSampling1D, ZeroPadding1D
+
+# 初始化
+X_good, Y_good = [], []
+X_bad, Y_bad = [], []
+X, Y = [], []
+X_rand, Y_rand = [], []
+nst_good, nev_good = [], []
+nst_bad, nev_bad = [], []
+X_nst, Y_nev = [], []
+nst_rand, nev_rand = [], []
+</code></pre>
+<pre class="notranslate"><code class="notranslate"># 读取参数文件
+n=0
+with open('parameters.list') as p:
+    for line in p:
+        n += 1
+        vals = line.split()
+        if n == 1: nrt = str(vals[0])
+        if n == 2: batch_size = int(vals[0])
+        if n == 3: epochs = int(vals[0])
+        if n == 4: byn = int(vals[0])
+        if n == 5:
+            ac = int(vals[0])
+            uc = int(vals[1])
+
+</code></pre>
+<pre class="notranslate"><code class="notranslate"># 读取SAC数据
+input_length = 1000
+XKS = ['PKS', 'SKS', 'SKK']
+
+for k in range(3):
+    XKS_rout = nrt + str(XKS[k]) + '.list'
+    with open(XKS_rout) as Pl:
+        for line_Pl in Pl:
+            vals = line_Pl.split()
+            P_rout = nrt + str(vals[0])
+            with open(P_rout) as P:
+                for line in P:
+                    PKS, y = [], []
+                    vals = line.split()
+                    nst = vals[0]  # station name
+                    nev = vals[1]  # event name
+                    y = [1, 0] if vals[2] in ['A', 'B'] else [0, 1]
+                    
+                    ncom = ['.ro', '.to', '.rl', '.tl']
+                    for i in range(4):
+                        ro_rout = f"{nrt}{XKS[k]}Out/{nst}/{nev}/{nst}{ncom[i]}"
+                        st = read(ro_rout)
+                        if i == 0: ro = st[0].data
+                        if i == 1: to = st[0].data
+                        if i == 2: rl = st[0].data
+                        if i == 3: tl = st[0].data
+                        
+                    for i in range(input_length):
+                        PKS.append(np.array([ro[i], to[i], rl[i], tl[i]]))
+                    if y[0] == 1:
+                        X_good.append(PKS)
+                        Y_good.append(y)
+                        nst_good.append(f"{nst}_{XKS[k]}_")
+                        nev_good.append(nev)
+                    else:
+                        X_bad.append(PKS)
+                        Y_bad.append(y)
+                        nst_bad.append(f"{nst}_{XKS[k]}_")
+                        nev_bad.append(nev)
+</code></pre>
+<pre class="notranslate"><code class="notranslate"># 数据处理
+npts = int(len(X_bad) / len(X_good))
+class_weight = {0: ac, 1: uc}
+if byn == 0: npts = 1
+
+for i in range(npts):
+    for ii in range(len(X_good)):
+        X.append(X_good[ii])
+        Y.append(Y_good[ii])
+        X_nst.append(nst_good[ii])
+        Y_nev.append(nev_good[ii])
+
+for i in range(len(X_bad)):
+    X.append(X_bad[i])
+    Y.append(Y_bad[i])
+    X_nst.append(nst_bad[i])
+    Y_nev.append(nev_bad[i])
+
+rann0 = random.sample(range(len(X)), len(X))
+X_rand = [X[i] for i in rann0]
+Y_rand = [Y[i] for i in rann0]
+
+x_train, y_train = np.array(X_rand[:int(len(X) * 0.8)]), np.array(Y_rand[:int(len(Y) * 0.8)])
+x_test, y_test = np.array(X_rand[int(len(X) * 0.8):]), np.array(Y_rand[int(len(Y) * 0.8):])
+
+</code></pre>
+<pre class="notranslate"><code class="notranslate">model = Sequential()
+model.add(Conv1D(32, kernel_size=3, strides=2, activation='relu', input_shape=(input_length, 4)))
+model.add(ZeroPadding1D(1))
+# 添加多个卷积层，最终展平成向量并连接到 softmax 输出层
+model.add(Flatten())
+model.add(Dense(2, activation='softmax'))
+
+model.compile(loss='categorical_crossentropy', optimizer=keras.optimizers.Adam(lr=0.001), metrics=['accuracy'])
+H = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, class_weight=class_weight, validation_data=(x_test, y_test))
+
+fig, ax = plt.subplots()
+plt.plot(H.history['acc'], label='train_acc')
+plt.plot(H.history['val_acc'], label='val_acc')
+plt.legend()
+plt.show()
+
+model.save_weights('CNN_XKS.h5')
+print('Finish')
+
+</code></pre></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
@@ -127,7 +1015,7 @@ if(""!=""){
 </script></div>
 </body>
 <script>
-var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z', 'copy': 'M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z', 'check': 'M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'};
 var utterancesLoad=0;
 
 let themeSettings={
@@ -200,7 +1088,70 @@ function iFrameLoading(){
     }
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+    const createClipboardHTML = (codeContent, additionalClasses = '') => `
+        <pre class="notranslate"><code class="notranslate">${codeContent}</code></pre>
+        <div class="clipboard-container position-absolute right-0 top-0 ${additionalClasses}">
+            <clipboard-copy class="ClipboardButton btn m-2 p-0" role="button" style="display: inherit;">
+                <svg height="16" width="16" class="octicon octicon-copy m-2"><path d="${IconList["copy"]}"></path></svg>
+                <svg height="16" width="16" class="octicon octicon-check color-fg-success m-2 d-none"><path d="${IconList["check"]}"></path></svg>
+            </clipboard-copy>
+            <div class="copy-feedback">Copied!</div>
+        </div>
+    `;
 
+    const handleCodeElements = (selector = '') => {
+        document.querySelectorAll(selector).forEach(codeElement => {
+            const codeContent = codeElement.innerHTML;
+            const newStructure = document.createElement('div');
+            newStructure.className = 'snippet-clipboard-content position-relative overflow-auto';
+            newStructure.innerHTML = createClipboardHTML(codeContent);
+
+            const parentElement = codeElement.parentElement;
+            if (selector.includes('highlight')) {
+                parentElement.insertBefore(newStructure, codeElement.nextSibling);
+                parentElement.removeChild(codeElement);
+            } else {
+                parentElement.parentElement.replaceChild(newStructure, parentElement);
+            }
+        });
+    };
+
+    handleCodeElements('pre.notranslate > code.notranslate');
+    handleCodeElements('div.highlight > pre.notranslate');
+
+    let currentFeedback = null;
+    document.querySelectorAll('clipboard-copy').forEach(copyButton => {
+        copyButton.addEventListener('click', () => {
+            const codeContent = copyButton.closest('.snippet-clipboard-content').innerText;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = codeContent;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            const copyIcon = copyButton.querySelector('.octicon-copy');
+            const checkIcon = copyButton.querySelector('.octicon-check');
+            const copyFeedback = copyButton.nextElementSibling;
+
+            if (currentFeedback && currentFeedback !== copyFeedback) {currentFeedback.style.display = 'none';}
+            currentFeedback = copyFeedback;
+
+            copyIcon.classList.add('d-none');
+            checkIcon.classList.remove('d-none');
+            copyFeedback.style.display = 'block';
+            copyButton.style.borderColor = 'var(--color-success-fg)';
+
+            setTimeout(() => {
+                copyIcon.classList.remove('d-none');
+                checkIcon.classList.add('d-none');
+                copyFeedback.style.display = 'none';
+                copyButton.style.borderColor = '';
+            }, 2000);
+        });
+    });
+});
 
 </script>
 
