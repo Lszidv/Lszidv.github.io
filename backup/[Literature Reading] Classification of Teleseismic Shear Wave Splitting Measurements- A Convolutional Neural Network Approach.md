@@ -47,7 +47,7 @@
 # 3.Structure and Training of the CNN
 ![cnn](https://github.com/user-attachments/assets/c61f8ee5-c4e0-415d-8956-89f6b1a71be7)
   （Length ; Depth）步长为2，数据尺寸逐步减半，特征32维
-  模型设计：8个一维卷积层和一个全连接层。（Following Perol et al. (2018)）
+  模型设计：8个一维卷积层和一个全连接层。（Following Perol et al. (2018)  [DOI: 10.1126/sciadv.1700578](https://doi.org/10.1126/sciadv.1700578)）
   层间使用Relu激活函数，缓解梯度消失
   输出参数组合能否被接受的概率
   交叉熵函数作为损失函数 （#..）
