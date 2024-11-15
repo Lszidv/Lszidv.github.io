@@ -13,7 +13,7 @@
 <meta name="description" content="# SWAS: A shear-wave analysis system for semi-automatic measurement of shear-wave splitting above small earthquakes
 #  Abstract
    问题：小震剪切波到达复杂，剪切波测量困难
-   方法：开发SAWS专家系统，自动估计快波极化方向和剪切波到时，人工辅助调整
+   方法：开发SAWS专家系统，自动估计快波极化方向和剪切波到时，人工辅助调整（在原始地震图、旋转地震图和极化图之间进行调整）
    数据：冰岛SIL地震网络数据
 
  ```
@@ -25,14 +25,15 @@
  ```
 $$  M_L = \log_{10}(A) + 3 \log_{10}(8T) - 2.92 $$
 $$ M_W = \frac{2}{3} \log_{10}(M_0) - 6.033 $$
+![震级](https://github.com/user-attachments/assets/d3b61cbd-40a3-4983-bffe-e233856f3e17)
 
 # Introduction
-。">
+  由于信号微弱，并且收到散射和各向异性的影响，准确测量小震的剪切波分裂十分困难，但其对于理解震前微裂隙的变型过程至关重要。">
 <meta property="og:title" content="[Literature Reading]SWAS: A shear-wave analysis system for semi-automatic measurement of shear-wave splitting above small earthquakes">
 <meta property="og:description" content="# SWAS: A shear-wave analysis system for semi-automatic measurement of shear-wave splitting above small earthquakes
 #  Abstract
    问题：小震剪切波到达复杂，剪切波测量困难
-   方法：开发SAWS专家系统，自动估计快波极化方向和剪切波到时，人工辅助调整
+   方法：开发SAWS专家系统，自动估计快波极化方向和剪切波到时，人工辅助调整（在原始地震图、旋转地震图和极化图之间进行调整）
    数据：冰岛SIL地震网络数据
 
  ```
@@ -44,9 +45,10 @@ $$ M_W = \frac{2}{3} \log_{10}(M_0) - 6.033 $$
  ```
 $$  M_L = \log_{10}(A) + 3 \log_{10}(8T) - 2.92 $$
 $$ M_W = \frac{2}{3} \log_{10}(M_0) - 6.033 $$
+![震级](https://github.com/user-attachments/assets/d3b61cbd-40a3-4983-bffe-e233856f3e17)
 
 # Introduction
-。">
+  由于信号微弱，并且收到散射和各向异性的影响，准确测量小震的剪切波分裂十分困难，但其对于理解震前微裂隙的变型过程至关重要。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://Lszidv.github.io/post/%5BLiterature%20Reading%5DSWAS-%20A%20shear-wave%20analysis%20system%20for%20semi-automatic%20measurement%20of%20shear-wave%20splitting%20above%20small%20earthquakes.html">
 <meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
@@ -120,7 +122,7 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <div class="markdown-body" id="postBody"><h1>SWAS: A shear-wave analysis system for semi-automatic measurement of shear-wave splitting above small earthquakes</h1>
 <h1>Abstract</h1>
 <p>问题：小震剪切波到达复杂，剪切波测量困难<br>
-方法：开发SAWS专家系统，自动估计快波极化方向和剪切波到时，人工辅助调整<br>
+方法：开发SAWS专家系统，自动估计快波极化方向和剪切波到时，人工辅助调整（在原始地震图、旋转地震图和极化图之间进行调整）<br>
 数据：冰岛SIL地震网络数据</p>
 <pre class="notranslate"><code class="notranslate"> 里氏震级：基于地震波振幅，在这个标度中，为了使结果不为负数，里克特定义在距离震中100千米处之观测点地 
  震仪记录到的最大水平位移为1微米（这也是伍德-安德森扭力式地震仪的最大精度）的地震作为0级地震，当地震 
@@ -130,7 +132,11 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </code></pre>
 <p>$$  M_L = \log_{10}(A) + 3 \log_{10}(8T) - 2.92 $$
 $$ M_W = \frac{2}{3} \log_{10}(M_0) - 6.033 $$</p>
-<h1>Introduction</h1></div>
+<h1>Introduction</h1>
+<p>由于信号微弱，并且收到散射和各向异性的影响，准确测量小震的剪切波分裂十分困难，但其对于理解震前微裂隙的变型过程至关重要。<br>
+在数据稀疏或者质量不高的情况下，过度依赖筛选会导致数据偏差。<br>
+现有的技术（SAM系统：通过计算快慢波互相关函数来确定它们的时间延迟，快波极化方向通过极化图来帮助识别）存在局限性（需要高信噪比数据，主观性强，耗时耗力，不适合大规模自动化应用）</p>
+<h1>An expert system for automatic identification and measurement</h1></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
