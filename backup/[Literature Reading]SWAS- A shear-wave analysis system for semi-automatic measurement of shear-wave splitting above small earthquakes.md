@@ -35,7 +35,9 @@ $$ M_W = \frac{2}{3} \log_{10}(M_0) - 6.033 $$
 ![2b](https://github.com/user-attachments/assets/e4e3a91f-db7c-4416-8955-a7fcb0aac612)
 ![2c](https://github.com/user-attachments/assets/1888e068-826b-4322-a088-c24e240650be)
 ![2d](https://github.com/user-attachments/assets/b1b01470-e002-478e-b153-db15bf89fbaa)
-
+![2e](https://github.com/user-attachments/assets/c2a28aca-d94f-4c84-8224-9637f65efe26)
+![3a](https://github.com/user-attachments/assets/c1bedb58-f7c5-4ed1-b504-4cb66564847e)
+![3b](https://github.com/user-attachments/assets/712ad825-322f-41dd-9f4a-b7595758feaf)
   ```
 1.初始三分量波形：原始波形，地震仪在三个方向上的记录
     Z方向为垂直记录，主要反映P波信号，剪切波信号弱
@@ -67,10 +69,9 @@ $$ M_W = \frac{2}{3} \log_{10}(M_0) - 6.033 $$
   剪切波分裂在小震上方的观测数据中，时间延迟有明显随机散布，这种效应无法用叠加技术来去除（叠加只会掩盖这一显著特征。这种散布不能用传统的读数误差、定位误差或结构解释误差来解释 Volti和Crampin, 2003a,b），而在人工源地震中，虽然也会在界面处出现大幅变化，但不会像小震一样在远离断层带的区域出现如此显著的随机散布，解释为断层带上高孔隙流体压力引起的，这种压力使得微裂隙的几何形状远离区域应力方向，导致剪切波极化方向发生90°的翻转（Crampin和Zatsepin, 1997）。这种现象已在模型模拟和在油气藏、断层带的观测中得到证实。
   
 ## 6. Comparing SWAS/ES and visual measurements  
-  
-![2e](https://github.com/user-attachments/assets/c2a28aca-d94f-4c84-8224-9637f65efe26)
-![3a](https://github.com/user-attachments/assets/c1bedb58-f7c5-4ed1-b504-4cb66564847e)
-![3b](https://github.com/user-attachments/assets/712ad825-322f-41dd-9f4a-b7595758feaf)
-
+  对时间延迟按照射线路径进行分组，射线路径方向与平均裂隙平面（Average Crack Plane）夹角在 15°-45° 之间，其对裂隙形状（即纵横比）更敏感，夹角在 15°以内对裂隙密度更敏感。
 
 ## 7. Conclusions
+  自动化初步结果和便捷的人工调整功能
+
+## Appendix A. An expert system for measuring shear-wave splitting
