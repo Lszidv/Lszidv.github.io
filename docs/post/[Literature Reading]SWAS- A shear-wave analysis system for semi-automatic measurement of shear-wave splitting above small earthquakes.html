@@ -125,7 +125,11 @@ $$ M_W = \frac{2}{3} \log_{10}(M_0) - 6.033 $$</p>
 <p>定义剪切波分裂测量质量的评估方法，按信噪比来评估Qp&lt;1,良好；2：可接受；3：不可接受 &gt;(极化方向质量)，按快波到达前一个时窗内振幅大小比值来评估Qt(延迟时间质量)</p>
 <h2>4. Automaticyinli picks and visual adjustments</h2>
 <p>SWAS的界面设计<br>
-fig2和fig3，两个使用案例</p>
+fig2和fig3，两个使用案例<br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/4af082f3-35db-471e-b682-4491615c2955"><img src="https://github.com/user-attachments/assets/4af082f3-35db-471e-b682-4491615c2955" alt="2a" style="max-width: 100%;"></a><br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/e4e3a91f-db7c-4416-8955-a7fcb0aac612"><img src="https://github.com/user-attachments/assets/e4e3a91f-db7c-4416-8955-a7fcb0aac612" alt="2b" style="max-width: 100%;"></a><br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/1888e068-826b-4322-a088-c24e240650be"><img src="https://github.com/user-attachments/assets/1888e068-826b-4322-a088-c24e240650be" alt="2c" style="max-width: 100%;"></a><br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/b1b01470-e002-478e-b153-db15bf89fbaa"><img src="https://github.com/user-attachments/assets/b1b01470-e002-478e-b153-db15bf89fbaa" alt="2d" style="max-width: 100%;"></a></p>
 <pre class="notranslate"><code class="notranslate">1.初始三分量波形：原始波形，地震仪在三个方向上的记录
   Z方向为垂直记录，主要反映P波信号，剪切波信号弱
   E、N分量为水平记录，包含剪切波信号
@@ -139,6 +143,12 @@ fig2和fig3，两个使用案例</p>
   通过旋转矩阵（快波极化方向）将 E、N 分量投影到 R、T 分量，将快慢波分离
 </code></pre>
 <p><a href="https://service.iris.edu/irisws/rotation/docs/1/help/" rel="nofollow">rotation</a></p>
+<pre class="notranslate"><code class="notranslate">   极化图：直观展示剪切波分裂过程中粒子在水平面的运动轨迹 ，在每个时间窗口内计算粒子运动轨迹，叠加为一个大图，用于展示剪切波极化行为和快慢波的分离。
+    快波极化方向通常与介质裂隙方向一致
+    快慢波极化方向垂直
+    轨迹从快波到慢波阶段表现出方向上的显著变化
+    快波阶段的运动轨迹较为线性，而慢波阶段的轨迹可能呈现更复杂的形状
+</code></pre>
 <h2>5. Accessing effectiveness of SWAS/ES techniques</h2>
 <p>研究范围：8个月内8个台站的855次地震事件，数据来源为震级 𝑀≥−1.0的小震记录。<br>
 525条记录（61%）被评估为质量良好（𝑄𝑝,𝑄𝑡=1,2）<br>
@@ -146,6 +156,9 @@ fig2和fig3，两个使用案例</p>
 <a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/51398786-47ee-4626-b432-b9c124ed9b37"><img src="https://github.com/user-attachments/assets/51398786-47ee-4626-b432-b9c124ed9b37" alt="准确率" style="max-width: 100%;"></a></p>
 <p>剪切波分裂在小震上方的观测数据中，时间延迟有明显随机散布，这种效应无法用叠加技术来去除（叠加只会掩盖这一显著特征。这种散布不能用传统的读数误差、定位误差或结构解释误差来解释 Volti和Crampin, 2003a,b），而在人工源地震中，虽然也会在界面处出现大幅变化，但不会像小震一样在远离断层带的区域出现如此显著的随机散布，解释为断层带上高孔隙流体压力引起的，这种压力使得微裂隙的几何形状远离区域应力方向，导致剪切波极化方向发生90°的翻转（Crampin和Zatsepin, 1997）。这种现象已在模型模拟和在油气藏、断层带的观测中得到证实。</p>
 <h2>6. Comparing SWAS/ES and visual measurements</h2>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/c2a28aca-d94f-4c84-8224-9637f65efe26"><img src="https://github.com/user-attachments/assets/c2a28aca-d94f-4c84-8224-9637f65efe26" alt="2e" style="max-width: 100%;"></a><br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/c1bedb58-f7c5-4ed1-b504-4cb66564847e"><img src="https://github.com/user-attachments/assets/c1bedb58-f7c5-4ed1-b504-4cb66564847e" alt="3a" style="max-width: 100%;"></a><br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/712ad825-322f-41dd-9f4a-b7595758feaf"><img src="https://github.com/user-attachments/assets/712ad825-322f-41dd-9f4a-b7595758feaf" alt="3b" style="max-width: 100%;"></a></p>
 <h2>7. Conclusions</h2></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
