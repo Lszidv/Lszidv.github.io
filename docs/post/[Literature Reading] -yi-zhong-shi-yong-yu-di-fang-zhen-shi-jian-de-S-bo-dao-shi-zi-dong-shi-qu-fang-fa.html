@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="##  引言
+
+  S波拾取困难:受到P波尾波及其他转换波震相影响，因此S波的信噪比一般低于P波，并且由于S波能量较弱，拾取的准确度也比较低；
+  现有手动拾取方法：基于极化特征，利用原始地震三分量记录，根据P波和S波在偏振方向上的不同特征（如质点运动的偏振度、线性度等），找到震相突变点，进而确定S波到时。">
+<meta property="og:title" content="[Literature Reading] 一种适用于地方震事件的S波到时自动拾取方法">
+<meta property="og:description" content="##  引言
+
+  S波拾取困难:受到P波尾波及其他转换波震相影响，因此S波的信噪比一般低于P波，并且由于S波能量较弱，拾取的准确度也比较低；
+  现有手动拾取方法：基于极化特征，利用原始地震三分量记录，根据P波和S波在偏振方向上的不同特征（如质点运动的偏振度、线性度等），找到震相突变点，进而确定S波到时。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://Lszidv.github.io/post/%5BLiterature%20Reading%5D%20-yi-zhong-shi-yong-yu-di-fang-zhen-shi-jian-de-S-bo-dao-shi-zi-dong-shi-qu-fang-fa.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
+<title>[Literature Reading] 一种适用于地方震事件的S波到时自动拾取方法</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+.copy-feedback {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 50px;
+    color: var(--color-fg-on-emphasis);
+    background-color: var(--color-fg-muted);
+    border-radius: 3px;
+    padding: 5px 8px;
+    font-size: 12px;
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">[Literature Reading] 一种适用于地方震事件的S波到时自动拾取方法</h1>
+<div class="title-right">
+    <a href="https://Lszidv.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/Lszidv/Lszidv.github.io/issues/9" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>引言</h2>
+<p>S波拾取困难:受到P波尾波及其他转换波震相影响，因此S波的信噪比一般低于P波，并且由于S波能量较弱，拾取的准确度也比较低；<br>
+现有手动拾取方法：基于极化特征，利用原始地震三分量记录，根据P波和S波在偏振方向上的不同特征（如质点运动的偏振度、线性度等），找到震相突变点，进而确定S波到时。<br>
+本文基于Lois等提出的一种基于特征值分析的时域算法，改进了相关参数，并在福建地震台网的9,855条三分向波形记录上进行了测试，验证了该算法的有效性。</p>
+<pre class="notranslate"><code class="notranslate">P波的质点运动方向和波传播方向一致，形成纵向偏振，S波的质点运动方向和波传播方向垂直，形成横向偏振。
+P波和S波的偏振特性有时会受到噪声和其他地震波的干扰，尤其是面波或其他转换波。
+当采用三分向波形数据时，P波和S波的偏振方向不同，可以通过计算质点运动的偏振度（即偏振的强度）或线性度（即运动方向的线性特征）来分辨P波和S波的位置。
+</code></pre>
+<h2>1.方法</h2>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/41d58267-5427-4fb7-8599-a01457220126"><img src="https://github.com/user-attachments/assets/41d58267-5427-4fb7-8599-a01457220126" alt="10 11939-jass 20200112-Figure1" style="max-width: 100%;"></a></p>
+<p>对于一段已知P到时的波形，本文使用滑动窗口将波形其划分为小窗，对每个小窗内的三分量波形求取特征值，生成特征值时程，并将其作为S波识别特征函数。<br>
+将三分量波形计算得到的协方差矩阵求特征值（λ1、λ2、λ3），特征值时程代表的物理含义是质点的运动方向，由图1d看出，λ1对信号传播方向上的能量变化更为敏感，故选择其为特征函数，求取λ1的平方根（放大中低值的同时压低中高值，图1e）实现对特征值的压缩。对于信噪比较低的事件波形，采用此方式的特征函数更能凸显信号中的能量突变位置。<br>
+选取P波初至到S波尾段求取峰度系数（图1f），S波到时附近，在特征函数中显示为一个明显的陡坎，S波到时为陡坎最低点，通过对其求取一阶差分（图1g）,将更容易判别。这里只是粗到时，应用自回归赤池信息准则（AIC）（Akaike，1974）在所拾取 S波粗到时位置附近精确判别（前后各取 0.3s），即可获得准确可靠的 S波到时信息。”<br>
+时窗的判别：过短，将对特征函数中微小变化过于敏感，拾取S波到时位置将超前；过长，缺乏必要敏感性，拾取到时将滞后。本文采用多窗口综合加权方法，窗口长度为 0.2—1.4s，间隔 0.2s，共 7 个。在各窗口中拾取S波到时Si,并计算 S 震相信噪比 Ri,然后依据信噪比综合加权给出 S 波到时位置<br>
+$$S_f = \frac{\sum_{i=1}^{7} S_i R_i}{\sum_{i=1}^{7} R_i}$$</p>
+<h2>2.数据</h2>
+<p>本研究分析了来自福建地震台网2015至2018年期间的1,862次地方震事件，震中距范围从ML-0.5到4.2，其中仅选择了震中距小于100 km的9,855条三分向地震波形记录进行计算分析。震中距范围内，所有的S波震相都被标记为Sg（深源震）。<br>
+数据主要来自于仙游震群和台湾海峡南部震群，这两个震群的记录占总数据的约三分之一。<br>
+人工地震编目提供了参考S波震相拾取结果，将人工拾取的结果与自动拾取方法的结果进行比较。<br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/86da5aa5-3382-4ad8-af5e-199f683222d2"><img src="https://github.com/user-attachments/assets/86da5aa5-3382-4ad8-af5e-199f683222d2" alt="10 11939-jass 20200112-Figure2" style="max-width: 100%;"></a><br>
+本文所用台站记录随震中距和震级分布<br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/3cade91e-1346-4221-9cef-d5fd418f136c"><img src="https://github.com/user-attachments/assets/3cade91e-1346-4221-9cef-d5fd418f136c" alt="10 11939-jass 20200112-Figure3" style="max-width: 100%;"></a><br>
+本文研究所用台站空间分布</p>
+<h2>3.结果与讨论</h2>
+<p>该方法的S波震相到时拾取平均偏差为（−0.003±1.34）秒，79.6%的记录拾取偏差小于0.5秒，63.9%的记录拾取偏差小于0.2秒，4.1%的记录拾取偏差超过2.0秒。<br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/7d5ea000-9999-40e6-9705-7d1939fd53b5"><img src="https://github.com/user-attachments/assets/7d5ea000-9999-40e6-9705-7d1939fd53b5" alt="10 11939-jass 20200112-Figure4" style="max-width: 100%;"></a><br>
+将地震数据按震群划分，发现其在不同地区的S波拾取偏差较为一致，而部分拾取偏差较大，原因有三：</p>
+<pre class="notranslate"><code class="notranslate">1.低信噪比（S波震相到时拾取算法准确度不高的主要困难所在），噪声可能掩盖了S波特征
+  若对事件波形进行带通滤波（如 1—20 Hz），则可在一定程度上提高记录质量，也将有利于提高 S 波震相的拾取精度。
+</code></pre>
+<p>如图6a所示，S波震相受到前序P波尾波的污染。（图6中虚线是加权时窗计算出的S波到时）<br>
+对到时拾取偏差超过±2.0 s 的记录的信噪比进行统计，直观看出多数为低信噪比记录，反之亦然<br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/388c6071-bdc8-409f-acc5-e750888dc0f1"><img src="https://github.com/user-attachments/assets/388c6071-bdc8-409f-acc5-e750888dc0f1" alt="10 11939-jass 20200112-Figure7" style="max-width: 100%;"></a><br>
+随着记录信噪比的提高，S波拾取残差呈平均值减小、标准差降低的趋势（见表1）<br>
+<a href="https://github.com/user-attachments/files/17865652/10.11939-jass.20200112-Table1.csv">10.11939-jass.20200112-Table1.csv</a><br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/1799173d-16ad-463c-9ece-9dab0193c13f"><img src="https://github.com/user-attachments/assets/1799173d-16ad-463c-9ece-9dab0193c13f" alt="10 11939-jass 20200112-Figure10" style="max-width: 100%;"></a></p>
+<p>对事件波形进行带通滤波（如 1—20 Hz），可在一定程度上提高记录质量（去除低频和高频噪声），提升S波拾取的精度（图6b）<br>
+$$SNR = \frac{\sqrt{\frac{1}{n} \sum_{i=s}^{s+n} x_i}}{\sqrt{\frac{1}{n} \sum_{i=s-n}^{s} x_i}}$$<br>
+式中s是人工拾取S波到时的位置，n是数据长度</p>
+<pre class="notranslate"><code class="notranslate">2.波形记录质量缺陷
+</code></pre>
+<p>波形记录本身存在的质量缺陷也是造成S波震相拾取偏差过大的显著影响因素（如图6d）</p>
+<pre class="notranslate"><code class="notranslate">3.序列事件的复杂性
+</code></pre>
+<p>该方法的主要限制是依赖于P波到时，并且只能在P波到时之后的一段时间窗内识别唯一的S波到时，无法处理多个连续震相，尤其是在密集余震序列中（图6c）</p>
+<h2>4.结论</h2>
+<pre class="notranslate"><code class="notranslate">算法特点：1.基于特征值分解，不像传统方法一样依赖P波和S波的偏振特性
+                  2.使用滑动时间窗，以避免时窗长度造成的拾取误差
+                   3.
+
+应用与结果：1.在福建地震台网的数据测试中，在S波拾取的精度上表现良好，适合应用于实时地震信息处理系统。但 
+                         在无法连续处理密集余震序列
+                      2.前提是必须首先准确地获取P波到时
+局限性： 数据以近震为主，拾取也仅为震相Sg震相，结论可能不够全面
+
+</code></pre>
+<blockquote>
+<p><a href="https://www.dzxb.org/article/doi/10.11939/jass.20200112" rel="nofollow">论文链接</a></p>
+</blockquote></div>
+<div style="font-size:small;margin-top:8px;float:right;"></div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://Lszidv.github.io">芜尽</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z', 'copy': 'M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z', 'check': 'M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","Lszidv/Lszidv.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const createClipboardHTML = (codeContent, additionalClasses = '') => `
+        <pre class="notranslate"><code class="notranslate">${codeContent}</code></pre>
+        <div class="clipboard-container position-absolute right-0 top-0 ${additionalClasses}">
+            <clipboard-copy class="ClipboardButton btn m-2 p-0" role="button" style="display: inherit;">
+                <svg height="16" width="16" class="octicon octicon-copy m-2"><path d="${IconList["copy"]}"></path></svg>
+                <svg height="16" width="16" class="octicon octicon-check color-fg-success m-2 d-none"><path d="${IconList["check"]}"></path></svg>
+            </clipboard-copy>
+            <div class="copy-feedback">Copied!</div>
+        </div>
+    `;
+
+    const handleCodeElements = (selector = '') => {
+        document.querySelectorAll(selector).forEach(codeElement => {
+            const codeContent = codeElement.innerHTML;
+            const newStructure = document.createElement('div');
+            newStructure.className = 'snippet-clipboard-content position-relative overflow-auto';
+            newStructure.innerHTML = createClipboardHTML(codeContent);
+
+            const parentElement = codeElement.parentElement;
+            if (selector.includes('highlight')) {
+                parentElement.insertBefore(newStructure, codeElement.nextSibling);
+                parentElement.removeChild(codeElement);
+            } else {
+                parentElement.parentElement.replaceChild(newStructure, parentElement);
+            }
+        });
+    };
+
+    handleCodeElements('pre.notranslate > code.notranslate');
+    handleCodeElements('div.highlight > pre.notranslate');
+
+    let currentFeedback = null;
+    document.querySelectorAll('clipboard-copy').forEach(copyButton => {
+        copyButton.addEventListener('click', () => {
+            const codeContent = copyButton.closest('.snippet-clipboard-content').innerText;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = codeContent;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            const copyIcon = copyButton.querySelector('.octicon-copy');
+            const checkIcon = copyButton.querySelector('.octicon-check');
+            const copyFeedback = copyButton.nextElementSibling;
+
+            if (currentFeedback && currentFeedback !== copyFeedback) {currentFeedback.style.display = 'none';}
+            currentFeedback = copyFeedback;
+
+            copyIcon.classList.add('d-none');
+            checkIcon.classList.remove('d-none');
+            copyFeedback.style.display = 'block';
+            copyButton.style.borderColor = 'var(--color-success-fg)';
+
+            setTimeout(() => {
+                copyIcon.classList.remove('d-none');
+                checkIcon.classList.add('d-none');
+                copyFeedback.style.display = 'none';
+                copyButton.style.borderColor = '';
+            }, 2000);
+        });
+    });
+});
+
+</script>
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</html>
