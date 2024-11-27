@@ -122,12 +122,31 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/8970c417-4ba2-4291-8af0-59b855af61a6"><img src="https://github.com/user-attachments/assets/8970c417-4ba2-4291-8af0-59b855af61a6" alt="wavenet结构" style="max-width: 100%;"></a></p>
 <p>较大感受野难以捕捉到较小地震的震相特征，将每层输出结果加和，更加符合不同震级震相拾取的需要<br>
 为降低计算效率，将其简化为7层，保持纯卷积结构，使用空洞卷积，增加感受野<br>
-使用深度可分离卷积，进一步减少参数</p>
+使用深度可分离卷积，进一步减少参数数量</p>
 <pre class="notranslate"><code class="notranslate">传统卷积神经网络: K×C1×C2
-
+深度卷积：K×C1
+逐点卷积：C1×C2
 </code></pre>
 <p>使用LeakyReLU作为激活函数，LeakyReLU＝max（0.25x，x）<br>
-此外，在一些半精度和单精度计算效率不同的设备上，使用半精度替代单精度（深度学习数值精度对分类性能影响较少）</p></div>
+此外，在一些半精度和单精度计算效率不同的设备上，使用半精度替代单精度（深度学习数值精度对分类性能影响较少）</p>
+<p>2.1 其它用于到时拾取的深度学习模型<br>
+三层CNN</p>
+<pre class="notranslate"><code class="notranslate">5*5  添加BN层
+仅依赖感受野，无法捕捉时序特征
+![表2](https://github.com/user-attachments/assets/e001c45a-7f38-41be-b409-e32b6d4c0a97)
+
+</code></pre>
+<p>双向RNN<br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/ab286080-584c-4a2f-bad7-be8d8c0ac6fe"><img src="https://github.com/user-attachments/assets/ab286080-584c-4a2f-bad7-be8d8c0ac6fe" alt="bi RNN" style="max-width: 100%;"></a></p>
+<pre class="notranslate"><code class="notranslate">Bi-RNN，并结合CNN处理原始波形
+推理速度慢，需要较多资源
+</code></pre>
+<p>稀疏编码模型（编码解码模型/U-Net）<br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/303cb0a4-4477-45b3-b60d-9296adf442f7"><img src="https://github.com/user-attachments/assets/303cb0a4-4477-45b3-b60d-9296adf442f7" alt="表三" style="max-width: 100%;"></a></p>
+<pre class="notranslate"><code class="notranslate">多层卷积层，池化层（降采样），转置卷积（上采样），添加BN层，【点对点输出】
+模型更加复杂，计算量更大
+</code></pre>
+<h2>3.网络性能对比分析</h2></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
