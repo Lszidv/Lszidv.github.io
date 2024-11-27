@@ -128,7 +128,7 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 逐点卷积：C1×C2
 </code></pre>
 <p>使用LeakyReLU作为激活函数，LeakyReLU＝max（0.25x，x）<br>
-此外，在一些半精度和单精度计算效率不同的设备上，使用半精度替代单精度（深度学习数值精度对分类性能影响较少）</p>
+此外，在一些半精度和单精度计算效率不同的设备上，使用半精度替代单精度（深度学习数值精度对分类性能影响较少）[cpu计算]</p>
 <p>2.1 其它用于到时拾取的深度学习模型<br>
 三层CNN<br>
 <a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/e001c45a-7f38-41be-b409-e32b6d4c0a97"><img src="https://github.com/user-attachments/assets/e001c45a-7f38-41be-b409-e32b6d4c0a97" alt="表2" style="max-width: 100%;"></a></p>
@@ -140,6 +140,7 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <pre class="notranslate"><code class="notranslate">Bi-RNN，并结合CNN处理原始波形
 推理速度慢，需要较多资源
 </code></pre>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/9869a044-1f9b-4ca4-870b-6b6fc64ead49"><img src="https://github.com/user-attachments/assets/9869a044-1f9b-4ca4-870b-6b6fc64ead49" alt="箱形图" style="max-width: 100%;"></a></p>
 <p>稀疏编码模型（编码解码模型/U-Net）<br>
 <a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/303cb0a4-4477-45b3-b60d-9296adf442f7"><img src="https://github.com/user-attachments/assets/303cb0a4-4477-45b3-b60d-9296adf442f7" alt="表三" style="max-width: 100%;"></a></p>
 <pre class="notranslate"><code class="notranslate">多层卷积层，池化层（降采样），转置卷积（上采样），添加BN层，【点对点输出】
@@ -147,15 +148,32 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </code></pre>
 <h2>3.网络性能对比分析</h2>
 <p>3.1 训练和测试数据</p>
-<pre class="notranslate"><code class="notranslate">
+<pre class="notranslate"><code class="notranslate">使用波数法合成14万条数据，选取1500条作为测试数据（震中距 20—470 km 范围内的台站，台站为任意方位角；震源深度为 4—19 km，震级 MW3.0—6.0，其它震源参数随机，噪声方差为0.1和0.3）
+单条数据采样点1024，采样间隔0.2s,即为204.8秒的地震波形
+生成数据不经过滤波，使用方差归一化，使用单一垂向分量波形进行震相拾取，加入方差为 0—0.2 的噪声
+标注波形，将正确到时（计算）前两个采样点作为正样本，其它作为负样本
+作为分类问题，负样本过多，因此对正样本以及 P 波与 S 波之间的波形加入权值 5，负样本加权值为 0.1
+标签数据使用独热编码（OneHot）对震相类型进行标注
 </code></pre>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/2a163126-1125-489e-83f1-eebc8f35b644"><img src="https://github.com/user-attachments/assets/2a163126-1125-489e-83f1-eebc8f35b644" alt="训练数据" style="max-width: 100%;"></a></p>
+<p>波数是描述波的空间频率的量度，它与波长（wavelength）和频率（frequency）相关。<br>
+在地震学中，波数法被用于生成虚拟地震数据。通过模拟不同震源、介质、波形等因素，生成用于模型训练的数据。<br>
+需要准确的介质模型和波传播参数才能产生高质量的模拟数据。</p>
+<p>独热编码（One-Hot Encoding）是一种常用的分类数据转换方法，它将每个类别映射到一个 二进制向量 中，在这个向量中，只有与该类别对应的位置为 1，其他位置为 0。独热编码常用于机器学习和深度学习中，用来处理类别型特征，使其适应模型的训练需求。例如P 波[1,0,0]S 波 [0,1,0]和 面波[0,0,1]</p>
 <p>3.2 网络规模和推断速度测试</p>
-<pre class="notranslate"><code class="notranslate">
+<pre class="notranslate"><code class="notranslate"> 网络规模、可训练参数数量、推断时间 和 硬件（CPU 和 GPU）性能的关系
 </code></pre>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/12c9e443-0caa-4b3c-aceb-d96a162e4805"><img src="https://github.com/user-attachments/assets/12c9e443-0caa-4b3c-aceb-d96a162e4805" alt="性能统计" style="max-width: 100%;"></a></p>
 <p>3.3 分类性能测试</p>
-<pre class="notranslate"><code class="notranslate">
+<pre class="notranslate"><code class="notranslate">测试数据中，如果一个震相的到时被识别为跨越超过 3 个采样点（0.6秒），被归类为负样本
+最优性能：CNN+biRNN  , Wavenet（扩张卷积） 说明增加感受野来捕捉更长时间依赖，均可以达到较好的结果。
+所有模型在 S 波 提取任务上的效果均好于 P 波[S波的振幅和持续时间相对较长，而P波由于振幅原因容易被噪声掩盖]（见图5）
+使用箱形图（Box Plot）对震相到时提取误差进行了分析，P 波的到时误差相比S波更小[P波样本较少被正确提取，S波的误差较大]（图6）
+CNN+biRNN与Wavenet类似
 </code></pre>
-<p>3.4 抗干扰测试</p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/48bc2bc3-1a2a-4f32-ab75-4cb225e2a76e"><img src="https://github.com/user-attachments/assets/48bc2bc3-1a2a-4f32-ab75-4cb225e2a76e" alt="ROC" style="max-width: 100%;"></a><br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/9d16f424-74c5-455a-84b5-b75fe0843049"><img src="https://github.com/user-attachments/assets/9d16f424-74c5-455a-84b5-b75fe0843049" alt="箱形图" style="max-width: 100%;"></a><br>
+3.4 抗干扰测试</p>
 <pre class="notranslate"><code class="notranslate">
 </code></pre>
 <h2>4.结果与讨论</h2></div>
