@@ -130,11 +130,10 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <p>使用LeakyReLU作为激活函数，LeakyReLU＝max（0.25x，x）<br>
 此外，在一些半精度和单精度计算效率不同的设备上，使用半精度替代单精度（深度学习数值精度对分类性能影响较少）</p>
 <p>2.1 其它用于到时拾取的深度学习模型<br>
-三层CNN</p>
+三层CNN<br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/e001c45a-7f38-41be-b409-e32b6d4c0a97"><img src="https://github.com/user-attachments/assets/e001c45a-7f38-41be-b409-e32b6d4c0a97" alt="表2" style="max-width: 100%;"></a></p>
 <pre class="notranslate"><code class="notranslate">5*5  添加BN层
 仅依赖感受野，无法捕捉时序特征
-![表2](https://github.com/user-attachments/assets/e001c45a-7f38-41be-b409-e32b6d4c0a97)
-
 </code></pre>
 <p>双向RNN<br>
 <a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/ab286080-584c-4a2f-bad7-be8d8c0ac6fe"><img src="https://github.com/user-attachments/assets/ab286080-584c-4a2f-bad7-be8d8c0ac6fe" alt="bi RNN" style="max-width: 100%;"></a></p>
@@ -146,7 +145,20 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <pre class="notranslate"><code class="notranslate">多层卷积层，池化层（降采样），转置卷积（上采样），添加BN层，【点对点输出】
 模型更加复杂，计算量更大
 </code></pre>
-<h2>3.网络性能对比分析</h2></div>
+<h2>3.网络性能对比分析</h2>
+<p>3.1 训练和测试数据</p>
+<pre class="notranslate"><code class="notranslate">
+</code></pre>
+<p>3.2 网络规模和推断速度测试</p>
+<pre class="notranslate"><code class="notranslate">
+</code></pre>
+<p>3.3 分类性能测试</p>
+<pre class="notranslate"><code class="notranslate">
+</code></pre>
+<p>3.4 抗干扰测试</p>
+<pre class="notranslate"><code class="notranslate">
+</code></pre>
+<h2>4.结果与讨论</h2></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>

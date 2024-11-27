@@ -53,11 +53,10 @@ BN层通过将每一层的输入进行归一化处理，使得训练过程更加
 
 2.1 其它用于到时拾取的深度学习模型
   三层CNN
+![表2](https://github.com/user-attachments/assets/e001c45a-7f38-41be-b409-e32b6d4c0a97)
 ```
 5*5  添加BN层
 仅依赖感受野，无法捕捉时序特征
-![表2](https://github.com/user-attachments/assets/e001c45a-7f38-41be-b409-e32b6d4c0a97)
-
 ```
 双向RNN
 ![bi RNN](https://github.com/user-attachments/assets/ab286080-584c-4a2f-bad7-be8d8c0ac6fe)
@@ -74,6 +73,21 @@ Bi-RNN，并结合CNN处理原始波形
 模型更加复杂，计算量更大
 ```
 ## 3.网络性能对比分析
+3.1 训练和测试数据
+```
 
+```
+3.2 网络规模和推断速度测试
+```
 
+```
+3.3 分类性能测试
+```
 
+```
+3.4 抗干扰测试
+```
+
+```
+
+## 4.结果与讨论
