@@ -103,4 +103,34 @@ k1(i) 和 k2(i) 分别表示点 i 与点 m + 1 和点 n - 1 之间幅度差与�
 第二阶段完成后，评估ES系统产生的最佳估计
 
 ## 4. Identifying quality of shear-wave splitting
-  
+  定义 Qp,Qt （1，2，3 --->Good,Acceptable,Unacceptable）评估快剪切波极化方向，慢剪切波到时以及时间延迟 
+  定义 Crsn1 和 2rsn2，分别表示Good和Acceptable的信噪比
+```
+（1）如果信噪比rsn大于等于参考值  crsn1（rsn ≥ crsn1），则Qp = 1
+    crsn2 ≤ rsn < crsn1 ， 则Qp = 2  （本文在冰岛的研究中， crsn1 = 5.0 和 crsn2 = 3.0 ）
+（2）定义 daft , dbef 分别表示快剪切波到达后，到达前10个点窗口内最大幅值与最小幅值之差
+    daft / dbef 表示的是快剪切波到达前后幅度变化的强度比率，比率越大，表示剪切波到达时的变化越显著
+    如果 daft / dbef ≥ rd，则 Qt = 1；如果 daft / dbef < rd，则 Qt = 2，其中 rd 由经验确定（在本研究中为2.8）
+    对于慢剪切波，daft 和 dbef 同样被用来计算幅度变化，如果快慢剪切波Qt = 1 ，则时间延迟质量也为1
+```
+## 5. Calculation of polarisation of fast shear-wave
+  快剪切波极化方向j通过加权极化图中每个时间延迟点的幅值来计算
+$$
+Φ = \frac{\sum_i Zamp(i) \cdot φ(i)}{\sum_i Zamp(i)}
+$$
+
+## 6. Evaluation of ES identification of shear-wave splitting
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -184,7 +184,22 @@ $$</p>
 </code></pre>
 <p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/9af10e35-6d09-447a-b526-8171dc053fde"><img src="https://github.com/user-attachments/assets/9af10e35-6d09-447a-b526-8171dc053fde" alt="#2 fig 2" style="max-width: 100%;"></a><br>
 第二阶段完成后，评估ES系统产生的最佳估计</p>
-<h2>4. Identifying quality of shear-wave splitting</h2></div>
+<h2>4. Identifying quality of shear-wave splitting</h2>
+<p>定义 Qp,Qt （1，2，3 ---&gt;Good,Acceptable,Unacceptable）评估快剪切波极化方向，慢剪切波到时以及时间延迟<br>
+定义 Crsn1 和 2rsn2，分别表示Good和Acceptable的信噪比</p>
+<pre class="notranslate"><code class="notranslate">（1）如果信噪比rsn大于等于参考值  crsn1（rsn ≥ crsn1），则Qp = 1
+    crsn2 ≤ rsn &lt; crsn1 ， 则Qp = 2  （本文在冰岛的研究中， crsn1 = 5.0 和 crsn2 = 3.0 ）
+（2）定义 daft , dbef 分别表示快剪切波到达后，到达前10个点窗口内最大幅值与最小幅值之差
+    daft / dbef 表示的是快剪切波到达前后幅度变化的强度比率，比率越大，表示剪切波到达时的变化越显著
+    如果 daft / dbef ≥ rd，则 Qt = 1；如果 daft / dbef &lt; rd，则 Qt = 2，其中 rd 由经验确定（在本研究中为2.8）
+    对于慢剪切波，daft 和 dbef 同样被用来计算幅度变化，如果快慢剪切波Qt = 1 ，则时间延迟质量也为1
+</code></pre>
+<h2>5. Calculation of polarisation of fast shear-wave</h2>
+<p>快剪切波极化方向j通过加权极化图中每个时间延迟点的幅值来计算<br>
+$$<br>
+Φ = \frac{\sum_i Zamp(i) \cdot φ(i)}{\sum_i Zamp(i)}<br>
+$$</p>
+<h2>6. Evaluation of ES identification of shear-wave splitting</h2></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
