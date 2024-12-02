@@ -160,7 +160,31 @@ Zamp(i) 是连续两个点绝对值差
 φ(i)是每个点振动方向，φ(0)是快剪切波极化方向的初始值
 具有最大p值点定义为D，即为快剪切波的到达时刻，慢剪切波具有类似的规则
 </code></pre>
-<h2>3. Accurate identification of shear-wave splitting</h2></div>
+<h2>3. Accurate identification of shear-wave splitting</h2>
+<p>第二阶段，重复迭代，至结果趋于稳定</p>
+<pre class="notranslate"><code class="notranslate">（1）如果慢波到时晚于快波到时，继续执行；不然，则将两个水平分量旋转90°（矫正极化方向），若重新计算后，慢波到时仍晚于快波到时，则拒绝此数据
+（2）任何评估步骤中，如果信噪比低于某个值（例如Crsn2 = 3.0），则认为数据质量不够，进行排除
+（3）ES规则第二次应用结束时，若慢波到时晚于快波到时，认为此数据不可接受
+    复杂的波形难以辨别，出现误判，如下图（m为系统识别，k为正确到时）
+（4）额外规则来提高精度：
+    定义系数ck
+</code></pre>
+<p>$$k1(i) = \frac{x(i) - x(m + 1)}{i - m - 1}, \quad k2(i) = \frac{x(n - 1) - x(i)}{n - 1 - i}$$</p>
+<p>$$
+ck(i) = \left| \frac{k1(i)}{k2(i)} \right|
+$$</p>
+<p>对于 ( i = m + 2, m + 3, ... , n - 2 )，</p>
+<p>$$
+\text{max}[ck(m + 2), ck(m + 3), \dots, ck(n - 2)] \geq cH
+$$</p>
+<p>如果 <strong>ck(i)</strong> 的最大值大于某个特定值 <strong>cH</strong>，则认为该样本点为快（或慢）剪切波的到达点。</p>
+<pre class="notranslate"><code class="notranslate">k1(i) 和 k2(i) 分别表示点 i 与点 m + 1 和点 n - 1 之间幅度差与距离的比值（局部变化率，离散点---&gt;有限差分代替导数计算）
+计算 k1(i) 和 k2(i) 的比值的绝对值来得到 ck(i)，目的是衡量幅度变化的相对速度。
+具有最大 ck(i) 值的样本点即为快（或慢）剪切波的到达点。若ck(i)最大值未超过阈值cH，到达点即为m(第二阶段计算的初步到达点)
+</code></pre>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/9af10e35-6d09-447a-b526-8171dc053fde"><img src="https://github.com/user-attachments/assets/9af10e35-6d09-447a-b526-8171dc053fde" alt="#2 fig 2" style="max-width: 100%;"></a><br>
+第二阶段完成后，评估ES系统产生的最佳估计</p>
+<h2>4. Identifying quality of shear-wave splitting</h2></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
