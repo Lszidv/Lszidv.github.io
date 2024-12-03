@@ -124,12 +124,19 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 考虑剪切波在水平面上的二维运动，定义两个基本量：</p>
 <pre class="notranslate"><code class="notranslate">nmax:剪切波到达前(BTW)噪声的最大振幅
 smax:剪切波到达后(ATW)信号的最大振幅
+假设剪切波到时为t0 , 两窗口为 t0 - t1 , t0 + t2 
 
 对每个地震，定义阈值参数veq = max(Cbef * nmax, smax / Caft),根据经验，对不同的台站有不同的系数Cbef和Caft
 
 信号强度超过veq，认为剪切波到达
 定义B点为信号首次超过Veq的点，A点为B点前，最接近BTW窗口内平均值的点
 快剪切波极化方向近似值j0为A→B的方向
+</code></pre>
+<pre class="notranslate"><code class="notranslate">剪切波到达时刻的精准判定是后续剪切波分裂（S-wave splitting）研究的基础.
+剪切波到达：
+1.信号幅度突增[分析窗口内的幅度变化]
+2.振动方向（即波形的极化方向）变化：快剪切波到达时，发生接近90°的振动方向变化；慢剪切波到达时，震动方向可能会有一个相对较小的变化，略微滞后于快剪切波。[ES系统通过加权计算时间窗内数据点的振动方向（极化方向），最终得出剪切波的整体平均极化方向。]
+3.噪声与信号的比值，剪切波到达前，信号强度较弱，可能被噪声掩盖（Cbef *nmax）；剪切波到达后，信号幅度超过噪声水平（smax/Caft）
 </code></pre>
 <p>2.2 初始规则：快慢波到达的近似</p>
 <pre class="notranslate"><code class="notranslate">将水平分量旋转，与j0平行或正交
@@ -278,7 +285,11 @@ console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 
 <script>
 document.getElementById("pathHome").setAttribute("d",IconList["home"]);
 document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
-
+cmButton=document.getElementById("cmButton");
+    span=document.createElement("span");
+    span.setAttribute("class","Counter");
+    span.innerHTML="1";
+    cmButton.appendChild(span);
 
 
 function openComments(){
