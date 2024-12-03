@@ -132,14 +132,32 @@ Qt5框架和PyQT5绑定确保了Pytheas拥有易于使用且跨平台的图形�
 六个模块：
 parsers：用于读取和写入配置文件的设置。
 db_handler：处理与数据库的所有交互。
-eigenvalue：实现特征值法（EV）分析。
-rotationcorrelation：实现旋转相关法（RC）分析。
-clustering：执行聚类分析（CA）。
-tools：提供辅助工具和功能。
+eigenvalue：实现特征值法（EV）分析。[特征值法（EV）和最小能量法（ME）所需的函数（Silver和Chan，1991）;ϕ和δt的误差公式，Walsh等（2013]
+rotationcorrelation：实现旋转相关法（RC）分析。[Bowman和Ando（1987）；通过计算95%置信区间，Pytheas为参数（如ϕ和δt）提供了一个误差范围。]
+
 数据库包含三个表：
 event：存储事件元数据。
 station：存储台站元数据。
 method：存储与SwS测量相关的信息，如ϕ和td值。
+</code></pre>
+<pre class="notranslate"><code class="notranslate">clustering：执行聚类分析（CA）。
+Teanby等（2004b）提出的聚类分析（CA）方法
+聚类模块使用一个类对象来管理分析流程中的各个步骤：
+   候选窗口生成：定义用于分析的信号窗口范围
+   聚类形成：根据相似性对数据进行分组
+   聚类选择：选择最优的聚类结果，用于进一步分析
+
+左侧窗口起始点：从S-P时间（S波到达台站的时间减去P波到达台站的时间）的一半开始，这有助于避免选择过短的窗口。※[Savage等（2010）]
+右侧窗口结束点：由S波到达时的主频率 * 自定义的因子(对右侧结束点的时间进行扩展或缩小)
+
+层次聚类：递归地将数据点合并为更大的聚类，或将大的聚类分割为小的聚类，最终形成一个树状结构
+四种链接聚类的标准，都使用欧几里得距离（直线距离）作为相似性度量：
+ward标准：最小化合并后的聚类的方差。
+average标准：最小化两个聚类之间的平均距离。
+complete标准：最小化两个聚类之间的最大距离。
+single标准：使用最小的距离来合并聚类。
+</code></pre>
+<pre class="notranslate"><code class="notranslate">tools：提供辅助工具和功能。
 </code></pre></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
