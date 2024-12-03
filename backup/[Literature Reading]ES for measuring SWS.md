@@ -154,4 +154,4 @@ ES技术在实际应用中关键表现:
 （2）对所有地震记录，64% 的数据的误差小于 3个采样点（即约 0.03秒）。对于Qt = 1的数据，78%的数据误差小于 3个采样点
 （3）只要记录的质量符合标准（Qp, Qt = 1, 2），小误差可以通过视觉调整进一步优化结果。
 
-
+[Paper Link](https://www.sciencedirect.com/science/article/abs/pii/S0098300407001215#preview-section-snippets)
