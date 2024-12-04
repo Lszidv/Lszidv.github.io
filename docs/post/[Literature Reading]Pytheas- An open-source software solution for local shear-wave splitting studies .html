@@ -173,36 +173,28 @@ single标准：使用最小的距离来合并聚类。
   Obspy的TauP：该工具用于计算理论上的S波到达时间和入射角。TauP方法用于模拟波的传播路径，并根据给定的介质结构计算S波到达观测台站的时间和入射角。
   AR-AIC自动拾取器：这是一个自动化工具，用于从地震记录中自动提取S波到达时间。**AIC（赤池信息准则）**是一个常用的信号处理方法，用于选择最适合的模型或参数。
 </code></pre>
-<ol>
-<li><strong>sδϕ</strong>（ϕ的误差评分）：</li>
-</ol>
+<p>（1）. <strong>sδϕ</strong>（ϕ的误差评分）：</p>
 <p>$$
 s_{\delta \phi} = \frac{\delta \phi}{\delta \phi_{\text{max}}}
 $$</p>
 <ul>
 <li>其中，<strong>δϕ</strong> 是偏振方向ϕ的误差，<strong>δϕmax</strong> 是允许的最大误差。</li>
 </ul>
-<ol start="2">
-<li><strong>sδt</strong>（时间延迟误差评分）：</li>
-</ol>
+<p>（2）. <strong>sδt</strong>（时间延迟误差评分）：</p>
 <p>$$
 s_{\delta t} = \frac{\delta td}{\delta td_{\text{max}}}
 $$</p>
 <ul>
 <li>其中，<strong>δtd</strong> 是时间延迟（td）的误差，<strong>δtdmax</strong> 是允许的最大时间延迟误差。</li>
 </ul>
-<ol start="3">
-<li><strong>sCCFS</strong>（FS轴系统中的相关系数评分）：</li>
-</ol>
+<p>（3）. <strong>sCCFS</strong>（FS轴系统中的相关系数评分）：</p>
 <p>$$
 s_{\text{CCFS}} = \frac{1 - |CCFS|}{1 - CCFS_{\text{min}}}
 $$</p>
 <ul>
 <li>其中，<strong>CCFS</strong> 是FS轴系统中修正后的水平波形的相关系数，<strong>CCFSmin</strong> 是允许的最小相关系数。</li>
 </ul>
-<ol start="4">
-<li><strong>sCCNE</strong>（NE轴系统中的相关系数评分）：</li>
-</ol>
+<p>（4）. <strong>sCCNE</strong>（NE轴系统中的相关系数评分）：</p>
 <p>$$
 s_{\text{CCNE}} = \frac{1 - |CCNE|}{1 - CCNE_{\text{min}}}
 $$</p>
@@ -216,7 +208,18 @@ $$</p>
 指向存储地震波形数据的文件夹路径。[波形文件：Obspy可读取的任何格式（例如，SAC和miniSEED）]<br>
 （每个事件记录存储在以震源时间命名的文件夹中，每个台站记录存储在单独文件夹中）<br>
 结合FDSN（国际数字地震仪网络联合会）的标准化接口</p>
-<p>2.2.1. Manual method</p></div>
+<p>2.2.1. Manual method</p>
+<pre class="notranslate"><code class="notranslate">挑选Sfast波到达时间：分析师手动确定Sfast波的到达时间。
+获取极化方向：软件从NE平面的运动向量中获取Sfast波的极化方向ϕ。
+旋转到FS轴向系统：将水平分量旋转到FS轴向系统。
+确定时间延迟：通过时间上移动Sslow波，以匹配两个分裂波的到达时间，从而确定时间延迟td。
+旋转回NE系统：将波形旋转回原始的NE系统。
+自动确定极化方向：Pytheas软件自动确定校正后的剪切波的极化方向。
+手动提供等级：分析师需要手动提供一个等级，以评估结果的质量。
+生成总结图表：可以生成一个图表来总结分析结果。
+</code></pre>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/8c98d0e8-32bd-4f4f-b683-c5a3a5d02156"><img src="https://github.com/user-attachments/assets/8c98d0e8-32bd-4f4f-b683-c5a3a5d02156" alt="manual" style="max-width: 100%;"></a></p>
+<p>2.2.2. Semi-automatic methods</p></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
