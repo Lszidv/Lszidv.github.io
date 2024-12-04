@@ -164,3 +164,32 @@ Calinski-Harabasz评分：展示了不同聚类数目的质量评估，帮助选
 ϕ变化：展示了不同窗口下Sfast波偏振方向的变化。
 td变化：展示了不同窗口下Sfast波和Sslow波之间时间延迟的变化。
 ```
+
+3. Case study: the Western Gulf of Corinth
+Western Gulf of Corinth (WGoC)一个月的地震记录，HUSN和CRLN两个台阵
+263个地震事件，震级范围从0.6到4.0，分析包括了一个Mw 5.1的地震事件
+(Papadimitriou et al., 1999; Kaviris et al., 2017, 2018b)，剪切波窗口被设置为45°
+CA-EV方法（偏好设置见表）进行自动分析，并且通过MAN方法分析了56个事件作为对照组。
+所有数据的相位到达时间和事件目录来自雅典大学地震实验室
+![偏好表](https://github.com/user-attachments/assets/6403736f-f560-4206-80cc-94d04311c770)
+
+
+
+
+
+
+
+## 4. Conclusions 
+  
+
+
+
+
+
+
+
+
+
+
+
+
