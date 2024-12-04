@@ -112,7 +112,7 @@ ES系统导致一些数据被误筛</li>
 Sfast和Sslow分量（Sfast and Sslow Components）
 - Sfast（快波）：是剪切波分裂现象中的一个分量，传播速度较快，沿着Sfast的偏振方向传播。
 - Sslow（慢波）：是剪切波分裂现象中的另一个分量，传播速度较慢，沿着Sslow的偏振方向传播。
-- 通过对径向和切向分量进行坐标旋转来获得（原始分量和快慢波的偏振方向不一致，R、T分量作为中间步骤，提供了更好的基准方向）。旋转后的坐标系统使得Sfast和Sslow分量能够沿其偏振方向进行区分，从而分析它们的传播速度差异。
+- 通过对径向和切向分量进行坐标旋转（ϕ）来获得（原始分量和快慢波的偏振方向不一致，R、T分量作为中间步骤，提供了更好的基准方向）。旋转后的坐标系统使得Sfast和Sslow分量能够沿其偏振方向进行区分，从而分析它们的传播速度差异。
 </code></pre>
 <pre class="notranslate"><code class="notranslate">网格搜索法：最小能量法（网格搜索寻找能最小化切向分量能量的最佳参数对）和特征值法（评估径向和切向分量的协方差矩阵的第二特征值，最小化这个特征值。）
 旋转相关法：将水平波形旋转到不同的F-S坐标系中，并为每个旋转后的坐标系应用不同的时间延迟值（td）。
@@ -158,7 +158,55 @@ complete标准：最小化两个聚类之间的最大距离。
 single标准：使用最小的距离来合并聚类。
 </code></pre>
 <pre class="notranslate"><code class="notranslate">tools：提供辅助工具和功能。
-</code></pre></div>
+自动评分算法：
+  1.检查数据是否有效：检查ϕ与修正剪切波的偏振方向的角度差（无效记为 ‘N’ ）
+      定义无效测量：没有剪切波分裂现象或S波的偏振方向过于接近快波或慢波的偏振方向（自定义阈值标准，用于判断近似平行与垂直）
+  2.使用最小信噪比筛掉有显著噪声的记录（‘E’）
+  3.评分：Pytheas的自动评分算法通过计算四个单独的评分，来评估剪切波分裂分析中的测量结果质量。具体评分指标包括：
+    ϕ的误差（S-δϕ）；
+    时间延迟（td）的误差（S-δt）；
+    FS轴系统中的波形相关性（S-CC-FS）；
+    NE轴系统中的波形相关性（S-CC-NE）。
+每个评分的计算方式是基于实际测量值与预定义的最大和最小阈值之间的差异。通过这些评分，系统可以判断测量结果的可靠性，并根据评分值判断数据是否有效。如果某个评分值超过1.0，测量会被拒绝（标记为“E”级）。如果所有评分都在允许范围内，则计算总评分S，并通过平均值来决定数据的质量。
+</code></pre>
+<ol>
+<li>
+<p><strong>sδϕ</strong>（ϕ的误差评分）：<br>
+$$<br>
+s_{\delta \phi} = \frac{\delta \phi}{\delta \phi_{\text{max}}}<br>
+$$</p>
+<ul>
+<li>其中，<strong>δϕ</strong> 是偏振方向ϕ的误差，<strong>δϕmax</strong> 是允许的最大误差。</li>
+</ul>
+</li>
+<li>
+<p><strong>sδt</strong>（时间延迟误差评分）：<br>
+$$<br>
+s_{\delta t} = \frac{\delta td}{\delta td_{\text{max}}}<br>
+$$</p>
+<ul>
+<li>其中，<strong>δtd</strong> 是时间延迟（td）的误差，<strong>δtdmax</strong> 是允许的最大时间延迟误差。</li>
+</ul>
+</li>
+<li>
+<p><strong>sCCFS</strong>（FS轴系统中的相关系数评分）：<br>
+$$<br>
+s_{\text{CCFS}} = \frac{1 - |CCFS|}{1 - CCFS_{\text{min}}}<br>
+$$</p>
+<ul>
+<li>其中，<strong>CCFS</strong> 是FS轴系统中修正后的水平波形的相关系数，<strong>CCFSmin</strong> 是允许的最小相关系数。</li>
+</ul>
+</li>
+<li>
+<p><strong>sCCNE</strong>（NE轴系统中的相关系数评分）：<br>
+$$<br>
+s_{\text{CCNE}} = \frac{1 - |CCNE|}{1 - CCNE_{\text{min}}}<br>
+$$</p>
+<ul>
+<li>其中，<strong>CCNE</strong> 是NE轴系统中修正后的水平波形的相关系数，<strong>CCNEmin</strong> 是允许的最小相关系数。</li>
+</ul>
+</li>
+</ol></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
