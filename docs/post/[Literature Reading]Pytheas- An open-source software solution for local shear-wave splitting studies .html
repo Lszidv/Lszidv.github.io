@@ -216,10 +216,28 @@ $$</p>
 旋转回NE系统：将波形旋转回原始的NE系统。
 自动确定极化方向：Pytheas软件自动确定校正后的剪切波的极化方向。
 手动提供等级：分析师需要手动提供一个等级，以评估结果的质量。
-生成总结图表：可以生成一个图表来总结分析结果。
+生成总结图表：可以生成一个图来总结分析结果。
 </code></pre>
 <p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/8c98d0e8-32bd-4f4f-b683-c5a3a5d02156"><img src="https://github.com/user-attachments/assets/8c98d0e8-32bd-4f4f-b683-c5a3a5d02156" alt="manual" style="max-width: 100%;"></a></p>
-<p>2.2.2. Semi-automatic methods</p></div>
+<p>2.2.2. Semi-automatic methods<br>
+选择分析窗口（RC、EV 和 ME）<br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/4bd259a7-f384-49fb-9ec7-1bf2e227201a"><img src="https://github.com/user-attachments/assets/4bd259a7-f384-49fb-9ec7-1bf2e227201a" alt="semi-automatic" style="max-width: 100%;"></a><br>
+左上：初始NE坐标系中经过滤波后的水平波形；旋转到FS坐标系并经过各项异性矫正；旋转回NE坐标系并再次各项异性矫正<br>
+左下：初始以及经过经过矫正的粒子运动图<br>
+右侧：特征值轮廓图，黑色区域为95%置信区间</p>
+<p>2.2.3. Automatic method<br>
+使用CA方法，有两种执行方式 ：<br>
+1.用户选择台站事件配对，手动或者从事件记录中提取Sfast到达时间，然后选择方法组合进行分析(如CA-RC、CA-EV或CA-ME)<br>
+2.自动分析数据集中所有可用的台站-事件配对，但到达时间必须在QuakeML文件中提供（可以选择剪切波窗口）<br>
+生成聚类质量评估图与上述半自动方法质量评估图<br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/7519e556-dd7f-4d2e-9c3d-bbc0c3833e1e"><img src="https://github.com/user-attachments/assets/7519e556-dd7f-4d2e-9c3d-bbc0c3833e1e" alt="聚类质量评估" style="max-width: 100%;"></a></p>
+<pre class="notranslate"><code class="notranslate">初始数据的分布：展示了候选信号窗口的位置和分布。
+Calinski-Harabasz评分：展示了不同聚类数目的质量评估，帮助选择最佳聚类数目。
+聚类结果：展示了数据的聚类结果，将相似的信号窗口分到同一组。
+聚类和窗口选择：展示了选择最合适聚类和信号窗口的过程。
+ϕ变化：展示了不同窗口下Sfast波偏振方向的变化。
+td变化：展示了不同窗口下Sfast波和Sslow波之间时间延迟的变化。
+</code></pre></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
