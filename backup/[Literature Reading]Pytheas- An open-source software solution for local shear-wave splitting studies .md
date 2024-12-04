@@ -181,16 +181,14 @@ CA-EV方法（偏好设置见表）进行自动分析，并且通过MAN方法分
 φ---0.71   δt---0.53
 
 ## 4. Conclusions 
-  
+结合现有分析方法，自动化，结果可视化
+提供与FDSN的接口
+集成的数据库便于生成玫瑰图和φ与δt的时间变化图
 
+未来方向：
+远震
+加权评分机制
+滤波选择和优化[https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2010JB007722]（Savage et al., 2010）
+并行计算
 
-
-
-
-
-
-
-
-
-
-
+[https://www.sciencedirect.com/science/article/abs/pii/S0098300419303784](Paper Link)
