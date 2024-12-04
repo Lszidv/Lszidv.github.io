@@ -168,45 +168,55 @@ single标准：使用最小的距离来合并聚类。
     FS轴系统中的波形相关性（S-CC-FS）；
     NE轴系统中的波形相关性（S-CC-NE）。
 每个评分的计算方式是基于实际测量值与预定义的最大和最小阈值之间的差异。通过这些评分，系统可以判断测量结果的可靠性，并根据评分值判断数据是否有效。如果某个评分值超过1.0，测量会被拒绝（标记为“E”级）。如果所有评分都在允许范围内，则计算总评分S，并通过平均值来决定数据的质量。
+    评分由D到A,每个评分参数的阈值和等级都可自定义，为计算误差，必须自动评分。
+额外功能：
+  Obspy的TauP：该工具用于计算理论上的S波到达时间和入射角。TauP方法用于模拟波的传播路径，并根据给定的介质结构计算S波到达观测台站的时间和入射角。
+  AR-AIC自动拾取器：这是一个自动化工具，用于从地震记录中自动提取S波到达时间。**AIC（赤池信息准则）**是一个常用的信号处理方法，用于选择最适合的模型或参数。
 </code></pre>
 <ol>
-<li>
-<p><strong>sδϕ</strong>（ϕ的误差评分）：<br>
-$$<br>
-s_{\delta \phi} = \frac{\delta \phi}{\delta \phi_{\text{max}}}<br>
+<li><strong>sδϕ</strong>（ϕ的误差评分）：</li>
+</ol>
+<p>$$
+s_{\delta \phi} = \frac{\delta \phi}{\delta \phi_{\text{max}}}
 $$</p>
 <ul>
 <li>其中，<strong>δϕ</strong> 是偏振方向ϕ的误差，<strong>δϕmax</strong> 是允许的最大误差。</li>
 </ul>
-</li>
-<li>
-<p><strong>sδt</strong>（时间延迟误差评分）：<br>
-$$<br>
-s_{\delta t} = \frac{\delta td}{\delta td_{\text{max}}}<br>
+<ol start="2">
+<li><strong>sδt</strong>（时间延迟误差评分）：</li>
+</ol>
+<p>$$
+s_{\delta t} = \frac{\delta td}{\delta td_{\text{max}}}
 $$</p>
 <ul>
 <li>其中，<strong>δtd</strong> 是时间延迟（td）的误差，<strong>δtdmax</strong> 是允许的最大时间延迟误差。</li>
 </ul>
-</li>
-<li>
-<p><strong>sCCFS</strong>（FS轴系统中的相关系数评分）：<br>
-$$<br>
-s_{\text{CCFS}} = \frac{1 - |CCFS|}{1 - CCFS_{\text{min}}}<br>
+<ol start="3">
+<li><strong>sCCFS</strong>（FS轴系统中的相关系数评分）：</li>
+</ol>
+<p>$$
+s_{\text{CCFS}} = \frac{1 - |CCFS|}{1 - CCFS_{\text{min}}}
 $$</p>
 <ul>
 <li>其中，<strong>CCFS</strong> 是FS轴系统中修正后的水平波形的相关系数，<strong>CCFSmin</strong> 是允许的最小相关系数。</li>
 </ul>
-</li>
-<li>
-<p><strong>sCCNE</strong>（NE轴系统中的相关系数评分）：<br>
-$$<br>
-s_{\text{CCNE}} = \frac{1 - |CCNE|}{1 - CCNE_{\text{min}}}<br>
+<ol start="4">
+<li><strong>sCCNE</strong>（NE轴系统中的相关系数评分）：</li>
+</ol>
+<p>$$
+s_{\text{CCNE}} = \frac{1 - |CCNE|}{1 - CCNE_{\text{min}}}
 $$</p>
 <ul>
 <li>其中，<strong>CCNE</strong> 是NE轴系统中修正后的水平波形的相关系数，<strong>CCNEmin</strong> 是允许的最小相关系数。</li>
 </ul>
-</li>
-</ol></div>
+<p>2.2. Analysis workflow<br>
+软件三个必须输入：<br>
+事件目录文件：包含地震事件的详细信息；[QuakeML文件或简单的ASCII文件]<br>
+台站信息文件：包含台站的相关信息波形数据存储路径；[StationXML或纯文本文件]<br>
+指向存储地震波形数据的文件夹路径。[波形文件：Obspy可读取的任何格式（例如，SAC和miniSEED）]<br>
+（每个事件记录存储在以震源时间命名的文件夹中，每个台站记录存储在单独文件夹中）<br>
+结合FDSN（国际数字地震仪网络联合会）的标准化接口</p>
+<p>2.2.1. Manual method</p></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
@@ -370,6 +380,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 </script>
-
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 </html>
