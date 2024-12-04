@@ -191,4 +191,7 @@ CA-EV方法（偏好设置见表）进行自动分析，并且通过MAN方法分
 滤波选择和优化 [Savage et al., 2010](https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2010JB007722)
 并行计算
 
+## Appendix 
+偏振方向玫瑰花图对比示例
+
  [Paper Link](https://www.sciencedirect.com/science/article/abs/pii/S0098300419303784)
