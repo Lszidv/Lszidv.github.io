@@ -106,7 +106,25 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </code></pre>
 <p>三种方法在良好环境下给出的分析结果有相似性，某些环境下，对分析结果的敏感性不同，尤其是在存在误差的情况下，例如：台站指北误差的敏感性<br>
 不同情况下的研究与应用，去伪存真。</p>
-<h2>1.横波分裂反演方法</h2></div>
+<h2>1.横波分裂反演方法</h2>
+<p>横波分裂[φ δt]</p>
+<p>1.1  旋转相关法</p>
+<pre class="notranslate"><code class="notranslate">[使快慢波波形尽可能匹配，即使它们相似性最大]
+在解空间中，进行2D搜索（φ：步长为1°，从 -90° 到 +90°  ； δt:步长为0.1秒，范围从0秒到3秒）
+对每一组解，将地震记录的NE矩阵进行旋转至快慢波方向
+之后求取快波与经过矫正后慢波的互相关函数，寻找系数最大组合
+</code></pre>
+<p>波形旋转</p>
+<p>$$
+u_F(\phi_i, t) = \cos\phi_i \cdot u_N(t) + \sin\phi_i \cdot u_E(t - \delta t_j)
+$$</p>
+<p>$$
+u_S(\phi_i, t) = -\sin\phi_i \cdot u_N(t) + \cos\phi_i \cdot u_E(t - \delta t_j)
+$$
+互相关函数
+$$
+r(\phi_i, \delta t_j) = \int u_F(\phi_i, t) \cdot u_S(\phi_i, t - \delta t_j) , dt
+$$</p></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
@@ -270,6 +288,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 </script>
-
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 </html>
