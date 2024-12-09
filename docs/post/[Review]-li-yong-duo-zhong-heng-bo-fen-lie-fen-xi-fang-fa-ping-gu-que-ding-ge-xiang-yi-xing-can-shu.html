@@ -109,7 +109,7 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <h2>1.横波分裂反演方法</h2>
 <p>横波分裂[φ δt]</p>
 <p>1.1  旋转相关法</p>
-<pre class="notranslate"><code class="notranslate">[使快慢波波形尽可能匹配，即使它们相似性最大]
+<pre class="notranslate"><code class="notranslate">[&lt;同一个横波震相分裂而来&gt;使快慢波波形尽可能匹配，即使它们相似性最大]
 在解空间中，进行2D搜索（φ：步长为1°，从 -90° 到 +90°  ； δt:步长为0.1秒，范围从0秒到3秒）
 对每一组解，将地震记录的NE矩阵进行旋转至快慢波方向
 之后求取快波与经过矫正后慢波的互相关函数，寻找系数最大组合
@@ -124,7 +124,58 @@ $$
 互相关函数
 $$
 r(\phi_i, \delta t_j) = \int u_F(\phi_i, t) \cdot u_S(\phi_i, t - \delta t_j) , dt
-$$</p></div>
+$$</p>
+<p>该方法只适用于分析由液态外核出射的Ｐ波转换而来的远震横波震相（ＰＫＳ，ＳＫＳ和ＳＫＫＳ等，统称 ＸＫＳ）</p>
+<p>1.２ 最小能量法<br>
+由纵波转换而来的横波在穿过各向异性介质之前，其切向分量（垂直于传播方向）能量为零。<br>
+给定任意φ，δt，通过旋转公式将水平分量旋转至快慢波分量后，通过：</p>
+<p>$$
+\left[
+\begin{array}{l}
+u_{R}(\varphi_{i}, t) \\
+u_{T}(\varphi_{i}, t)
+\end{array}
+\right] =
+\left[
+\begin{array}{cc}
+\cos(-\theta_{i}) &amp; \sin(-\theta_{i}) \\
+-\sin(-\theta_{i}) &amp; \cos(-\theta_{i})
+\end{array}
+\right]
+\times
+\left[
+\begin{array}{cc}
+u_{F}(\varphi_{i}, t) \\
+u_{S}(\varphi_{i}, t - \delta t_{j})
+\end{array}
+\right]
+$$</p>
+<p>将快波和经延时矫正后的慢波旋转回至径向和切向方向，再通过：<br>
+$$<br>
+E_T(\phi_i, \delta t_j) = \int u_T^2(\phi_i, t) , dt<br>
+$$<br>
+计算切向分量的能量，同样使用网格搜索法寻找使切向能量最小的参数组合。<br>
+该方法也只适用 ＸＫＳ等已知初始偏振方向（P to S ,P波）的远震转换横波 <a href="https://academic.oup.com/gji/article/199/1/146/722045" rel="nofollow">（Rüｍpker et al. ,2014)</a></p>
+<h2>1.3 最小特征值法</h2>
+<p>[&lt;同一个横波震相分裂而来&gt; 在分裂前，它们的质点运动呈线性相关。即快慢波的振幅是相关的，在理想情况下（未分裂前），它们的运动会表现为相似的模式。]</p>
+<p>给定任意φ，δt，通过旋转公式将水平分量旋转至快慢波分量后，构建快波uF(t）与延时矫正后的慢波uS(t-δt)的协方差矩阵:</p>
+<p>$$
+\left[\begin{array}{cc}
+C_{FF} &amp; C_{FS} \\
+C_{FS} &amp; C_{SS}
+\end{array}\right],
+$$</p>
+<pre class="notranslate"><code class="notranslate">cFF是快波振幅的方差。cSS 是慢波振幅的方差。cFS是快慢波振幅的协方差。
+这个协方差矩阵用于描述快慢波的振幅变化关系。如果两者的波形非常相似，协方差会很大，反之则较小。
+在横波分裂前，快慢波的波形是线性相关的，因此协方差矩阵的特征值应该只有一个非零值，且该特征值反映了两者的线性关系。
+在横波分裂后，由于快慢波的传播速度不同，导致它们的波形开始分离，因此协方差矩阵将出现两个非零的特征值，这两个特征值不再相等，表示波形的分裂。
+在未分裂时，特征值接近零；而在分裂后，特征值会变大，且变为两个不相等的数值。
+网格搜索，最小特征值对应的参数组合
+</code></pre>
+<p>$$
+\lambda = \frac{(c_{FF} + c_{SS}) - \sqrt{(c_{FF} + c_{SS})^2 - 4(c_{FF} \cdot c_{SS} - c_{FS}^2)}}{2}
+$$</p>
+<p>此法不要求初始偏振方向已知</p></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
