@@ -1,1 +1,8 @@
-## Feasibility of Deep Learning in Shear Wave Splitting analysis using Synthetic-Data Training and Waveform Deconvolution
+## Abstract
+背景与传统方法：传统方法通过逆转分裂过程，通过频域和时域操作，最小化波形切向能量，得到分裂参数。
+swsnet模型：自动化从预选波形中提取分裂参数
+合成数据训练：缺乏标注数据，生成合成数据集
+模型性能：在带噪声的合成测试数据上，SWSNet能够以9.7°（φ）和0.14秒（δt）的均方根误差（RMSE）进行预测
+实际数据应用：实际的USArray数据集，通过去卷积步骤对波形进行预处理，使其均匀化。模型在实际数据上的表现与以往的研究一致，预测结果的平均绝对差为9.6°（φ）和0.16秒（δt），显示出较好的准确性和应用潜力。
+
+## 1.Introduction
