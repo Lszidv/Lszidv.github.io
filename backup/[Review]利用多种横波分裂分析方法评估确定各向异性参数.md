@@ -108,3 +108,16 @@ $$
 $$
 
 此法不要求初始偏振方向已知
+
+1.4 理论测试示例
+
+
+
+
+
+
+
+
+
+
+[Paper Link](http://www.geophy.cn/article/doi/10.6038/cjg2022Q0363?viewType=HTML)
