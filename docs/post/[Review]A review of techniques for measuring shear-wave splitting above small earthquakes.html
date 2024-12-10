@@ -169,16 +169,35 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </code></pre>
 <p><strong>3.2. 旋转地震图（Rotated Seismograms）</strong></p>
 <pre class="notranslate"><code class="notranslate">通过将地震记录旋转到快慢波的优选偏振方向，使快慢波的时间延迟和到达时间更加明显
-
-
-
-
+需要应对偏振非正交性的问题，特别是在水平投影中，快慢波可能无法分离为独立波列。
 </code></pre>
 <p><strong>3.3 矢量偏振图（Vectorial Polarisation Diagrams）</strong></p>
-<pre class="notranslate"><code class="notranslate">
+<pre class="notranslate"><code class="notranslate">将水平粒子运动矢量按时间绘制为动态轨迹，为剪切波分裂研究提供了美观且直观的工具
 </code></pre>
 <p><strong>3.4 复杂偏振分析（Complex-Polarisation Analysis）</strong></p>
-<pre class="notranslate"><code class="notranslate">
+<pre class="notranslate"><code class="notranslate">使用复杂协方差矩阵的特征值和特征向量，量化剪切波的倾角、偏振角和线性偏振。
+可用于自动化处理
+</code></pre>
+<h2>4. Automatic techniques for measuring shear-wave splitting</h2>
+<p><strong>4.1节交叉相关技术（Cross-correlation techniques）</strong></p>
+<pre class="notranslate"><code class="notranslate">自Fukao（1984）提出后，交叉相关技术广泛应用于地壳小型地震和上地幔各向异性的时间延迟测量。
+结合偏振图和线性测试，交叉相关技术能够通过滞后值直观估算快波偏振方向和时间延迟。
+
+
+交叉相关技术需要非常严格的数据选择标准,对微小信号变化不敏感,可能导致50-70%的数据被拒绝，从而偏倚结果。
+对窗口端点的选择影响显著，尤其当面波信号与剪切波信号重叠时，进一步增加了解释的复杂性
+</code></pre>
+<p><strong>4.2交叉相关技术的问题与局限</strong></p>
+<pre class="notranslate"><code class="notranslate">1.窗口选择问题：由于剪切波和面波尾波的强振幅影响，选择合适的窗口端点非常困难，容易掩盖剪切波分裂的小效应。
+2.快慢波波形差异：快慢波通常具有不同的频率和波形特征，导致交叉相关函数值较低，影响测量准确性。
+3.偏振方向非正交：快慢波的偏振方向通常不完全正交，难以分离为独立波列。
+4.区域限制：交叉相关技术在地壳小型地震（通常大于5Hz）的表面观测中应用受限，但在远震（更低的频率，0.1–2 Hz）和地幔研究中表现较好（远震剪切波由于频率低且波形相似，其交叉相关技术应用更为可靠）。
+</code></pre>
+<p><strong>4.3. 线性技术：纵横比</strong></p>
+<pre class="notranslate"><code class="notranslate">通过旋转地震图找到粒子运动轨迹的最大线性方向，计算其纵横比（长度/宽度）以确定快波偏振方向。快波偏振方向对应纵横比最大的方位角。
+
+
+
 
 </code></pre>
 <p><a href="https://www.sciencedirect.com/science/article/abs/pii/S0031920106001853" rel="nofollow">Paper Link</a></p></div>
