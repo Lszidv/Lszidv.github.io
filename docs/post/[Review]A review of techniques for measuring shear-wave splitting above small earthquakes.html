@@ -195,11 +195,30 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </code></pre>
 <p><strong>4.3. 线性技术：纵横比</strong></p>
 <pre class="notranslate"><code class="notranslate">通过旋转地震图找到粒子运动轨迹的最大线性方向，计算其纵横比（长度/宽度）以确定快波偏振方向。快波偏振方向对应纵横比最大的方位角。
-
-
-
-
+如果快慢波的时间延迟过小，纵横比技术效果较差,偏振方向非正交会导致快慢波分离难度增加。
 </code></pre>
+<p><strong>4.4 线性技术：线性区间</strong></p>
+<pre class="notranslate"><code class="notranslate">通过评估方差张量最大特征值方向的线性度，监测剪切波分裂的偏振方向和时间延迟。
+
+数据对齐和事件相似性判定存在缺陷。
+关键窗口选择困难，噪声影响较大。
+测量误差较高，时间延迟偏差可达200%。
+</code></pre>
+<p><strong>4.5 线性技术：奇异协方差矩阵</strong></p>
+<pre class="notranslate"><code class="notranslate">通过奇异协方差矩阵提取偏振方向和时间延迟，适用于低频、干扰少的上地幔信号
+在地壳复杂信号中效果较差，因剪切波与面波尾波混叠，局部地形的不规则性对结果干扰较大。
+</code></pre>
+<p><strong>4.6  线性技术：单值分解</strong></p>
+<pre class="notranslate"><code class="notranslate">通过单值分解技术（SVD）提取三分量地震图的优选偏振方向，并结合交叉相关法估算快慢波分裂时间延迟。
+表现出较好的抗噪性，但在地震数据分析中的某些限制（如窗口选择等）仍然存在。
+</code></pre>
+<p><strong>4.7 互相关和线性技术的结合</strong></p>
+<pre class="notranslate"><code class="notranslate">在台湾集集地震的低速近地表环境下，交叉相关和纵横比技术成功结合使用。
+理想条件（如几乎正交的偏振方向、较少的尾波干扰）使两种技术的结果高度一致
+</code></pre>
+<p><strong>4.8 ANN</strong></p>
+<h2>5. Discussion</h2>
+<p>显示技术虽具主观性，但通过标准化程序可获得一致结果；自动化技术虽声称客观，但未经验证的“客观性”可能具有误导性。</p>
 <p><a href="https://www.sciencedirect.com/science/article/abs/pii/S0031920106001853" rel="nofollow">Paper Link</a></p></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
