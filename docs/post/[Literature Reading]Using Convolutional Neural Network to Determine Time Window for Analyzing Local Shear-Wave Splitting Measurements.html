@@ -184,7 +184,22 @@ CNN结果与先前研究（Liu等，2008）保持一致性，进一步支持其�
 深源远震： 深源事件中，S相传播时间较长，时间窗口需更早开始，以保证完整捕获S相信号。
 数据集中，事件深度范围为3.1至14.4公里，事件与台站之间的距离范围为0.7至14.1公里，最大入射角约为35°。
 </code></pre>
+<p><strong>基于机器学习的自动排序</strong></p>
+<pre class="notranslate"><code class="notranslate">S相时间窗口的准确性直接决定了剪切波分裂参数（δt 和 ϕ）的可靠性。
+如果时间窗口选择不准确，可能导致测量中的横向分量干扰未完全去除，从而影响分裂参数的精度。
+横向分量通常包含与各向异性相关的特征信号，但也可能受到其他波（如P波或P尾波）的干扰。
+
+精确的时间窗口可以实现横向分量能量的最小化，这种校正特性为分析剪切波分裂提供了明确的物理依据。
+横向分量的能量特性不仅是地震信号分析的关键，也是自动化排序的重要特征。
+
+横向分量校正后的能量最小化特征可作为机器学习模型的核心输入特征，帮助自动化评估测量值的质量。
+配合前面的研究
+</code></pre>
+<p>#2</p>
 <h2>Conclusions</h2>
+<pre class="notranslate"><code class="notranslate">研究开发了一种CNN模型，用于局部SWS测量时间窗口结束时间e的自动选择，并验证了其在剪切波分裂参数测量中的高精度和高效性。
+CNN能够显著提高SWS分析的可靠性，为未来完全自动化的剪切波分裂测量与排序系统提供了技术基础。
+</code></pre>
 <p><a href="https://pubs.geoscienceworld.org/ssa/srl/article-abstract/95/6/3626/645348/Using-Convolutional-Neural-Network-to-Determine" rel="nofollow">Paper Link</a></p></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
