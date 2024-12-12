@@ -183,6 +183,32 @@ $$</p>
 合成数据与真实数据之间的特性差异需要通过中间步骤来弥合。(可以包括数据校正、去卷积或增强模型对真实数据的适应性。)
 </code></pre>
 <p>2.4 反卷积</p>
+<pre class="notranslate"><code class="notranslate">真实波形的复杂性受到震源机制和路径效应的影响，给直接分析带来了挑战。
+去卷积方法通过去除震源和路径效应，统一波形特性，为剪切波分裂参数的提取奠定基础。
+
+径向分量被归一化为标准值1，用作基准。
+横向分量中的分裂特征被提取，通过频域导数和调制操作进行量化。
+
+方法假设径向分量在进入各向异性层前未受影响，适用于波形周期远大于延迟时间的情况。
+通过参考波形的卷积处理，进一步标准化波形，以提高后续分析的准确性。
+</code></pre>
+<p>我们在频域中对径向分量和横向分量进行去卷积，具体公式如下：</p>
+<p>$$
+u^{(r)}_* = \frac{u^{(r)}_1}{u^{(r)}_1}
+$$</p>
+<p>$$
+\quad u^{(t)}_* = i\omega \frac{\delta t}{2} \sin 2\alpha \frac{u^{(r)}_0}{u^{(r)}_1} \approx i\omega \frac{\delta t}{2} \sin 2\alpha
+$$</p>
+<p>其中，假设：</p>
+<p>$$
+\frac{u^{(r)}_0}{u^{(r)}_1} \approx 1
+$$</p>
+<p>这意味着径向分量足以代表未进入各向异性层前的波形。</p>
+<p>结果表明：</p>
+<ul>
+<li>径向分量在频域中被归一化为 1，对应于时域中的 $\delta$ 函数。</li>
+<li>横向分量由 $\sin 2\alpha$ 调制，且包含了剪切波分裂信息。</li>
+</ul>
 <p><a href="https://seismica.library.mcgill.ca/article/view/1124" rel="nofollow">Paper Link</a></p></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
