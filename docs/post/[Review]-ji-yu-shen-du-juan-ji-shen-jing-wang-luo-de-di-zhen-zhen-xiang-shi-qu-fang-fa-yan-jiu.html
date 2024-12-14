@@ -10,9 +10,13 @@
         let theme = localStorage.getItem("meek_theme") || "light";
         document.documentElement.setAttribute("data-color-mode", theme);
     </script>
-<meta name="description" content="">
+<meta name="description" content="## 摘要
+1. 研究背景与问题
+地震震相拾取是地震数据自动化处理中至关重要的步骤，主要包括信号检测、震相到时估计和震相识别等过程。">
 <meta property="og:title" content="[Review]基于深度卷积神经网络的地震震相拾取方法研究">
-<meta property="og:description" content="">
+<meta property="og:description" content="## 摘要
+1. 研究背景与问题
+地震震相拾取是地震数据自动化处理中至关重要的步骤，主要包括信号检测、震相到时估计和震相识别等过程。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://Lszidv.github.io/post/%5BReview%5D-ji-yu-shen-du-juan-ji-shen-jing-wang-luo-de-di-zhen-zhen-xiang-shi-qu-fang-fa-yan-jiu.html">
 <meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
@@ -41,7 +45,17 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
     body {padding: 8px;}
     .postTitle{font-size:24px;}
 }
-
+.copy-feedback {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 50px;
+    color: var(--color-fg-on-emphasis);
+    background-color: var(--color-fg-muted);
+    border-radius: 3px;
+    padding: 5px 8px;
+    font-size: 12px;
+}
 </style>
 
 
@@ -73,7 +87,103 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </div>
 </div>
     <div id="content">
-<div class="markdown-body" id="postBody"></div>
+<div class="markdown-body" id="postBody"><h2>摘要</h2>
+<ol>
+<li>
+<p>研究背景与问题<br>
+地震震相拾取是地震数据自动化处理中至关重要的步骤，主要包括信号检测、震相到时估计和震相识别等过程。震相拾取的准确性直接影响到后续的事件关联处理和观测报告的质量。当前，传统的地震震相拾取方法在准确性和效率上可能面临一定的挑战，因此需要新技术来提升处理效果。</p>
+</li>
+<li>
+<p>研究目标与方法<br>
+为了提高震相拾取的准确性，本文采用了深度卷积神经网络（CNN），尤其是多任务卷积神经网络（Multi-task CNN），来解决这一问题。模型不仅用于震相的检测和识别，还能准确估计到时。为了优化训练过程，作者设计了联合损失函数，其中包括了基于加权的分类损失函数，旨在提高模型对震相数据的准确识别。</p>
+</li>
+<li>
+<p>实验与结果<br>
+采用美国南加州地震台网的200万条震相数据进行训练、验证和测试。研究结果表明，测试集中P、S震相的识别查全率分别达到了98%以上，震相到时估计的标准偏差分别为0.067秒和0.082秒。<br>
+接着，研究采用了迁移学习和数据增强技术，成功将模型应用到我国东北地区台网的数据集上。在这个数据集上，P、S震相的查全率分别为91.21%和85.65%，虽然与南加州的数据集相比有所下降，但依然具有较高的应用潜力。</p>
+</li>
+<li>
+<p>应用与验证<br>
+基于迁移学习训练后的模型，本文进一步设计了一个用于连续数据的震相拾取方法。通过在实际地震数据上进行测试，发现该方法的震相检测识别率平均可达到84.5%。与国家数据中心和中国地震局的观测报告对比，表明该方法在实际应用中的有效性和可行性。</p>
+</li>
+</ol>
+<h2>0 引言</h2>
+<ol>
+<li>
+<p>神经网络方法与其应用背景<br>
+神经网络方法通过映射函数实现了数据的非线性映射，从而能够应对复杂的分类和回归任务。早期的人工神经网络受限于计算能力，无法充分发挥其优势，直到云计算与大数据的兴起，才为深度学习的发展奠定了基础。随着计算资源的提高和数据集的扩展，深度学习得以更好地应用，特别是在计算机视觉等领域中表现出色，推动了包括图像识别、语音识别和自然语言处理等任务的突破。</p>
+</li>
+<li>
+<p>卷积神经网络（CNN）的构成与特点<br>
+卷积神经网络（CNN）利用局部连接和权重共享的特性，大大减少了网络中的参数量，使其在处理图像、语音等高维数据时更加高效。通过卷积层提取局部特征，池化层减少数据的维度，CNN能够逐步学习数据中的层次化特征。这种结构使得CNN在图像分类、目标检测等任务中展现出强大的优势，是深度学习领域的重要突破。</p>
+</li>
+<li>
+<p>地震数据自动处理的挑战与现有方法<br>
+地震数据自动处理中的震相拾取问题至关重要，不同的方法各有优缺点。传统的 STA/LTA 方法因其简单高效，但对于弱信号的检测存在局限；而基于AR-AIC的震相到时估算方法虽然效果较好，但在低信噪比条件下的表现较差。这表明，在地震信号处理任务中，单一方法往往难以应对所有场景，需要综合多种技术来提升检测精度。</p>
+</li>
+<li>
+<p>深度神经网络在地震震相拾取中的应用<br>
+深度神经网络，尤其是卷积神经网络（CNN），已成为解决地震震相拾取问题的重要工具。与传统方法相比，CNN能够处理更加复杂的数据模式，提升震相识别和事件检测的精度。深度学习方法通过自动学习数据中的特征，减少了对人工特征提取的依赖，且在实时性和准确性上均表现出较大优势，尤其在复杂和大规模地震数据的处理方面有显著提高。</p>
+</li>
+<li>
+<p>本文的研究贡献与方法<br>
+本文提出的多任务卷积神经网络模型，通过结合分类和回归任务的方式，提升了震相拾取的准确性。利用大量的震相数据进行训练与测试，并通过迁移学习将模型应用于不同地区，验证了该方法的广泛适用性。最终，本文所提出的模型不仅在模拟数据集上表现出色，还能在实际的连续地震数据中应用，具有较强的实际应用潜力。</p>
+</li>
+</ol>
+<hr>
+<p>总的来说，本文通过引入卷积神经网络（CNN）技术，突破了传统方法在地震震相拾取中的局限性。深度学习的引入，尤其是在数据量增加和计算能力提升的背景下，为地震信号的自动识别、分类和时刻估计提供了新的解决方案，具备了良好的应用前景。</p>
+<h2>1  数据和方法</h2>
+<h3>1.1 数据集及预处理</h3>
+<p>本文所使用的数据集由 Ross 等（2018）进行过预处理，数据来源于美国南加州地震数据中心</p>
+<pre class="notranslate"><code class="notranslate">包括了美国南加州地震台网2000年至2017年间的200万条近震波形，数据来源于692个宽频带和短周期台站。
+数据包含三分量事件波形，震相主要是直达P波和S波，噪声数据为信号检测前5秒的数据。
+数据的采样率为100Hz，数据截取以震相到时为中心，窗口长度为4秒。数据预处理包括去除线性趋势、0.1～20Hz的带通滤波，并对每段数据进行归一化处理。
+
+此外，研究还从中国地震局地球物理研究所获取了东北地区包括牡丹江、延边、长白山、宽甸、沈阳和长春等6个台站2013-2018年的震相数据和原始波形数据。
+数据包含1938个近震事件，台站和事件位置图，事件震级分布图。根据震相到时对数据进行截取，并进行去线性、滤波和归一化处理，作为后续迁移学习的输入数据。
+</code></pre>
+<h3>1.2 卷积神经网络设计</h3>
+<pre class="notranslate"><code class="notranslate">本文主要解决震相拾取问题，包括震相检测识别和到时估计，这些任务通过直接学习三分量台站数据来完成。
+该问题与图像识别中的目标检测和定位任务类似，首先需要检测和识别震相是否存在，然后估算震相的起始时间。
+多任务卷积神经网络（CNN）可以有效实现这一任务。输入数据为三分量台站的波形数据，输出分为两个部分：一个用于震相分类，实现震相的检测和识别（P、S、N），采用分类方法；另一个用于预测到时，采用回归方法。
+由于震相类别和其到时之间具有相关性，建立一个卷积神经网络模型能够学习到准确的表示，帮助实现震相的识别和到时的预测。
+
+</code></pre>
+<ul>
+<li>
+<p><strong>网络结构</strong>：<br>
+该网络结构分为两大部分：<strong>卷积基</strong>（用于特征提取）和<strong>全连接层</strong>（用于任务输出）。前半部分由5个卷积层和池化层构成，卷积层通过卷积核自动从地震波形数据中提取特征，而池化层则在卷积后对特征进行下采样，减少数据维度和计算量。这些卷积层之间加入了批归一化（Batch Normalization）操作，用于正则化，防止过拟合，并加速模型收敛。</p>
+</li>
+<li>
+<p><strong>卷积层配置</strong>：</p>
+<ul>
+<li>第一层卷积层有32个卷积核，每个卷积核的尺寸为21，输入为三通道的震波数据，输出的特征图形状为（None, 400, 32）。</li>
+<li>每个卷积层后都跟随一个池化层，池化操作的大小为2，进行特征下采样。经过5层卷积和池化操作后，输出形状为（None, 12, 256）。</li>
+</ul>
+</li>
+<li>
+<p><strong>输出层设计</strong>：<br>
+网络的输出层分为两个分支：</p>
+<ol>
+<li><strong>震相分类</strong>：使用Softmax激活函数的全连接层，对震相进行分类（P、S、N）。该任务通过分类器来实现，最终输出震相类别的概率。</li>
+<li><strong>到时回归</strong>：使用线性激活函数的全连接层进行回归任务，输出震相到达时间的预测值。</li>
+</ol>
+</li>
+<li>
+<p><strong>训练细节</strong>：<br>
+该网络采用了多任务学习的方式，通过共享卷积层来提取震波的低级特征，之后在全连接层部分分开处理不同任务。分类任务和回归任务共享卷积层的参数，能够有效利用不同任务之间的相关性，从而提高整体模型的表现力与泛化能力。网络的设计避免了为每个任务分别构建独立的模型，从而提高了计算效率。</p>
+</li>
+<li>
+<p><strong>与其他研究的比较</strong>：<br>
+本研究与Perol等（2018）和Ross等（2018）研究的区别在于，前者的CNN模型主要针对单一任务（地震事件检测或震相分类），而本研究的多任务卷积神经网络能够同时执行震相的检测、分类和到时估计，两个任务共享卷积基，提升了任务间的协同效果。因此，相比于单一任务的模型，本研究的模型在性能和计算效率上都有显著优势。</p>
+</li>
+<li>
+<p><strong>激活函数和正则化</strong>：<br>
+ReLU（Rectified Linear Unit）函数，这种激活函数能有效地引入非线性特征，增加网络的表达能力，防止梯度消失问题。<br>
+批归一化（Batch Normalization）层帮助控制训练中的梯度爆炸，保证训练稳定性。</p>
+</li>
+</ul>
+<hr></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
@@ -98,7 +208,7 @@ if(""!=""){
 </script></div>
 </body>
 <script>
-var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z', 'copy': 'M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z', 'check': 'M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'};
 var utterancesLoad=0;
 
 let themeSettings={
@@ -171,7 +281,70 @@ function iFrameLoading(){
     }
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+    const createClipboardHTML = (codeContent, additionalClasses = '') => `
+        <pre class="notranslate"><code class="notranslate">${codeContent}</code></pre>
+        <div class="clipboard-container position-absolute right-0 top-0 ${additionalClasses}">
+            <clipboard-copy class="ClipboardButton btn m-2 p-0" role="button" style="display: inherit;">
+                <svg height="16" width="16" class="octicon octicon-copy m-2"><path d="${IconList["copy"]}"></path></svg>
+                <svg height="16" width="16" class="octicon octicon-check color-fg-success m-2 d-none"><path d="${IconList["check"]}"></path></svg>
+            </clipboard-copy>
+            <div class="copy-feedback">Copied!</div>
+        </div>
+    `;
 
+    const handleCodeElements = (selector = '') => {
+        document.querySelectorAll(selector).forEach(codeElement => {
+            const codeContent = codeElement.innerHTML;
+            const newStructure = document.createElement('div');
+            newStructure.className = 'snippet-clipboard-content position-relative overflow-auto';
+            newStructure.innerHTML = createClipboardHTML(codeContent);
+
+            const parentElement = codeElement.parentElement;
+            if (selector.includes('highlight')) {
+                parentElement.insertBefore(newStructure, codeElement.nextSibling);
+                parentElement.removeChild(codeElement);
+            } else {
+                parentElement.parentElement.replaceChild(newStructure, parentElement);
+            }
+        });
+    };
+
+    handleCodeElements('pre.notranslate > code.notranslate');
+    handleCodeElements('div.highlight > pre.notranslate');
+
+    let currentFeedback = null;
+    document.querySelectorAll('clipboard-copy').forEach(copyButton => {
+        copyButton.addEventListener('click', () => {
+            const codeContent = copyButton.closest('.snippet-clipboard-content').innerText;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = codeContent;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            const copyIcon = copyButton.querySelector('.octicon-copy');
+            const checkIcon = copyButton.querySelector('.octicon-check');
+            const copyFeedback = copyButton.nextElementSibling;
+
+            if (currentFeedback && currentFeedback !== copyFeedback) {currentFeedback.style.display = 'none';}
+            currentFeedback = copyFeedback;
+
+            copyIcon.classList.add('d-none');
+            checkIcon.classList.remove('d-none');
+            copyFeedback.style.display = 'block';
+            copyButton.style.borderColor = 'var(--color-success-fg)';
+
+            setTimeout(() => {
+                copyIcon.classList.remove('d-none');
+                checkIcon.classList.add('d-none');
+                copyFeedback.style.display = 'none';
+                copyButton.style.borderColor = '';
+            }, 2000);
+        });
+    });
+});
 
 </script>
 
