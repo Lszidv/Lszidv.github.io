@@ -78,7 +78,63 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </div>
     <div id="content">
 <div class="markdown-body" id="postBody"><h2>引言</h2>
-<p> 通过测量分裂剪切波的快波极化方向（φ）和慢波延迟时间（δt），可以揭示地下介质的各向异性特征。剪切波分裂方法具备较好的横向分辨率，能够在不同深度、不同区域揭示介质的各向异性变化，特别是在地壳和地幔的研究中具有重要应用。通过近震S波和远震SKS波的分析，分别揭示了地壳和地幔的各向异性特征，并进一步探讨了与构造应力、矿物定向排列等因素的关系。</p></div>
+<p> 通过测量分裂剪切波的快波极化方向（φ）和慢波延迟时间（δt），可以揭示地下介质的各向异性特征。剪切波分裂方法具备较好的横向分辨率，能够在不同深度、不同区域揭示介质的各向异性变化，特别是在地壳和地幔的研究中具有重要应用。通过近震S波和远震SKS波的分析，分别揭示了地壳和地幔的各向异性特征，并进一步探讨了与构造应力、矿物定向排列等因素的关系。</p>
+<ol>
+<li>
+<p>剪切波在经过单层各向异性介质的分裂过程描述公式：</p>
+<p>$$
+u(\omega) = R^{-1}DRu_0(\omega)
+$$</p>
+</li>
+<li>
+<p>旋转矩阵 ( R ) 的表达式：</p>
+</li>
+</ol>
+<p>$$
+R = \begin{bmatrix}
+\cos\alpha &amp; -\sin\alpha \\
+\sin\alpha &amp; \cos\alpha
+\end{bmatrix}
+$$</p>
+<ol start="3">
+<li>时间延迟算子 ( D ) 的表达式：</li>
+</ol>
+<p>$$
+D = \begin{bmatrix}
+e^{i\omega\delta t/2} &amp; 0 \\
+0 &amp; -e^{i\omega\delta t/2}
+\end{bmatrix}
+$$</p>
+<ol start="4">
+<li>质量检测参数ρ 的定义：</li>
+</ol>
+<p>$$
+\rho = \frac{\delta t_{XC}}{\delta t_{EV}}
+$$</p>
+<ol start="5">
+<li>快轴方向差δt的定义：</li>
+</ol>
+<p>$$
+\Delta \phi = \phi_{EV} - \phi_{XC}
+$$</p>
+<p> 观测到的剪切波分裂信号需要进行校正，首先将径向和切向分量的波形旋转至快轴和慢轴坐标系，消除时间延迟的影响后，再将其恢复至原始的径向和切向坐标系，以便于进一步分析。<br>
+ 互相关法和特征值法是两种常用的自动化方法。互相关法基于快慢波的相似性来计算分裂参数，而特征值法则通过分析协方差矩阵的特征值来判断波的分裂状态，并进一步提取分裂参数。特征值法的特殊应用——切向能量最小化法，在已知剪切波极化方向（如SKS、SKKS波）的情况下，通过最小化切向分量的能量，精确计算分裂参数。</p>
+<ul>
+<li>这些方法的共同基础是单层横向同性的水平各向异性层假设，通过网格搜索技术在大数据中准确提取分裂参数。不同方法的测量结果具有高度一致性，能够确保剪切波的分裂分析既精确又可靠。</li>
+</ul>
+<p> 在某些情况下（如剪切波传播通过各向同性介质，或初始极化方向与快轴或慢轴方向接近时），剪切波不会分裂，导致无法获取有效的时间延迟信息，这种“无效”结果仍然能对各向异性介质的快轴方向提供某种程度的约束。<br>
+ 随着地震观测台站数量的增加，剪切波分裂分析所需处理的数据量也显著增多，单一的测量方法往往无法满足高效性和准确性要求。在这种背景下，Wüstefeld等（2007）提出了通过对不同方法（如互相关法和切向能量最小化法）进行对比来判断结果质量的方案。通过引入两个重要的参数（ρ和ΔΦ），他们能够量化测量结果的差异，进而将结果分类为“好”、“无效”和“差”三类。</p>
+<p>$$
+\begin{array}{c}
+\rho = \delta t_{XC} / \delta t_{EV} \\
+\Delta\phi = \phi_{EV} - \phi_{XC}
+\end{array}
+$$</p>
+<p> 通过对比不同方法的测量结果并设定阈值，研究者能够筛选出可靠的测量结果。例如，若ρ值在0.7到1.2之间，且ΔΦ小于15°，则认为是“好”的测量结果；若ρ值低于0.3，且ΔΦ介于32°到58°之间，则为“无效”测量结果。这种分类标准使得地震学家可以更加高效地识别有效数据，并剔除误差较大的“无效”结果。<br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/93cad535-f443-454a-888e-bd0b53f7b24b"><img src="https://github.com/user-attachments/assets/93cad535-f443-454a-888e-bd0b53f7b24b" alt="质量检测" style="max-width: 100%;"></a></p>
+<p>深度卷积神经网络的引入</p>
+<h2>1. 方法原理</h2>
+<p>1.1 卷积神经网络</p></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
@@ -179,6 +235,6 @@ function iFrameLoading(){
 
 
 </script>
-
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 </html>
