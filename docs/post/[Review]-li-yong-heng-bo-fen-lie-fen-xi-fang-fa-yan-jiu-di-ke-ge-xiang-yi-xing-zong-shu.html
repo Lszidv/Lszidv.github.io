@@ -105,7 +105,7 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <h2>1.方法原理</h2>
 <p>1.1 横波分裂的理论方程<br>
 <a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/55f0027e-a2df-4e02-8333-0c8d731b7369"><img src="https://github.com/user-attachments/assets/55f0027e-a2df-4e02-8333-0c8d731b7369" alt="LQT" style="max-width: 100%;"></a><br>
-. 射线坐标系 (LQT)</p>
+射线坐标系 (LQT)</p>
 <ul>
 <li>L：射线方向，即波的传播方向。</li>
 <li>Q：径向分量，垂直于L-T平面。</li>
@@ -115,18 +115,21 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <p>横波分裂方程</p>
 <ul>
 <li>径向分量：<br>
-Q(t) = A_0 f(t)</li>
+$Q(t) = A_0 f(t)$
+</li>
 <li>切向分量：<br>
-T(t) = B_0 f(t)
+$T(t) = B_0 f(t)$
 <ul>
 <li>其中，( f(t) ) 为时间函数，( A_0 ) 和 ( B_0 ) 为振幅，决定了波的运动轨迹<br>
 . 快慢波分裂与时间延迟</li>
 </ul>
 </li>
 <li>快横波：<br>
-F(t) = A_1 f(t)</li>
+$F(t) = A_1 f(t)$
+</li>
 <li>慢横波：<br>
-S(t) = B_1 f(t)</li>
+$S(t) = B_1 f(t)$
+</li>
 <li>时间延迟：</li>
 </ul>
 <p>$$  S(t) = B_1 f(t - \delta t) $$</p>
@@ -143,7 +146,7 @@ $$Q(t) = A_0 \cos(\psi) f(t) - B_0 \sin(\psi) f(t - \delta t)$$
 <li>切向分量：<br>
 $$T(t) = A_0 \sin(\psi) f(t) + B_0 \cos(\psi) f(t - \delta t)$$
 </li>
-<li>其中，( \psi ) 是旋转角度，( \delta t ) 为快慢波的时间延迟。</li>
+<li>其中，$\psi$ 是旋转角度，$\delta t$ 是快慢波的时间延迟。</li>
 </ul>
 </li>
 <li>由于时间延迟δt 和旋转角度φ通常是未知的，我们需要通过反推这些参数来重建快慢波：
