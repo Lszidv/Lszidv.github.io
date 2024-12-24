@@ -11,14 +11,12 @@
         document.documentElement.setAttribute("data-color-mode", theme);
     </script>
 <meta name="description" content="
-
 ## 1. 研究背景与意义
 
 ### 1.1 剪切波分裂现象
 - 剪切波（S波）分裂是横波在通过各向异性介质时的一种重要现象。">
 <meta property="og:title" content="[Literature Reading]近场地震快慢横波到时差测量离散辨析和改正">
 <meta property="og:description" content="
-
 ## 1. 研究背景与意义
 
 ### 1.1 剪切波分裂现象
@@ -164,21 +162,25 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </ul>
 <h3>2.2 测量方法</h3>
 <ol>
-<li>
-<p><strong>横波分裂参数提取公式</strong>：<br>
-[<br>
-Q(t) = A_0 f(t) \cos \phi + B_0 f(t - \delta t) \sin \phi<br>
-]<br>
-[<br>
-T(t) = A_0 f(t) \sin \phi - B_0 f(t - \delta t) \cos \phi<br>
-]</p>
+<li><strong>横波分裂参数提取公式</strong>：</li>
+</ol>
+<p>$$
+Q(t) = A_0 f(t) \cos \phi + B_0 f(t - \delta t) \sin \phi
+$$</p>
+<p>$$
+T(t) = A_0 f(t) \sin \phi - B_0 f(t - \delta t) \cos \phi
+$$</p>
 <ul>
-<li>(Q(t))：径向分量。</li>
-<li>(T(t))：横向分量。</li>
-<li>(\phi)：快波极化方向。</li>
-<li>(\delta t)：快慢波时间延迟。</li>
+<li>
+<strong>$Q(t)$</strong>：径向分量。</li>
+<li>
+<strong>$T(t)$</strong>：横向分量。</li>
+<li>
+<strong>$\phi$</strong>：快波极化方向。</li>
+<li>
+<strong>$\delta t$</strong>：快慢波时间延迟。</li>
 </ul>
-</li>
+<ol start="2">
 <li>
 <p><strong>数据处理步骤</strong>：</p>
 <ul>
@@ -498,6 +500,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 </script>
-
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 </html>
