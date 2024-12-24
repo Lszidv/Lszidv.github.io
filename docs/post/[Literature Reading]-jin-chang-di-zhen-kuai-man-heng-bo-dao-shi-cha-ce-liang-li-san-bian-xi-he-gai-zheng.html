@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="
+
+## 1. 研究背景与意义
+
+### 1.1 剪切波分裂现象
+- 剪切波（S波）分裂是横波在通过各向异性介质时的一种重要现象。">
+<meta property="og:title" content="[Literature Reading]近场地震快慢横波到时差测量离散辨析和改正">
+<meta property="og:description" content="
+
+## 1. 研究背景与意义
+
+### 1.1 剪切波分裂现象
+- 剪切波（S波）分裂是横波在通过各向异性介质时的一种重要现象。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://Lszidv.github.io/post/%5BLiterature%20Reading%5D-jin-chang-di-zhen-kuai-man-heng-bo-dao-shi-cha-ce-liang-li-san-bian-xi-he-gai-zheng.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
+<title>[Literature Reading]近场地震快慢横波到时差测量离散辨析和改正</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+.copy-feedback {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 50px;
+    color: var(--color-fg-on-emphasis);
+    background-color: var(--color-fg-muted);
+    border-radius: 3px;
+    padding: 5px 8px;
+    font-size: 12px;
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">[Literature Reading]近场地震快慢横波到时差测量离散辨析和改正</h1>
+<div class="title-right">
+    <a href="https://Lszidv.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/Lszidv/Lszidv.github.io/issues/27" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>1. 研究背景与意义</h2>
+<h3>1.1 剪切波分裂现象</h3>
+<ul>
+<li>剪切波（S波）分裂是横波在通过各向异性介质时的一种重要现象。</li>
+<li>剪切波分裂的本质是S波分裂为两个速度不同的正交偏振波：
+<ul>
+<li><strong>快波（Fast Wave）</strong>：传播速度较快，与介质主轴方向一致。</li>
+<li><strong>慢波（Slow Wave）</strong>：传播速度较慢，与快波正交。</li>
+</ul>
+</li>
+<li>应用：
+<ul>
+<li>地球内部各向异性的研究（如裂隙结构和矿物排列）。</li>
+<li>构造应力分布分析。</li>
+<li>地震活动中应力积累与释放规律的研究。</li>
+</ul>
+</li>
+</ul>
+<h3>1.2 近场地震与快慢波到时差</h3>
+<ul>
+<li><strong>近场地震特点</strong>：
+<ul>
+<li>传播路径短；</li>
+<li>横波能量强，易于捕获；</li>
+<li>各向异性效应显著。</li>
+</ul>
+</li>
+<li><strong>快慢波到时差</strong>：
+<ul>
+<li>描述横波分裂的重要参数；</li>
+<li>反映介质的各向异性强度、厚度以及应力状态。</li>
+</ul>
+</li>
+</ul>
+<h3>1.3 测量离散问题</h3>
+<ul>
+<li><strong>成因</strong>：
+<ol>
+<li><strong>地震路径复杂性</strong>：多层各向异性介质引发的多次分裂效应。</li>
+<li><strong>数据处理误差</strong>：滤波窗口、震相识别、路径归一化等技术环节。</li>
+</ol>
+</li>
+<li><strong>研究目的</strong>：
+<ul>
+<li>提出改进方法（如动态频率滤波与“有效震源距”）；</li>
+<li>分析各向异性变化的物理规律。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2>2. 数据与方法</h2>
+<h3>2.1 数据来源与筛选</h3>
+<ul>
+<li><strong>研究区域</strong>：新西兰南岛北部KHZ台站区域。</li>
+<li><strong>数据样本</strong>：
+<ul>
+<li>时间范围：2013年至2017年。</li>
+<li>初始记录：605条地震记录。</li>
+<li>筛选标准：
+<ul>
+<li>信噪比；</li>
+<li>横波窗内信号质量；</li>
+<li>震源距小于50 km。</li>
+</ul>
+</li>
+<li>最终提取：72条高质量横波分裂参数记录。</li>
+</ul>
+</li>
+</ul>
+<h3>2.2 测量方法</h3>
+<ol>
+<li>
+<p><strong>横波分裂参数提取公式</strong>：<br>
+[<br>
+Q(t) = A_0 f(t) \cos \phi + B_0 f(t - \delta t) \sin \phi<br>
+]<br>
+[<br>
+T(t) = A_0 f(t) \sin \phi - B_0 f(t - \delta t) \cos \phi<br>
+]</p>
+<ul>
+<li>(Q(t))：径向分量。</li>
+<li>(T(t))：横向分量。</li>
+<li>(\phi)：快波极化方向。</li>
+<li>(\delta t)：快慢波时间延迟。</li>
+</ul>
+</li>
+<li>
+<p><strong>数据处理步骤</strong>：</p>
+<ul>
+<li>旋转坐标，优化震相分量。</li>
+<li>时间校正横向分量，恢复线性偏振状态。</li>
+</ul>
+</li>
+<li>
+<p><strong>路径归一化</strong>：</p>
+<ul>
+<li>传统方法假设震源距等于传播路径。</li>
+<li>本文提出“<strong>有效震源距</strong>”方法，减少归一化误差。</li>
+</ul>
+</li>
+<li>
+<p><strong>动态滤波改进</strong>：</p>
+<ul>
+<li>根据每条记录的主频动态调整滤波窗，提高测量精度。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2>3. 结果与分析</h2>
+<h3>3.1 滤波窗口的影响</h3>
+<ul>
+<li><strong>问题</strong>：
+<ul>
+<li>固定频带滤波影响到时差和快波偏振方向的测量结果。</li>
+</ul>
+</li>
+<li><strong>改进</strong>：
+<ul>
+<li>动态调整滤波窗，消除噪声干扰，保留信号高频特性，显著减少测量离散性。</li>
+</ul>
+</li>
+</ul>
+<h3>3.2 路径归一化的改正</h3>
+<ul>
+<li><strong>传统问题</strong>：
+<ul>
+<li>假设震源距等于传播路径，导致路径归一化“过量”。</li>
+<li>误差使到时差与震源距呈不合理负相关。</li>
+</ul>
+</li>
+<li><strong>改正</strong>：
+<ul>
+<li>采用“<strong>有效震源距</strong>”代替震源距：
+<ul>
+<li>更合理地描述横波传播路径。</li>
+<li>归一化后到时差分布更加符合物理规律。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3>3.3 多层介质的多次分裂</h3>
+<ul>
+<li><strong>现象</strong>：
+<ul>
+<li>到时差数据中存在多值现象。</li>
+</ul>
+</li>
+<li><strong>解释</strong>：
+<ul>
+<li>基于多层各向异性介质模型：
+<ul>
+<li>KHZ台站下方可能存在三个分裂界面，深度分别为15 km、27 km和37 km。</li>
+</ul>
+</li>
+<li>各层分别对应：
+<ul>
+<li>浅层裂隙排列。</li>
+<li>深层岩石应力作用。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3>3.4 应力变化与地震活动</h3>
+<ul>
+<li><strong>观测现象</strong>：
+<ul>
+<li>在2016年7.8级地震发生前数月，KHZ台站快慢波到时差逐渐增大。</li>
+<li>地震发生后，到时差迅速减小。</li>
+</ul>
+</li>
+<li><strong>解释</strong>：
+<ul>
+<li>到时差变化趋势与应力积累和释放相符。</li>
+<li>表明横波分裂参数可能成为地震监测的重要前兆指标。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2>4. 研究意义与贡献</h2>
+<h3>4.1 方法学贡献</h3>
+<ol>
+<li>提出动态滤波和“有效震源距”方法，显著提高横波分裂参数测量精度。</li>
+<li>系统分析横波分裂测量离散的成因，为后续研究提供了技术框架。</li>
+</ol>
+<h3>4.2 地震监测应用</h3>
+<ul>
+<li>到时差变化可能作为地震前兆监测的重要工具。</li>
+<li>横波分裂参数与构造应力场变化的研究为地震预测提供了新思路。</li>
+</ul>
+<h3>4.3 地质结构研究</h3>
+<ul>
+<li>确认了KHZ台站下方多层各向异性结构。</li>
+<li>提供了区域地质构造的重要观测证据。</li>
+</ul>
+<hr>
+<h2>5. 图表支持</h2>
+<ol>
+<li><strong>地震分布图</strong>：显示KHZ台站周围震中分布及震源深度。</li>
+<li><strong>快慢波到时差与震源距关系图</strong>：对比归一化前后结果的合理性。</li>
+<li><strong>多层介质模型图</strong>：解释到时差多值现象和分裂界面的分布。</li>
+<li><strong>到时差时间序列图</strong>：揭示到时差与地震活动的时间相关性。</li>
+</ol>
+<hr>
+<h2>6. 结论</h2>
+<p>本文在近场地震横波分裂研究中取得以下成果：</p>
+<ol>
+<li>系统分析了快慢波到时差测量的离散成因。</li>
+<li>提出了动态滤波和路径归一化改正方法，提高了数据可靠性。</li>
+<li>揭示了多层介质分裂特性与应力变化的规律。</li>
+<li>提出了到时差变化作为地震监测和预测的潜在应用价值。</li>
+</ol>
+<hr>
+<p>若需进一步扩展某一部分，请随时告知！</p>
+<pre class="notranslate"><code class="notranslate">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</code></pre></div>
+<div style="font-size:small;margin-top:8px;float:right;"></div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://Lszidv.github.io">芜尽</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z', 'copy': 'M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z', 'check': 'M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","Lszidv/Lszidv.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const createClipboardHTML = (codeContent, additionalClasses = '') => `
+        <pre class="notranslate"><code class="notranslate">${codeContent}</code></pre>
+        <div class="clipboard-container position-absolute right-0 top-0 ${additionalClasses}">
+            <clipboard-copy class="ClipboardButton btn m-2 p-0" role="button" style="display: inherit;">
+                <svg height="16" width="16" class="octicon octicon-copy m-2"><path d="${IconList["copy"]}"></path></svg>
+                <svg height="16" width="16" class="octicon octicon-check color-fg-success m-2 d-none"><path d="${IconList["check"]}"></path></svg>
+            </clipboard-copy>
+            <div class="copy-feedback">Copied!</div>
+        </div>
+    `;
+
+    const handleCodeElements = (selector = '') => {
+        document.querySelectorAll(selector).forEach(codeElement => {
+            const codeContent = codeElement.innerHTML;
+            const newStructure = document.createElement('div');
+            newStructure.className = 'snippet-clipboard-content position-relative overflow-auto';
+            newStructure.innerHTML = createClipboardHTML(codeContent);
+
+            const parentElement = codeElement.parentElement;
+            if (selector.includes('highlight')) {
+                parentElement.insertBefore(newStructure, codeElement.nextSibling);
+                parentElement.removeChild(codeElement);
+            } else {
+                parentElement.parentElement.replaceChild(newStructure, parentElement);
+            }
+        });
+    };
+
+    handleCodeElements('pre.notranslate > code.notranslate');
+    handleCodeElements('div.highlight > pre.notranslate');
+
+    let currentFeedback = null;
+    document.querySelectorAll('clipboard-copy').forEach(copyButton => {
+        copyButton.addEventListener('click', () => {
+            const codeContent = copyButton.closest('.snippet-clipboard-content').innerText;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = codeContent;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            const copyIcon = copyButton.querySelector('.octicon-copy');
+            const checkIcon = copyButton.querySelector('.octicon-check');
+            const copyFeedback = copyButton.nextElementSibling;
+
+            if (currentFeedback && currentFeedback !== copyFeedback) {currentFeedback.style.display = 'none';}
+            currentFeedback = copyFeedback;
+
+            copyIcon.classList.add('d-none');
+            checkIcon.classList.remove('d-none');
+            copyFeedback.style.display = 'block';
+            copyButton.style.borderColor = 'var(--color-success-fg)';
+
+            setTimeout(() => {
+                copyIcon.classList.remove('d-none');
+                checkIcon.classList.add('d-none');
+                copyFeedback.style.display = 'none';
+                copyButton.style.borderColor = '';
+            }, 2000);
+        });
+    });
+});
+
+</script>
+
+
+</html>
