@@ -10,17 +10,13 @@
         let theme = localStorage.getItem("meek_theme") || "light";
         document.documentElement.setAttribute("data-color-mode", theme);
     </script>
-<meta name="description" content="以下是根据您指定格式和内容要求对**SplitLab**文档的详细总结，采用严格的 Markdown 结构化方式：
-
-```markdown
+<meta name="description" content="
 # SplitLab: 剪切波分裂数据处理环境总结
 
 ## 背景与目标
 - 剪切波分裂（Shear Wave Splitting, SWS）是研究地壳和地幔各向异性的重要方法。">
 <meta property="og:title" content="[Literature Reading]SplitLab">
-<meta property="og:description" content="以下是根据您指定格式和内容要求对**SplitLab**文档的详细总结，采用严格的 Markdown 结构化方式：
-
-```markdown
+<meta property="og:description" content="
 # SplitLab: 剪切波分裂数据处理环境总结
 
 ## 背景与目标
@@ -29,7 +25,7 @@
 <meta property="og:url" content="https://Lszidv.github.io/post/%5BLiterature%20Reading%5DSplitLab.html">
 <meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
 <title>[Literature Reading]SplitLab</title>
-<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
 
 
 </head>
@@ -53,17 +49,7 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
     body {padding: 8px;}
     .postTitle{font-size:24px;}
 }
-.copy-feedback {
-    display: none;
-    position: absolute;
-    top: 10px;
-    right: 50px;
-    color: var(--color-fg-on-emphasis);
-    background-color: var(--color-fg-muted);
-    border-radius: 3px;
-    padding: 5px 8px;
-    font-size: 12px;
-}
+
 </style>
 
 
@@ -95,104 +81,158 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </div>
 </div>
     <div id="content">
-<div class="markdown-body" id="postBody"><p>以下是根据您指定格式和内容要求对<strong>SplitLab</strong>文档的详细总结，采用严格的 Markdown 结构化方式：</p>
-<div class="highlight highlight-text-md"><pre class="notranslate"><span class="pl-mh"># <span class="pl-en">SplitLab: 剪切波分裂数据处理环境总结</span></span>
-
-<span class="pl-mh">## <span class="pl-en">背景与目标</span></span>
-<span class="pl-v">-</span> 剪切波分裂（Shear Wave Splitting, SWS）是研究地壳和地幔各向异性的重要方法。
-<span class="pl-v">-</span> <span class="pl-s">**</span>SplitLab<span class="pl-s">**</span> 是基于 MATLAB 的交互式剪切波分裂处理环境，目标是：
-  <span class="pl-s">1</span><span class="pl-v">.</span> <span class="pl-s">**</span>简化流程<span class="pl-s">**</span>：减轻用户在重复性处理步骤中的负担。
-  <span class="pl-s">2</span><span class="pl-v">.</span> <span class="pl-s">**</span>提高效率<span class="pl-s">**</span>：通过 GUI 界面实现便捷的交互式操作。
-  <span class="pl-s">3</span><span class="pl-v">.</span> <span class="pl-s">**</span>数据扩展性<span class="pl-s">**</span>：支持从多个地震数据中心导入、处理和分析不同格式的数据。
-
-<span class="pl-ms">---</span>
-
-<span class="pl-mh">## <span class="pl-en">方法框架</span></span>
-
-<span class="pl-mh">### <span class="pl-en">核心功能模块</span></span>
-<span class="pl-s">1</span><span class="pl-v">.</span> <span class="pl-s">**</span>项目配置（Project Configuration）<span class="pl-s">**</span>：
-   <span class="pl-v">-</span> 用户设置站点参数、选择震源事件（时间、震级、深度等），并从数据中心获取波形数据。
-   <span class="pl-v">-</span> 支持 SAC 格式转换和自动匹配。
-
-<span class="pl-s">2</span><span class="pl-v">.</span> <span class="pl-s">**</span>地震图检视器（Seismogram Viewer）<span class="pl-s">**</span>：
-   <span class="pl-v">-</span> 提供波形旋转（LQT 系统）、频率滤波、粒子运动分析等功能。
-   <span class="pl-v">-</span> 用户可选择时间窗口和地震相位进行剪切波分裂测量。
-
-<span class="pl-s">3</span><span class="pl-v">.</span> <span class="pl-s">**</span>剪切波分裂测量（Shear Wave Splitting Measurement）<span class="pl-s">**</span>：
-   <span class="pl-v">-</span> 集成三种主流算法：
-     <span class="pl-v">-</span> <span class="pl-s">**</span>旋转相关法（RC）<span class="pl-s">**</span>：最大化径向和横向分量的交叉相关。
-     <span class="pl-v">-</span> <span class="pl-s">**</span>最小能量法（SC）<span class="pl-s">**</span>：通过最小化横向分量的能量确定分裂参数。
-     <span class="pl-v">-</span> <span class="pl-s">**</span>特征值法（EV）<span class="pl-s">**</span>：基于特征值最小化实现粒子运动线性化。
-
-<span class="pl-s">4</span><span class="pl-v">.</span> <span class="pl-s">**</span>结果输出与分析<span class="pl-s">**</span>：
-   <span class="pl-v">-</span> 自动生成诊断图（如波形校正前后的对比）。
-   <span class="pl-v">-</span> 支持导出为 Excel 或文本格式，便于进一步分析。
-
-<span class="pl-mh">### <span class="pl-en">数据处理流程</span></span>
-<span class="pl-v">-</span> 用户从 GUI 中加载地震事件数据，设置时间窗口和目标相位。
-<span class="pl-v">-</span> SplitLab 自动执行以下步骤：
-  <span class="pl-s">1</span><span class="pl-v">.</span> 预处理波形：去除线性趋势、滤波、切片。
-  <span class="pl-s">2</span><span class="pl-v">.</span> 应用剪切波分裂算法，生成分裂参数（快波偏振方向 $\phi$ 和时间延迟 $\delta t$）。
-  <span class="pl-s">3</span><span class="pl-v">.</span> 输出分裂参数并生成诊断图。
-
-<span class="pl-ms">---</span>
-
-<span class="pl-mh">## <span class="pl-en">结果与分析</span></span>
-
-<span class="pl-mh">### <span class="pl-en">模拟实验</span></span>
-<span class="pl-v">-</span> SplitLab 对三种测量算法进行了模拟验证：
-  <span class="pl-s">1</span><span class="pl-v">.</span> <span class="pl-s">**</span>高信噪比条件下<span class="pl-s">**</span>，RC 与 SC 方法在快波偏振方向和时间延迟的测量结果高度一致。
-  <span class="pl-s">2</span><span class="pl-v">.</span> <span class="pl-s">**</span>“null”方位角条件下<span class="pl-s">**</span>：
-     <span class="pl-v">-</span> RC 方法的快波方向偏差为 45°。
-     <span class="pl-v">-</span> SC 方法的结果分散在快波和慢波方向之间。
-  <span class="pl-s">3</span><span class="pl-v">.</span> 特征值法（EV）表现与 SC 法相似，适用于未知初始极化方向的相位。
-
-<span class="pl-mh">### <span class="pl-en">实际数据验证</span></span>
-<span class="pl-v">-</span> 使用 Geoscope 网络 ATD 台站的历史数据（Barruol 和 Hoffmann, 1999）验证：
-  <span class="pl-v">-</span> SplitLab 生成的剪切波分裂参数（快波偏振方向 $\phi=45^\circ$，时间延迟 $\delta t=1.6s$）与原始研究高度一致。
-  <span class="pl-v">-</span> RC 方法在低质量数据上表现出更大的不确定性，但能有效区分“null”信号。
-
-<span class="pl-mh">### <span class="pl-en">优化对比</span></span>
-<span class="pl-v">-</span> <span class="pl-s">**</span>SplitLab<span class="pl-s">**</span> 的诊断图清晰显示了波形分裂校正前后的变化，便于用户直观判断分裂质量。
-<span class="pl-v">-</span> 支持多次试验并通过 GUI 对测量结果进行手动质量分级。
-
-<span class="pl-ms">---</span>
-
-<span class="pl-mh">## <span class="pl-en">优势与局限</span></span>
-
-<span class="pl-mh">### <span class="pl-en">优势</span></span>
-<span class="pl-s">1</span><span class="pl-v">.</span> <span class="pl-s">**</span>交互友好<span class="pl-s">**</span>：
-   <span class="pl-v">-</span> GUI 界面直观简洁，降低了复杂性。
-   <span class="pl-v">-</span> 允许用户对数据进行细致的手动质量控制。
-<span class="pl-s">2</span><span class="pl-v">.</span> <span class="pl-s">**</span>算法多样<span class="pl-s">**</span>：
-   <span class="pl-v">-</span> 同时集成三种测量方法，增强了结果的可靠性。
-<span class="pl-s">3</span><span class="pl-v">.</span> <span class="pl-s">**</span>平台独立<span class="pl-s">**</span>：
-   <span class="pl-v">-</span> 基于 MATLAB，可在 Windows、macOS 和 Linux 系统上运行。
-
-<span class="pl-mh">### <span class="pl-en">局限</span></span>
-<span class="pl-s">1</span><span class="pl-v">.</span> <span class="pl-s">**</span>非完全自动化<span class="pl-s">**</span>：
-   <span class="pl-v">-</span> 用户仍需手动选择时间窗口和目标相位。
-<span class="pl-s">2</span><span class="pl-v">.</span> <span class="pl-s">**</span>低信噪比数据适应性<span class="pl-s">**</span>：
-   <span class="pl-v">-</span> 在处理低信噪比数据时，RC 和 SC 方法的结果可能出现较大偏差。
-
-<span class="pl-ms">---</span>
-
-<span class="pl-mh">## <span class="pl-en">未来发展方向</span></span>
-<span class="pl-s">1</span><span class="pl-v">.</span> <span class="pl-s">**</span>增强自动化<span class="pl-s">**</span>：
-   <span class="pl-v">-</span> 实现自动时间窗口选择和质量评分，提高对低质量数据的适应性。
-<span class="pl-s">2</span><span class="pl-v">.</span> <span class="pl-s">**</span>算法优化<span class="pl-s">**</span>：
-   <span class="pl-v">-</span> 增强算法在“null”方位角和复杂噪声条件下的稳健性。
-<span class="pl-s">3</span><span class="pl-v">.</span> <span class="pl-s">**</span>扩展功能<span class="pl-s">**</span>：
-   <span class="pl-v">-</span> 支持更多波形格式和地震台站网络。
-
-<span class="pl-ms">---</span>
-
-<span class="pl-mh">## <span class="pl-en">引用</span></span>
-
-<span class="pl-v">-</span> Wüstefeld, A., Bokelmann, G., Zaroli, C., &amp; Barruol, G. (2008). SplitLab: A shear-wave splitting environment in Matlab. <span class="pl-s">*</span>Computers &amp; Geosciences<span class="pl-s">*</span>, 34(4), 515-528. DOI:10.1016/j.cageo.2007.08.002
-<span class="pl-v">-</span> Barruol, G., &amp; Hoffmann, R. (1999). Upper mantle anisotropy beneath the Geoscope stations. <span class="pl-s">*</span>Journal of Geophysical Research<span class="pl-s">*</span>, 104(10), 10757-10773.
-<span class="pl-v">-</span> Savage, M.K. (1999). Seismic anisotropy and mantle deformation: what have we learned from shear wave splitting. <span class="pl-s">*</span>Reviews of Geophysics<span class="pl-s">*</span>, 37(1), 69-106.</pre></div>
-<p>如果需要对某一部分内容补充或调整，请随时告知！</p></div>
+<div class="markdown-body" id="postBody"><h1>SplitLab: 剪切波分裂数据处理环境总结</h1>
+<h2>背景与目标</h2>
+<ul>
+<li>剪切波分裂（Shear Wave Splitting, SWS）是研究地壳和地幔各向异性的重要方法。</li>
+<li><strong>SplitLab</strong> 是基于 MATLAB 的交互式剪切波分裂处理环境，目标是：
+<ol>
+<li><strong>简化流程</strong>：减轻用户在重复性处理步骤中的负担。</li>
+<li><strong>提高效率</strong>：通过 GUI 界面实现便捷的交互式操作。</li>
+<li><strong>数据扩展性</strong>：支持从多个地震数据中心导入、处理和分析不同格式的数据。</li>
+</ol>
+</li>
+</ul>
+<hr>
+<h2>方法框架</h2>
+<h3>核心功能模块</h3>
+<ol>
+<li>
+<p><strong>项目配置（Project Configuration）</strong>：</p>
+<ul>
+<li>用户设置站点参数、选择震源事件（时间、震级、深度等），并从数据中心获取波形数据。</li>
+<li>支持 SAC 格式转换和自动匹配。</li>
+</ul>
+</li>
+<li>
+<p><strong>地震图检视器（Seismogram Viewer）</strong>：</p>
+<ul>
+<li>提供波形旋转（LQT 系统）、频率滤波、粒子运动分析等功能。</li>
+<li>用户可选择时间窗口和地震相位进行剪切波分裂测量。</li>
+</ul>
+</li>
+<li>
+<p><strong>剪切波分裂测量（Shear Wave Splitting Measurement）</strong>：</p>
+<ul>
+<li>集成三种主流算法：
+<ul>
+<li><strong>旋转相关法（RC）</strong>：最大化径向和横向分量的交叉相关。</li>
+<li><strong>最小能量法（SC）</strong>：通过最小化横向分量的能量确定分裂参数。</li>
+<li><strong>特征值法（EV）</strong>：基于特征值最小化实现粒子运动线性化。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>结果输出与分析</strong>：</p>
+<ul>
+<li>自动生成诊断图（如波形校正前后的对比）。</li>
+<li>支持导出为 Excel 或文本格式，便于进一步分析。</li>
+</ul>
+</li>
+</ol>
+<h3>数据处理流程</h3>
+<ul>
+<li>用户从 GUI 中加载地震事件数据，设置时间窗口和目标相位。</li>
+<li>SplitLab 自动执行以下步骤：
+<ol>
+<li>预处理波形：去除线性趋势、滤波、切片。</li>
+<li>应用剪切波分裂算法，生成分裂参数（快波偏振方向 $\phi$ 和时间延迟 $\delta t$）。</li>
+<li>输出分裂参数并生成诊断图。</li>
+</ol>
+</li>
+</ul>
+<hr>
+<h2>结果与分析</h2>
+<h3>模拟实验</h3>
+<ul>
+<li>SplitLab 对三种测量算法进行了模拟验证：
+<ol>
+<li><strong>高信噪比条件下</strong>，RC 与 SC 方法在快波偏振方向和时间延迟的测量结果高度一致。</li>
+<li><strong>“null”方位角条件下</strong>：
+<ul>
+<li>RC 方法的快波方向偏差为 45°。</li>
+<li>SC 方法的结果分散在快波和慢波方向之间。</li>
+</ul>
+</li>
+<li>特征值法（EV）表现与 SC 法相似，适用于未知初始极化方向的相位。</li>
+</ol>
+</li>
+</ul>
+<h3>实际数据验证</h3>
+<ul>
+<li>使用 Geoscope 网络 ATD 台站的历史数据（Barruol 和 Hoffmann, 1999）验证：
+<ul>
+<li>SplitLab 生成的剪切波分裂参数（快波偏振方向 $\phi=45^\circ$，时间延迟 $\delta t=1.6s$）与原始研究高度一致。</li>
+<li>RC 方法在低质量数据上表现出更大的不确定性，但能有效区分“null”信号。</li>
+</ul>
+</li>
+</ul>
+<h3>优化对比</h3>
+<ul>
+<li><strong>SplitLab</strong> 的诊断图清晰显示了波形分裂校正前后的变化，便于用户直观判断分裂质量。</li>
+<li>支持多次试验并通过 GUI 对测量结果进行手动质量分级。</li>
+</ul>
+<hr>
+<h2>优势与局限</h2>
+<h3>优势</h3>
+<ol>
+<li><strong>交互友好</strong>：
+<ul>
+<li>GUI 界面直观简洁，降低了复杂性。</li>
+<li>允许用户对数据进行细致的手动质量控制。</li>
+</ul>
+</li>
+<li><strong>算法多样</strong>：
+<ul>
+<li>同时集成三种测量方法，增强了结果的可靠性。</li>
+</ul>
+</li>
+<li><strong>平台独立</strong>：
+<ul>
+<li>基于 MATLAB，可在 Windows、macOS 和 Linux 系统上运行。</li>
+</ul>
+</li>
+</ol>
+<h3>局限</h3>
+<ol>
+<li><strong>非完全自动化</strong>：
+<ul>
+<li>用户仍需手动选择时间窗口和目标相位。</li>
+</ul>
+</li>
+<li><strong>低信噪比数据适应性</strong>：
+<ul>
+<li>在处理低信噪比数据时，RC 和 SC 方法的结果可能出现较大偏差。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2>未来发展方向</h2>
+<ol>
+<li><strong>增强自动化</strong>：
+<ul>
+<li>实现自动时间窗口选择和质量评分，提高对低质量数据的适应性。</li>
+</ul>
+</li>
+<li><strong>算法优化</strong>：
+<ul>
+<li>增强算法在“null”方位角和复杂噪声条件下的稳健性。</li>
+</ul>
+</li>
+<li><strong>扩展功能</strong>：
+<ul>
+<li>支持更多波形格式和地震台站网络。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2>引用</h2>
+<ul>
+<li>Wüstefeld, A., Bokelmann, G., Zaroli, C., &amp; Barruol, G. (2008). SplitLab: A shear-wave splitting environment in Matlab. <em>Computers &amp; Geosciences</em>, 34(4), 515-528. DOI:10.1016/j.cageo.2007.08.002</li>
+<li>Barruol, G., &amp; Hoffmann, R. (1999). Upper mantle anisotropy beneath the Geoscope stations. <em>Journal of Geophysical Research</em>, 104(10), 10757-10773.</li>
+<li>Savage, M.K. (1999). Seismic anisotropy and mantle deformation: what have we learned from shear wave splitting. <em>Reviews of Geophysics</em>, 37(1), 69-106.</li>
+</ul></div>
 <div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
@@ -217,7 +257,7 @@ if(""!=""){
 </script></div>
 </body>
 <script>
-var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z', 'copy': 'M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z', 'check': 'M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'};
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
 var utterancesLoad=0;
 
 let themeSettings={
@@ -290,72 +330,9 @@ function iFrameLoading(){
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const createClipboardHTML = (codeContent, additionalClasses = '') => `
-        <pre class="notranslate"><code class="notranslate">${codeContent}</code></pre>
-        <div class="clipboard-container position-absolute right-0 top-0 ${additionalClasses}">
-            <clipboard-copy class="ClipboardButton btn m-2 p-0" role="button" style="display: inherit;">
-                <svg height="16" width="16" class="octicon octicon-copy m-2"><path d="${IconList["copy"]}"></path></svg>
-                <svg height="16" width="16" class="octicon octicon-check color-fg-success m-2 d-none"><path d="${IconList["check"]}"></path></svg>
-            </clipboard-copy>
-            <div class="copy-feedback">Copied!</div>
-        </div>
-    `;
 
-    const handleCodeElements = (selector = '') => {
-        document.querySelectorAll(selector).forEach(codeElement => {
-            const codeContent = codeElement.innerHTML;
-            const newStructure = document.createElement('div');
-            newStructure.className = 'snippet-clipboard-content position-relative overflow-auto';
-            newStructure.innerHTML = createClipboardHTML(codeContent);
-
-            const parentElement = codeElement.parentElement;
-            if (selector.includes('highlight')) {
-                parentElement.insertBefore(newStructure, codeElement.nextSibling);
-                parentElement.removeChild(codeElement);
-            } else {
-                parentElement.parentElement.replaceChild(newStructure, parentElement);
-            }
-        });
-    };
-
-    handleCodeElements('pre.notranslate > code.notranslate');
-    handleCodeElements('div.highlight > pre.notranslate');
-
-    let currentFeedback = null;
-    document.querySelectorAll('clipboard-copy').forEach(copyButton => {
-        copyButton.addEventListener('click', () => {
-            const codeContent = copyButton.closest('.snippet-clipboard-content').innerText;
-            const tempTextArea = document.createElement('textarea');
-            tempTextArea.value = codeContent;
-            document.body.appendChild(tempTextArea);
-            tempTextArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempTextArea);
-
-            const copyIcon = copyButton.querySelector('.octicon-copy');
-            const checkIcon = copyButton.querySelector('.octicon-check');
-            const copyFeedback = copyButton.nextElementSibling;
-
-            if (currentFeedback && currentFeedback !== copyFeedback) {currentFeedback.style.display = 'none';}
-            currentFeedback = copyFeedback;
-
-            copyIcon.classList.add('d-none');
-            checkIcon.classList.remove('d-none');
-            copyFeedback.style.display = 'block';
-            copyButton.style.borderColor = 'var(--color-success-fg)';
-
-            setTimeout(() => {
-                copyIcon.classList.remove('d-none');
-                checkIcon.classList.add('d-none');
-                copyFeedback.style.display = 'none';
-                copyButton.style.borderColor = '';
-            }, 2000);
-        });
-    });
-});
 
 </script>
-
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 </html>

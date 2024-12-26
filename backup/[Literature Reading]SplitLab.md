@@ -1,6 +1,4 @@
-以下是根据您指定格式和内容要求对**SplitLab**文档的详细总结，采用严格的 Markdown 结构化方式：
 
-```markdown
 # SplitLab: 剪切波分裂数据处理环境总结
 
 ## 背景与目标
@@ -97,6 +95,3 @@
 - Wüstefeld, A., Bokelmann, G., Zaroli, C., & Barruol, G. (2008). SplitLab: A shear-wave splitting environment in Matlab. *Computers & Geosciences*, 34(4), 515-528. DOI:10.1016/j.cageo.2007.08.002
 - Barruol, G., & Hoffmann, R. (1999). Upper mantle anisotropy beneath the Geoscope stations. *Journal of Geophysical Research*, 104(10), 10757-10773.
 - Savage, M.K. (1999). Seismic anisotropy and mantle deformation: what have we learned from shear wave splitting. *Reviews of Geophysics*, 37(1), 69-106.
-```
-
-如果需要对某一部分内容补充或调整，请随时告知！
