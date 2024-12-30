@@ -201,7 +201,285 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <td>单震相分析，高质量数据的精确测量</td>
 </tr>
 </tbody>
-</table></markdown-accessiblity-table></div>
+</table></markdown-accessiblity-table>
+<hr>
+<h2>3. Effects of a Dipping Axis of Symmetry</h2>
+<h3>剪切波在各向异性层中的传播总结</h3>
+<h4>1. 剪切波分裂的物理本质</h4>
+<ul>
+<li>
+<p><strong>剪切波分裂现象</strong>：</p>
+<ul>
+<li>剪切波通过各向异性介质时分裂为两个分量：
+<ul>
+<li>
+<strong>快波（Fast Shear Wave）</strong>：传播速度较快，极化方向 $\phi$ 通常与介质的主要对称轴一致。</li>
+<li>
+<strong>慢波（Slow Shear Wave）</strong>：传播速度较慢，与快波方向正交。</li>
+</ul>
+</li>
+<li>
+<strong>延迟时间</strong> $\delta t$：快慢波传播时间的差异，反映各向异性强度和路径厚度。</li>
+</ul>
+</li>
+<li>
+<p><strong>关键参数</strong>：</p>
+<ol>
+<li>
+<strong>快波极化方向</strong> $\phi$：与介质的主要应力方向或晶体取向相关。</li>
+<li>
+<strong>延迟时间</strong> $\delta t$：与介质的各向异性强度及传播路径长度成正比。</li>
+</ol>
+</li>
+</ul>
+<hr>
+<h4>2. 数学模型</h4>
+<ul>
+<li><strong>剪切波分裂公式</strong>：
+<ul>
+<li>假设入射波为一个线性极化的剪切波，经过各向异性层后，其快波和慢波可以分别表示为：</li>
+</ul>
+</li>
+</ul>
+<p>$$
+R(t) = w(t + \frac{\delta t}{2}) \cos^2\phi + w(t - \frac{\delta t}{2}) \sin^2\phi
+$$</p>
+<p>$$
+T(t) = \frac{1}{2} \left[ w(t + \frac{\delta t}{2}) - w(t - \frac{\delta t}{2}) \right] \sin 2\phi
+$$</p>
+<ul>
+<li>
+<p><strong>$R(t)$</strong>：径向分量；</p>
+</li>
+<li>
+<p><strong>$T(t)$</strong>：横向分量；</p>
+</li>
+<li>
+<p><strong>$w(t)$</strong>：入射波形；</p>
+</li>
+<li>
+<p><strong>$\delta t$</strong>：快波和慢波的延迟时间；</p>
+</li>
+<li>
+<p><strong>$\phi$</strong>：快波极化方向。</p>
+</li>
+<li>
+<p><strong>小延迟时间的近似</strong>：</p>
+<ul>
+<li>当 $ \delta t $ 较小时，可以简化为：</li>
+</ul>
+</li>
+</ul>
+<p>$$
+R(t) \approx w(t)
+$$</p>
+<p>$$
+T(t) \approx \frac{\delta t}{2} w'(t) \sin 2\phi
+$$</p>
+<p>其中 $w'(t)$ 是 $w(t)$ 的时间导数。</p>
+<ul>
+<li><strong>矩阵表示</strong>：
+<ul>
+<li>横向分量的矩阵形式可以表示为：</li>
+</ul>
+</li>
+</ul>
+<p>$$
+T = a \cdot s \otimes r
+$$</p>
+<ul>
+<li>
+<strong>$a = -\frac{1}{2}$</strong> 是比例系数；</li>
+<li>
+<strong>$s$</strong> 是分裂矢量，与方位角变化的横向分量振幅相关；</li>
+<li>
+<strong>$r$</strong> 是径向分量的导数；</li>
+<li>
+<strong>$\otimes$</strong> 表示张量外积。</li>
+</ul>
+<hr>
+<h4>3. 横向各向同性（TI-H）模型</h4>
+<ul>
+<li><strong>定义</strong>：
+<ul>
+<li>假设介质具有水平对称轴（Transverse Isotropy with Horizontal Symmetry Axis, TI-H）。</li>
+<li>在这种模型下，分裂矢量的变化可以通过以下公式描述：</li>
+</ul>
+</li>
+</ul>
+<p>$$
+s(\phi) = \delta t \sin[2(\phi - \phi_0)]
+$$</p>
+<hr>
+<h4>4. 多震相的传播特性</h4>
+<ul>
+<li>
+<p><strong>不同震相的分裂现象</strong>：</p>
+<ul>
+<li>远震震相（如 SKS 波、SKKS 波）由于传播路径较长，分裂现象主要受到上地幔各向异性的影响。</li>
+<li>不同方位角的震相传播路径对分裂参数的测量结果有显著影响。</li>
+</ul>
+</li>
+<li>
+<p><strong>联合分析的必要性</strong>：</p>
+<ul>
+<li>单震相分裂结果可能受到路径效应或噪声干扰，通过整合多个震相数据，可以提高分裂参数的可靠性。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4>5. 剪切波分裂的观测与测量</h4>
+<ul>
+<li><strong>观测方式</strong>：
+<ul>
+<li>分析横波的横向分量，通过以下特性提取分裂参数：
+<ul>
+<li>横向分量振幅的变化；</li>
+<li>横向分量与径向分量的时间差异。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>观测限制</strong>：
+<ul>
+<li>传播路径的复杂性（如地壳效应）和噪声可能导致测量结果的不稳定。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4>总结</h4>
+<ul>
+<li>剪切波分裂由介质的各向异性引起，其关键参数包括快波极化方向 $ \phi $ 和延迟时间 $ \delta t $。</li>
+<li>数学模型提供了对分裂现象的定量描述，TI-H 模型是一种常用假设，用以简化分析。</li>
+<li>多震相联合分析能有效提高测量精度，为后续 Multichannel 方法的提出奠定了理论基础。</li>
+</ul>
+<h2>3. Effects of a Dipping Axis of Symmetry</h2>
+<h4>核心思想</h4>
+<ul>
+<li>
+<p><strong>目标</strong>：</p>
+<ul>
+<li>提出一种鲁棒的剪切波分裂测量方法，称为 <strong>Multichannel Method</strong>，该方法能够在高噪声条件下稳定估计各向异性参数。</li>
+<li>通过联合分析多个震相记录的数据（多通道），减少单次测量的随机误差，并提高分裂参数的可靠性。</li>
+</ul>
+</li>
+<li>
+<p><strong>基本原理</strong>：</p>
+<ul>
+<li>多震相观测中，横波的分裂现象包含了介质的各向异性信息。通过整合这些不同震相的数据，可以提高对快波方向 $ \phi $ 和延迟时间 $ \delta t $ 的估计精度。</li>
+<li>采用 <strong>分裂强度矩阵（Splitting Intensity Matrix）</strong> 和奇异值分解（SVD）技术来优化分裂参数的提取。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4>分裂强度矩阵</h4>
+<ul>
+<li><strong>定义</strong>：
+<ul>
+<li>分裂强度矩阵表示横向分量中的分裂信息，定义如下：</li>
+<li></li>
+</ul>
+</li>
+</ul>
+<p>$$
+\mathbf{S} = \sum_i \mathbf{T}_i \cdot \mathbf{T}_i^T
+$$</p>
+<p>其中：</p>
+<ul>
+<li>
+<p><strong>$\mathbf{T}_i$</strong> 是第 $i$ 个震相的横向分量；</p>
+</li>
+<li>
+<p><strong>$\mathbf{S}$</strong> 表示分裂强度矩阵，综合了不同震相的横波分量信息。</p>
+</li>
+<li>
+<p><strong>矩阵性质</strong>：</p>
+<ul>
+<li>矩阵的主方向（即主奇异向量）反映了快波方向 $\phi$；</li>
+<li>奇异值的分布用于估计快波和慢波的分裂程度，即延迟时间 $\delta t$。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4>奇异值分解（SVD）技术</h4>
+<ul>
+<li><strong>引入 SVD 的必要性</strong>：
+<ul>
+<li>在噪声数据中，分裂强度矩阵可能包含较大的随机误差，通过奇异值分解，可以有效提取主信号方向并消除噪声的影响。</li>
+<li>奇异值分解公式为：</li>
+</ul>
+</li>
+</ul>
+<p>$$
+\mathbf{S} = \mathbf{U} \Sigma \mathbf{V}^T
+$$</p>
+<p>其中：</p>
+<ul>
+<li>
+<p><strong>$\mathbf{U}$</strong> 和 <strong>$\mathbf{V}$</strong> 是正交矩阵；</p>
+</li>
+<li>
+<p><strong>$\Sigma$</strong> 是对角矩阵，包含奇异值。</p>
+</li>
+<li>
+<p><strong>物理意义</strong>：</p>
+<ul>
+<li>最大奇异值方向对应于快波方向 $\phi$；</li>
+<li>奇异值的大小反映分裂效应的强弱，与延迟时间 $\delta t$ 相关。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4>Multichannel 方法的步骤</h4>
+<ol>
+<li>
+<strong>数据准备</strong>：
+<ul>
+<li>收集多个震相的横波分量数据（如 SKS 波和 SKKS 波）。</li>
+</ul>
+</li>
+<li>
+<strong>构建分裂强度矩阵</strong>：
+<ul>
+<li>将所有震相的横波分量数据叠加，生成分裂强度矩阵 $\mathbf{S}$。</li>
+</ul>
+</li>
+<li>
+<strong>奇异值分解</strong>：
+<ul>
+<li>对矩阵 $\mathbf{S}$ 进行奇异值分解，提取快波方向 $\phi$ 和延迟时间 $\delta t$。</li>
+</ul>
+</li>
+<li>
+<strong>参数优化</strong>：
+<ul>
+<li>使用优化算法进一步调整结果，提高分裂参数的准确性。</li>
+</ul>
+</li>
+<li>
+<strong>结果验证</strong>：
+<ul>
+<li>验证测量结果的稳定性和可靠性，例如通过残差分析或对比多个震相的独立结果。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h4>方法局限</h4>
+<ul>
+<li>
+<p><strong>数据需求高</strong>：</p>
+<ul>
+<li>Multichannel 方法依赖多个震相的高质量记录，特别是方位角分布均匀的震相覆盖。</li>
+</ul>
+</li>
+<li>
+<p><strong>复杂性较高</strong>：</p>
+<ul>
+<li>方法实现涉及较多矩阵计算和参数优化过程，需要较高的计算资源。</li>
+</ul>
+</li>
+</ul>
+<hr></div>
 <div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
@@ -302,6 +580,6 @@ function iFrameLoading(){
 
 
 </script>
-
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 </html>
