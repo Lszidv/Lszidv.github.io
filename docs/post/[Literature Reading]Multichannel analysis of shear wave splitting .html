@@ -479,7 +479,130 @@ $$</p>
 </ul>
 </li>
 </ul>
-<hr></div>
+<hr>
+<h2>4. Measuring Shear Wave Splitting Parameters from the Splitting Vector s</h2>
+<h4>4.1 分裂矢量的定义</h4>
+<ul>
+<li>分裂矢量 $s$ 是剪切波分裂的重要数学描述，定义为：</li>
+<li>
+</li></ul>
+<p>$$
+s(\phi) = \delta t \sin[2(\phi - \phi_0)]
+$$</p>
+<p>其中：</p>
+<ul>
+<li>
+<p><strong>$\phi_0$</strong> 是快波极化方向；</p>
+</li>
+<li>
+<p><strong>$\delta t$</strong> 是快慢波之间的延迟时间；</p>
+</li>
+<li>
+<p>$s(\phi)$ 是快波极化方向 $\phi$ 的函数，反映横向分量振幅的变化。</p>
+</li>
+<li>
+<p><strong>分裂矢量的特点</strong>：</p>
+<ul>
+<li>分裂矢量与震相的传播方位角相关，其振幅取决于介质的各向异性和传播路径。</li>
+<li>通过分析分裂矢量的变化，可以确定 $\phi$ 和 $\delta t$。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4>4.2 提取分裂参数的数学模型</h4>
+<ul>
+<li>
+<strong>数学模型</strong>：
+<ul>
+<li>快波方向 $\phi$ 和延迟时间 $\delta t$ 是通过最小化目标函数确定的，目标函数为：</li>
+</ul>
+</li>
+</ul>
+<p>$$
+E(\phi, \delta t) = \sum_i \left[s_i - \delta t \sin(2 (\phi - \phi_i)) \right]^2
+$$</p>
+<p>其中：</p>
+<ul>
+<li>
+<p>$s_i$ 是观测的分裂矢量分量；</p>
+</li>
+<li>
+<p>$\phi_i$ 是震相的方位角；</p>
+</li>
+<li>
+<p>$\phi$ 和 $\delta t$ 是需要优化的分裂参数。</p>
+</li>
+<li>
+<p><strong>优化目标</strong>：</p>
+<ul>
+<li>最小化 $E(\phi, \delta t)$ 以获得最优的 $\phi$ 和 $\delta t$。</li>
+<li>该过程可以通过非线性拟合算法实现。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4>4.3 优化算法</h4>
+<ul>
+<li>为了解决目标函数 $E(\phi, \delta t)$ 的非线性优化问题，作者使用迭代算法：</li>
+</ul>
+<ol>
+<li>设定初始值 $\phi_0$ 和 $\delta t_0$。</li>
+<li>计算目标函数 $E(\phi, \delta t)$ 的梯度：</li>
+</ol>
+<p>$$
+\frac{\partial E}{\partial \phi}, \quad \frac{\partial E}{\partial \delta t}
+$$</p>
+<ol start="3">
+<li>更新参数：</li>
+</ol>
+<p>$$
+\phi_{k+1} = \phi_k - \alpha \frac{\partial E}{\partial \phi}
+$$</p>
+<p>$$
+\delta t_{k+1} = \delta t_k - \beta \frac{\partial E}{\partial \delta t}
+$$</p>
+<p>其中 $\alpha$ 和 $\beta$ 是学习率。<br>
+4. 重复迭代直到收敛。</p>
+<hr>
+<h4>4.4 方法的优缺点</h4>
+<ul>
+<li>
+<p><strong>优点</strong>：</p>
+<ol>
+<li>
+<strong>精确性</strong>：
+<ul>
+<li>分裂矢量模型直接将分裂参数 $\phi$ 和 $\delta t$ 与横波的物理特性相关联。</li>
+<li>使用优化算法能有效减少噪声的影响。</li>
+</ul>
+</li>
+<li>
+<strong>适用性</strong>：
+<ul>
+<li>适用于复杂的震相数据集，包括方位角覆盖不均或信噪比较低的情况。</li>
+<li>能处理多层各向异性或非对称的介质。</li>
+</ul>
+</li>
+</ol>
+</li>
+<li>
+<p><strong>局限性</strong>：</p>
+<ol>
+<li>
+<strong>计算复杂性</strong>：
+<ul>
+<li>优化过程需要较高的计算资源，特别是在大规模数据集下。</li>
+</ul>
+</li>
+<li>
+<strong>初值敏感性</strong>：
+<ul>
+<li>优化结果依赖于初始参数 $\phi_0$ 和 $\delta t_0$ 的选择，可能导致局部最优解。</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul></div>
 <div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
