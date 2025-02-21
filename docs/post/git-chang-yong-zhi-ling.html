@@ -10,14 +10,208 @@
         let theme = localStorage.getItem("meek_theme") || "light";
         document.documentElement.setAttribute("data-color-mode", theme);
     </script>
-<meta name="description" content="">
+<meta name="description" content="
+# Git 和 GitHub 常用操作
+
+## Git 基本操作
+
+### 1. 初始化一个 Git 仓库
+在项目目录下，使用以下命令初始化一个新的 Git 仓库：
+```bash
+git init
+```
+
+### 2. 配置 Git 用户信息
+在开始使用 Git 前，需要配置用户名和邮箱：
+```bash
+git config --global user.name 'Your Name'
+git config --global user.email 'your_email@example.com'
+```
+
+### 3. 查看 Git 配置信息
+查看当前的 Git 配置信息：
+```bash
+git config --list
+```
+
+### 4. 克隆远程仓库
+将远程 Git 仓库克隆到本地：
+```bash
+git clone https://github.com/username/repository.git
+```
+
+### 5. 查看文件状态
+查看当前工作目录中文件的状态（比如是否有未跟踪的文件、是否有更改）：
+```bash
+git status
+```
+
+### 6. 添加文件到暂存区
+将文件添加到 Git 暂存区：
+```bash
+git add filename
+```
+或者添加所有文件：
+```bash
+git add .
+```
+
+### 7. 提交更改
+将暂存区的更改提交到本地仓库：
+```bash
+git commit -m 'Your commit message'
+```
+
+### 8. 查看提交历史
+查看项目的提交历史：
+```bash
+git log
+```
+
+### 9. 推送本地更改到远程仓库
+将本地的更改推送到远程仓库：
+```bash
+git push origin main
+```
+
+### 10. 拉取远程更改到本地
+将远程仓库的更改拉取到本地仓库：
+```bash
+git pull origin main
+```
+
+### 11. 创建分支
+创建一个新的分支：
+```bash
+git branch new-branch-name
+```
+
+### 12. 切换分支
+切换到指定的分支：
+```bash
+git checkout branch-name
+```
+
+### 13. 合并分支
+将指定分支的更改合并到当前分支：
+```bash
+git merge branch-name
+```
+
+### 14. 删除分支
+删除本地分支：
+```bash
+git branch -d branch-name
+```
+
+## [GitHub](https://github.com/) 常用操作
+
+### 1. 创建一个新的 GitHub 仓库
+1. 登录到 [GitHub](https://github.com/)。">
 <meta property="og:title" content="git常用指令">
-<meta property="og:description" content="">
+<meta property="og:description" content="
+# Git 和 GitHub 常用操作
+
+## Git 基本操作
+
+### 1. 初始化一个 Git 仓库
+在项目目录下，使用以下命令初始化一个新的 Git 仓库：
+```bash
+git init
+```
+
+### 2. 配置 Git 用户信息
+在开始使用 Git 前，需要配置用户名和邮箱：
+```bash
+git config --global user.name 'Your Name'
+git config --global user.email 'your_email@example.com'
+```
+
+### 3. 查看 Git 配置信息
+查看当前的 Git 配置信息：
+```bash
+git config --list
+```
+
+### 4. 克隆远程仓库
+将远程 Git 仓库克隆到本地：
+```bash
+git clone https://github.com/username/repository.git
+```
+
+### 5. 查看文件状态
+查看当前工作目录中文件的状态（比如是否有未跟踪的文件、是否有更改）：
+```bash
+git status
+```
+
+### 6. 添加文件到暂存区
+将文件添加到 Git 暂存区：
+```bash
+git add filename
+```
+或者添加所有文件：
+```bash
+git add .
+```
+
+### 7. 提交更改
+将暂存区的更改提交到本地仓库：
+```bash
+git commit -m 'Your commit message'
+```
+
+### 8. 查看提交历史
+查看项目的提交历史：
+```bash
+git log
+```
+
+### 9. 推送本地更改到远程仓库
+将本地的更改推送到远程仓库：
+```bash
+git push origin main
+```
+
+### 10. 拉取远程更改到本地
+将远程仓库的更改拉取到本地仓库：
+```bash
+git pull origin main
+```
+
+### 11. 创建分支
+创建一个新的分支：
+```bash
+git branch new-branch-name
+```
+
+### 12. 切换分支
+切换到指定的分支：
+```bash
+git checkout branch-name
+```
+
+### 13. 合并分支
+将指定分支的更改合并到当前分支：
+```bash
+git merge branch-name
+```
+
+### 14. 删除分支
+删除本地分支：
+```bash
+git branch -d branch-name
+```
+
+## [GitHub](https://github.com/) 常用操作
+
+### 1. 创建一个新的 GitHub 仓库
+1. 登录到 [GitHub](https://github.com/)。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://Lszidv.github.io/post/git-chang-yong-zhi-ling.html">
 <meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
 <title>git常用指令</title>
-
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
 
 
 </head>
@@ -41,7 +235,17 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
     body {padding: 8px;}
     .postTitle{font-size:24px;}
 }
-
+.copy-feedback {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 50px;
+    color: var(--color-fg-on-emphasis);
+    background-color: var(--color-fg-muted);
+    border-radius: 3px;
+    padding: 5px 8px;
+    font-size: 12px;
+}
 </style>
 
 
@@ -73,7 +277,146 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </div>
 </div>
     <div id="content">
-<div class="markdown-body" id="postBody"></div>
+<div class="markdown-body" id="postBody"><h1>Git 和 GitHub 常用操作</h1>
+<h2>Git 基本操作</h2>
+<h3>1. 初始化一个 Git 仓库</h3>
+<p>在项目目录下，使用以下命令初始化一个新的 Git 仓库：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">git init</pre></div>
+<h3>2. 配置 Git 用户信息</h3>
+<p>在开始使用 Git 前，需要配置用户名和邮箱：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">git config --global user.name <span class="pl-s"><span class="pl-pds">"</span>Your Name<span class="pl-pds">"</span></span>
+git config --global user.email <span class="pl-s"><span class="pl-pds">"</span>your_email@example.com<span class="pl-pds">"</span></span></pre></div>
+<h3>3. 查看 Git 配置信息</h3>
+<p>查看当前的 Git 配置信息：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">git config --list</pre></div>
+<h3>4. 克隆远程仓库</h3>
+<p>将远程 Git 仓库克隆到本地：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">git clone https://github.com/username/repository.git</pre></div>
+<h3>5. 查看文件状态</h3>
+<p>查看当前工作目录中文件的状态（比如是否有未跟踪的文件、是否有更改）：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">git status</pre></div>
+<h3>6. 添加文件到暂存区</h3>
+<p>将文件添加到 Git 暂存区：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">git add filename</pre></div>
+<p>或者添加所有文件：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">git add <span class="pl-c1">.</span></pre></div>
+<h3>7. 提交更改</h3>
+<p>将暂存区的更改提交到本地仓库：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">git commit -m <span class="pl-s"><span class="pl-pds">"</span>Your commit message<span class="pl-pds">"</span></span></pre></div>
+<h3>8. 查看提交历史</h3>
+<p>查看项目的提交历史：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">git log</pre></div>
+<h3>9. 推送本地更改到远程仓库</h3>
+<p>将本地的更改推送到远程仓库：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">git push origin main</pre></div>
+<h3>10. 拉取远程更改到本地</h3>
+<p>将远程仓库的更改拉取到本地仓库：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">git pull origin main</pre></div>
+<h3>11. 创建分支</h3>
+<p>创建一个新的分支：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">git branch new-branch-name</pre></div>
+<h3>12. 切换分支</h3>
+<p>切换到指定的分支：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">git checkout branch-name</pre></div>
+<h3>13. 合并分支</h3>
+<p>将指定分支的更改合并到当前分支：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">git merge branch-name</pre></div>
+<h3>14. 删除分支</h3>
+<p>删除本地分支：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">git branch -d branch-name</pre></div>
+<h2><a href="https://github.com/">GitHub</a> 常用操作</h2>
+<h3>1. 创建一个新的 GitHub 仓库</h3>
+<ol>
+<li>登录到 <a href="https://github.com/">GitHub</a>。</li>
+<li>点击右上角的 <strong>+</strong> 图标，选择 <strong>New repository</strong>。</li>
+<li>填写仓库名称、描述等信息，然后点击 <strong>Create repository</strong>。</li>
+</ol>
+<h3>2. 将本地仓库推送到 GitHub</h3>
+<ol>
+<li>在本地仓库中初始化 Git 并进行一些提交（如 <code class="notranslate">git init</code> 和 <code class="notranslate">git add .</code>）。</li>
+<li>将远程仓库添加为 Git 远程仓库：
+<div class="highlight highlight-source-shell"><pre class="notranslate">git remote add origin https://github.com/username/repository.git</pre></div>
+</li>
+<li>推送本地更改到 GitHub：
+<div class="highlight highlight-source-shell"><pre class="notranslate">git push -u origin main</pre></div>
+</li>
+</ol>
+<h3>3. 创建 Pull Request (PR)</h3>
+<ol>
+<li>在 GitHub 仓库页面，点击 <strong>Pull requests</strong> 标签。</li>
+<li>点击 <strong>New pull request</strong>，选择源分支和目标分支。</li>
+<li>输入 PR 的描述并点击 <strong>Create pull request</strong>。</li>
+</ol>
+<h3>4. Fork 和 Pull Request 工作流程</h3>
+<ol>
+<li>Fork 其他人的 GitHub 仓库。</li>
+<li>克隆 Fork 后的仓库到本地并创建一个新分支。</li>
+<li>做出更改并提交，然后推送到自己的 GitHub 仓库。</li>
+<li>在原仓库的 <strong>Pull requests</strong> 标签中发起 PR，提交更改。</li>
+</ol>
+<h3>5. 查看远程仓库的状态</h3>
+<p>查看当前远程仓库的详细信息：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">git remote -v</pre></div>
+<h2>常用 Git 命令</h2>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>命令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="notranslate">git init</code></td>
+<td>初始化 Git 仓库</td>
+</tr>
+<tr>
+<td><code class="notranslate">git clone &lt;repository&gt;</code></td>
+<td>克隆远程仓库到本地</td>
+</tr>
+<tr>
+<td><code class="notranslate">git add &lt;file&gt;</code></td>
+<td>将文件添加到暂存区</td>
+</tr>
+<tr>
+<td><code class="notranslate">git commit -m "message"</code></td>
+<td>提交更改到本地仓库</td>
+</tr>
+<tr>
+<td><code class="notranslate">git status</code></td>
+<td>查看当前工作目录中文件的状态</td>
+</tr>
+<tr>
+<td><code class="notranslate">git log</code></td>
+<td>查看提交历史</td>
+</tr>
+<tr>
+<td><code class="notranslate">git push</code></td>
+<td>将本地更改推送到远程仓库</td>
+</tr>
+<tr>
+<td><code class="notranslate">git pull</code></td>
+<td>从远程仓库拉取更改到本地</td>
+</tr>
+<tr>
+<td><code class="notranslate">git branch</code></td>
+<td>查看本地分支</td>
+</tr>
+<tr>
+<td><code class="notranslate">git checkout &lt;branch&gt;</code></td>
+<td>切换分支</td>
+</tr>
+<tr>
+<td><code class="notranslate">git merge &lt;branch&gt;</code></td>
+<td>合并分支</td>
+</tr>
+<tr>
+<td><code class="notranslate">git remote add origin &lt;url&gt;</code></td>
+<td>添加远程仓库</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<p>&lt;学习网站&gt;[learngitbranching.js.org]</p></div>
 <div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
@@ -98,7 +441,7 @@ if(""!=""){
 </script></div>
 </body>
 <script>
-var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z', 'copy': 'M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z', 'check': 'M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'};
 var utterancesLoad=0;
 
 let themeSettings={
@@ -171,7 +514,70 @@ function iFrameLoading(){
     }
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+    const createClipboardHTML = (codeContent, additionalClasses = '') => `
+        <pre class="notranslate"><code class="notranslate">${codeContent}</code></pre>
+        <div class="clipboard-container position-absolute right-0 top-0 ${additionalClasses}">
+            <clipboard-copy class="ClipboardButton btn m-2 p-0" role="button" style="display: inherit;">
+                <svg height="16" width="16" class="octicon octicon-copy m-2"><path d="${IconList["copy"]}"></path></svg>
+                <svg height="16" width="16" class="octicon octicon-check color-fg-success m-2 d-none"><path d="${IconList["check"]}"></path></svg>
+            </clipboard-copy>
+            <div class="copy-feedback">Copied!</div>
+        </div>
+    `;
 
+    const handleCodeElements = (selector = '') => {
+        document.querySelectorAll(selector).forEach(codeElement => {
+            const codeContent = codeElement.innerHTML;
+            const newStructure = document.createElement('div');
+            newStructure.className = 'snippet-clipboard-content position-relative overflow-auto';
+            newStructure.innerHTML = createClipboardHTML(codeContent);
+
+            const parentElement = codeElement.parentElement;
+            if (selector.includes('highlight')) {
+                parentElement.insertBefore(newStructure, codeElement.nextSibling);
+                parentElement.removeChild(codeElement);
+            } else {
+                parentElement.parentElement.replaceChild(newStructure, parentElement);
+            }
+        });
+    };
+
+    handleCodeElements('pre.notranslate > code.notranslate');
+    handleCodeElements('div.highlight > pre.notranslate');
+
+    let currentFeedback = null;
+    document.querySelectorAll('clipboard-copy').forEach(copyButton => {
+        copyButton.addEventListener('click', () => {
+            const codeContent = copyButton.closest('.snippet-clipboard-content').innerText;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = codeContent;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            const copyIcon = copyButton.querySelector('.octicon-copy');
+            const checkIcon = copyButton.querySelector('.octicon-check');
+            const copyFeedback = copyButton.nextElementSibling;
+
+            if (currentFeedback && currentFeedback !== copyFeedback) {currentFeedback.style.display = 'none';}
+            currentFeedback = copyFeedback;
+
+            copyIcon.classList.add('d-none');
+            checkIcon.classList.remove('d-none');
+            copyFeedback.style.display = 'block';
+            copyButton.style.borderColor = 'var(--color-success-fg)';
+
+            setTimeout(() => {
+                copyIcon.classList.remove('d-none');
+                checkIcon.classList.add('d-none');
+                copyFeedback.style.display = 'none';
+                copyButton.style.borderColor = '';
+            }, 2000);
+        });
+    });
+});
 
 </script>
 

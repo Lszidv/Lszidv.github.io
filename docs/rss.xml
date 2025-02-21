@@ -1,5 +1,102 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>芜尽</title><link>https://Lszidv.github.io</link><description>Only love can set us free</description><copyright>芜尽</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/160511559?s=400&amp;u=68ec73daff523efd8652079b221d42e446d01cb6&amp;v=4</url><title>avatar</title><link>https://Lszidv.github.io</link></image><lastBuildDate>Fri, 21 Feb 2025 09:26:16 +0000</lastBuildDate><managingEditor>芜尽</managingEditor><ttl>60</ttl><webMaster>芜尽</webMaster><item><title>git常用指令</title><link>https://Lszidv.github.io/post/git-chang-yong-zhi-ling.html</link><guid isPermaLink="true">https://Lszidv.github.io/post/git-chang-yong-zhi-ling.html</guid><pubDate>Fri, 21 Feb 2025 09:25:54 +0000</pubDate></item><item><title>[Literature Reading]Multichannel analysis of shear wave splitting </title><link>https://Lszidv.github.io/post/%5BLiterature%20Reading%5DMultichannel%20analysis%20of%20shear%20wave%20splitting%20.html</link><description>## Abstract&#13;
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>芜尽</title><link>https://Lszidv.github.io</link><description>Only love can set us free</description><copyright>芜尽</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/160511559?s=400&amp;u=68ec73daff523efd8652079b221d42e446d01cb6&amp;v=4</url><title>avatar</title><link>https://Lszidv.github.io</link></image><lastBuildDate>Fri, 21 Feb 2025 09:31:25 +0000</lastBuildDate><managingEditor>芜尽</managingEditor><ttl>60</ttl><webMaster>芜尽</webMaster><item><title>git常用指令</title><link>https://Lszidv.github.io/post/git-chang-yong-zhi-ling.html</link><description>
+# Git 和 GitHub 常用操作
+
+## Git 基本操作
+
+### 1. 初始化一个 Git 仓库
+在项目目录下，使用以下命令初始化一个新的 Git 仓库：
+```bash
+git init
+```
+
+### 2. 配置 Git 用户信息
+在开始使用 Git 前，需要配置用户名和邮箱：
+```bash
+git config --global user.name 'Your Name'
+git config --global user.email 'your_email@example.com'
+```
+
+### 3. 查看 Git 配置信息
+查看当前的 Git 配置信息：
+```bash
+git config --list
+```
+
+### 4. 克隆远程仓库
+将远程 Git 仓库克隆到本地：
+```bash
+git clone https://github.com/username/repository.git
+```
+
+### 5. 查看文件状态
+查看当前工作目录中文件的状态（比如是否有未跟踪的文件、是否有更改）：
+```bash
+git status
+```
+
+### 6. 添加文件到暂存区
+将文件添加到 Git 暂存区：
+```bash
+git add filename
+```
+或者添加所有文件：
+```bash
+git add .
+```
+
+### 7. 提交更改
+将暂存区的更改提交到本地仓库：
+```bash
+git commit -m 'Your commit message'
+```
+
+### 8. 查看提交历史
+查看项目的提交历史：
+```bash
+git log
+```
+
+### 9. 推送本地更改到远程仓库
+将本地的更改推送到远程仓库：
+```bash
+git push origin main
+```
+
+### 10. 拉取远程更改到本地
+将远程仓库的更改拉取到本地仓库：
+```bash
+git pull origin main
+```
+
+### 11. 创建分支
+创建一个新的分支：
+```bash
+git branch new-branch-name
+```
+
+### 12. 切换分支
+切换到指定的分支：
+```bash
+git checkout branch-name
+```
+
+### 13. 合并分支
+将指定分支的更改合并到当前分支：
+```bash
+git merge branch-name
+```
+
+### 14. 删除分支
+删除本地分支：
+```bash
+git branch -d branch-name
+```
+
+## [GitHub](https://github.com/) 常用操作
+
+### 1. 创建一个新的 GitHub 仓库
+1. 登录到 [GitHub](https://github.com/)。</description><guid isPermaLink="true">https://Lszidv.github.io/post/git-chang-yong-zhi-ling.html</guid><pubDate>Fri, 21 Feb 2025 09:25:54 +0000</pubDate></item><item><title>[Literature Reading]Multichannel analysis of shear wave splitting </title><link>https://Lszidv.github.io/post/%5BLiterature%20Reading%5DMultichannel%20analysis%20of%20shear%20wave%20splitting%20.html</link><description>## Abstract&#13;
 科学问题：&#13;
 如何联合多个震相提高测量结果的鲁棒性？&#13;
 如何在复杂区域有效区分不同的各向异性特征？&#13;
