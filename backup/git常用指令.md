@@ -144,5 +144,4 @@ git remote -v
 | `git merge <branch>`          | 合并分支                           |
 | `git remote add origin <url>` | 添加远程仓库                       |
 
-
-<学习网站>[https://learngitbranching.js.org/?locale=zh_CN]
+[学习网站](https://learngitbranching.js.org/?locale=zh_CN)
