@@ -1,6 +1,6 @@
 ## **CNN_Local_SWS: S 波到时计算**
 
-本文件的主要任务是 **计算 S 波的到达时间**，并将其用于后续的剪切波分裂分析。该计算过程涉及 **理论到时计算**、**S 波实际到时计算**、**时间扰动引入** 以及 **波形数据读取**，确保时间窗口的选取足够精确。
+该计算过程涉及 **理论到时计算**、**S 波实际到时计算**、**时间扰动引入** 以及 **波形数据读取**，确保时间窗口的选取足够精确。
 
 ---
 
@@ -88,25 +88,21 @@ st = read(nz)
 <pre><code>
 
 ---
-## Pytheas计算S波到时
+## **Pytheas计算S波到时**
 
 ## 函数: `arPicker`
-
 该函数使用AR-AIC方法（Akazawa, 2004）来自动计算P波和S波的到达时间。此方法集成在Obspy中，使用`obspy.signal.trigger.ar_pick`来实现。
-
 ### 参数：
 - `stream`: 包含波形数据的`Stream`对象（包含3个分量：垂直分量、北向分量和东向分量）。该数据流用于计算P波和S波到达时间。
 - `pkCNF`: 配置类`parsePickerCnf`，包含S波和P波到达时间计算所需的设置参数。
-
 ### 返回值：
 - `p`: P波到达时间，相对于记录开始时间的秒数。
 - `s`: S波到达时间，相对于记录开始时间的秒数。
-
 ```
 def arPicker(stream, pkCNF):
     df = stream[0].stats.sampling_rate  # 采样率
     z, n, e = stream  # 获取三分量（垂直、北向、东向）
-    
+   
     # 使用ar_pick计算P波和S波的到达时间
     p, s = ar_pick(
         z.data, n.data, e.data, df,
@@ -119,7 +115,6 @@ def arPicker(stream, pkCNF):
     logging.info("AR-AIC arrivals (p,s) in s: " + str((p, s)))
     return p, s
 ```
-
 ### 关键步骤：
 1. **参数初始化**：从`Stream`对象中获取采样率（`df`）和波形数据（`z`, `n`, `e`）。这些数据是用于计算P波和S波到达时间的输入。
 2. **调用`ar_pick`**：使用`ar_pick`函数计算P波和S波的到达时间。该函数包含了多个参数，用于配置计算过程中的频率范围、滤波器参数等。
@@ -127,9 +122,5 @@ def arPicker(stream, pkCNF):
 
 ### 参考文献：
 - Akazawa, T., 2004. A technique for automatic detection of onset time of P-and S-Phases in strong motion records, 13th World Conference on Earthquake Engineering.
-
 ---
 
-### 总结：
-该函数利用AR-AIC方法自动计算S波到达时间，并返回相对于记录开始的时间。计算过程依赖于多个配置参数，确保可以在不同的数据条件下正确检测到P波和S波的到达时间。
-```

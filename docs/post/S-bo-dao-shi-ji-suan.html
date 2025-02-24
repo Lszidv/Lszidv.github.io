@@ -12,11 +12,11 @@
     </script>
 <meta name="description" content="## **CNN_Local_SWS: S 波到时计算**
 
-本文件的主要任务是 **计算 S 波的到达时间**，并将其用于后续的剪切波分裂分析。">
+该计算过程涉及 **理论到时计算**、**S 波实际到时计算**、**时间扰动引入** 以及 **波形数据读取**，确保时间窗口的选取足够精确。">
 <meta property="og:title" content="S波到时计算">
 <meta property="og:description" content="## **CNN_Local_SWS: S 波到时计算**
 
-本文件的主要任务是 **计算 S 波的到达时间**，并将其用于后续的剪切波分裂分析。">
+该计算过程涉及 **理论到时计算**、**S 波实际到时计算**、**时间扰动引入** 以及 **波形数据读取**，确保时间窗口的选取足够精确。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://Lszidv.github.io/post/S-bo-dao-shi-ji-suan.html">
 <meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
@@ -88,7 +88,7 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </div>
     <div id="content">
 <div class="markdown-body" id="postBody"><h2><strong>CNN_Local_SWS: S 波到时计算</strong></h2>
-<p>本文件的主要任务是 <strong>计算 S 波的到达时间</strong>，并将其用于后续的剪切波分裂分析。该计算过程涉及 <strong>理论到时计算</strong>、<strong>S 波实际到时计算</strong>、<strong>时间扰动引入</strong> 以及 <strong>波形数据读取</strong>，确保时间窗口的选取足够精确。</p>
+<p>该计算过程涉及 <strong>理论到时计算</strong>、<strong>S 波实际到时计算</strong>、<strong>时间扰动引入</strong> 以及 <strong>波形数据读取</strong>，确保时间窗口的选取足够精确。</p>
 <hr>
 <h3><strong>1. 计算 S 波的理论到时</strong></h3>
 <div class="highlight highlight-source-python"><pre class="notranslate"><span class="pl-k">if</span> <span class="pl-v">S_arrival</span> <span class="pl-c1">==</span> <span class="pl-c1">-</span><span class="pl-c1">1</span>:
@@ -196,7 +196,7 @@ ne = '../data/SWS_trace/' + nst + '/' + neq + '/' + nst + '.e'
 <p><strong>最终 <code class="notranslate">S_arr</code> 以</strong> <strong>1/100 秒单位计算</strong>，用于剪切波分裂分析。</p>
 <pre class="notranslate"><code class="notranslate">
 <hr>
-<h2>Pytheas计算S波到时</h2>
+<h2><strong>Pytheas计算S波到时</strong></h2>
 <h2>函数: <code class="notranslate">arPicker</code></h2>
 <p>该函数使用AR-AIC方法（Akazawa, 2004）来自动计算P波和S波的到达时间。此方法集成在Obspy中，使用<code class="notranslate">obspy.signal.trigger.ar_pick</code>来实现。</p>
 <h3>参数：</h3>
@@ -212,7 +212,7 @@ ne = '../data/SWS_trace/' + nst + '/' + neq + '/' + nst + '.e'
 <pre class="notranslate"><code class="notranslate">def arPicker(stream, pkCNF):
     df = stream[0].stats.sampling_rate  # 采样率
     z, n, e = stream  # 获取三分量（垂直、北向、东向）
-    
+   
     # 使用ar_pick计算P波和S波的到达时间
     p, s = ar_pick(
         z.data, n.data, e.data, df,
@@ -235,10 +235,7 @@ ne = '../data/SWS_trace/' + nst + '/' + neq + '/' + nst + '.e'
 <ul>
 <li>Akazawa, T., 2004. A technique for automatic detection of onset time of P-and S-Phases in strong motion records, 13th World Conference on Earthquake Engineering.</li>
 </ul>
-<hr>
-<h3>总结：</h3>
-<p>该函数利用AR-AIC方法自动计算S波到达时间，并返回相对于记录开始的时间。计算过程依赖于多个配置参数，确保可以在不同的数据条件下正确检测到P波和S波的到达时间。</p>
-<pre class="notranslate"><code class="notranslate"></code></pre></code></pre></div>
+<hr></code></pre></div>
 <div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
