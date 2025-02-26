@@ -103,12 +103,12 @@ $$sigma^2_{\text{data},c} = \left( \sum_{n=1}^{N_c} \frac{1}{\sigma^2_{\delta t,
 QW值通过以下公式计算：
 
 $$
-QW = \left\{
+QW = \{
 \begin{matrix}
 -(1 - d_{\text{null}}) & \text{当 } d_{\text{null}} < d_{\text{good}} \\
 (1 - d_{\text{good}}) & \text{当 } d_{\text{null}} \geq d_{\text{good}}
 \end{matrix}
-\right.
+\}
 $$
 
 其中，dnull和dgood分别表示较差和较好的测量结果。QW值的高低反映了测量结果的质量，理想结果对应QW = 1，而差的结果则接近零。
