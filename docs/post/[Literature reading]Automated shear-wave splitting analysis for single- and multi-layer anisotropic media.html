@@ -156,15 +156,11 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </ul>
 <p>这些参数都是相对于S波相位到达时间定义的，这意味着用户必须提供S波相位到达时间的适当近似值。</p>
 <p>每个窗口的最佳分裂参数δt和φ通过DBSCAN聚类算法进行聚类（Ester等，1996）。这与Teanby等（2004）的方法不同，因为我们在新的领域中进行聚类，优化处理了φ的周期性特性。聚类领域C的定义如下：</p>
-<p>$C = \left( \delta t \cdot \cos(2\phi), \delta t \cdot \sin(2\phi) \right)$</p>
+<p>$$C = \left( \delta t \cdot \cos(2\phi), \delta t \cdot \sin(2\phi) \right)$$</p>
 <p>其中，<strong>δt</strong>是归一化的延迟时间，<strong>φ</strong>是快方向的偏振角度。通过聚类，SWSPy找到每个源接收器对的最优分裂结果，选择具有最小方差的结果。这些方差包括<strong>集群内方差</strong>和<strong>数据方差</strong>，其计算方式如下：</p>
-<p>[<br>
-\sigma^2_{\text{cluster},c} = \frac{1}{N_c} \sum_{n=1}^{N_c} \left( (\delta t_n - \bar{\delta t}_c)^2 + (\phi_n - \bar{\phi}_c)^2 \right)<br>
-]</p>
-<p>[<br>
-\sigma^2_{\text{data},c} = \left( \sum_{n=1}^{N_c} \frac{1}{\sigma^2_{\delta t,n}} \right)^{-1} + \left( \sum_{n=1}^{N_c} \frac{1}{\sigma^2_{\phi,n}} \right)^{-1}<br>
-]</p>
-<p>其中，<strong>N_c</strong>是集群c中的样本数，**(\bar{\delta t}_c)<strong>和</strong>(\bar{\phi}_c)**分别是集群c的平均值。通过这些计算，SWSPy能够准确地聚类分裂参数并获得最稳定的结果。</p></div>
+<p>$$sigma^2_{\text{cluster},c} = \frac{1}{N_c} \sum_{n=1}^{N_c} \left( (\delta t_n - \bar{\delta t}_c)^2 + (\phi_n - \bar{\phi}_c)^2 \right)$$</p>
+<p>$$sigma^2_{\text{data},c} = \left( \sum_{n=1}^{N_c} \frac{1}{\sigma^2_{\delta t,n}} \right)^{-1} + \left( \sum_{n=1}^{N_c} \frac{1}{\sigma^2_{\phi,n}} \right)^{-1}$$</p>
+<p>其中，$ N_c $是集群 $ c $ 中的样本数，$ \bar{\delta t}_c $和$ \bar{\phi}_c $分别是集群$ c $的平均值。通过这些计算，SWSPy 能够准确地聚类分裂参数并获得最稳定的结果。</p></div>
 <div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
