@@ -91,9 +91,27 @@ $$sigma^2_{\text{cluster},c} = \frac{1}{N_c} \sum_{n=1}^{N_c} \left( (\delta t_n
 
 $$sigma^2_{\text{data},c} = \left( \sum_{n=1}^{N_c} \frac{1}{\sigma^2_{\delta t,n}} \right)^{-1} + \left( \sum_{n=1}^{N_c} \frac{1}{\sigma^2_{\phi,n}} \right)^{-1}$$
 
-其中，$ N_c $是集群 $ c $ 中的样本数，$ \bar{\delta t}_c $和$ \bar{\phi}_c $分别是集群$ c $的平均值。通过这些计算，SWSPy 能够准确地聚类分裂参数并获得最稳定的结果。
+其中， $N_c$ 是集群 $c$ 中的样本数，  $\bar{\delta t}_c$  和 $\bar{\phi}_c$ 分别是集群 $c$ 的平均值。通过这些计算，SWSPy能够准确地聚类分裂参数并获得最稳定的结果。
+![Image](https://github.com/user-attachments/assets/8c549077-7fa1-48df-95cf-5b482f16a873)
 
+#### 2.1.5 自动化处理多个地震源和多个接收器
 
+- Teanby等（2004）的方法结合Silver和Chan（1991）的特征值法，能够为给定的源接收器对提供稳定的剪切波分裂结果。在地震活动研究中，通常涉及数十到数百个接收器和数千到数十万个地震事件，因此，自动化的剪切波分裂结果质量量化方法显得尤为重要。
+
+- SWSPy包含一个类，能够自动计算整个地震目录中的剪切波分裂测量结果。用于量化分裂测量质量的三个指标包括：（1）δt和φ的不确定性（分别为αδt和αφ）；（2）结果的线性度，λ2/λ1，较小的λ2/λ1值表示更好的结果；（3）Wuestefeld质量因子，QW，它衡量特征值法和互相关法之间的结果一致性。
+
+QW值通过以下公式计算：
+
+$$
+QW = \left\{
+\begin{matrix}
+-(1 - d_{\text{null}}) & \text{当 } d_{\text{null}} < d_{\text{good}} \\
+(1 - d_{\text{good}}) & \text{当 } d_{\text{null}} \geq d_{\text{good}}
+\end{matrix}
+\right.
+$$
+
+其中，dnull和dgood分别表示较差和较好的测量结果。QW值的高低反映了测量结果的质量，理想结果对应QW = 1，而差的结果则接近零。
 
 
 
