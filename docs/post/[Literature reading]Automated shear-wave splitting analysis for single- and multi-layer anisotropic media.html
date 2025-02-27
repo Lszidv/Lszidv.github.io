@@ -21,7 +21,7 @@
 <meta property="og:url" content="https://Lszidv.github.io/post/%5BLiterature%20reading%5DAutomated%20shear-wave%20splitting%20analysis%20for%20single-%20and%20multi-layer%20anisotropic%20media.html">
 <meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
 <title>[Literature reading]Automated shear-wave splitting analysis for single- and multi-layer anisotropic media</title>
-
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
 
 
 </head>
@@ -45,7 +45,17 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
     body {padding: 8px;}
     .postTitle{font-size:24px;}
 }
-
+.copy-feedback {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 50px;
+    color: var(--color-fg-on-emphasis);
+    background-color: var(--color-fg-muted);
+    border-radius: 3px;
+    padding: 5px 8px;
+    font-size: 12px;
+}
 </style>
 
 
@@ -234,11 +244,179 @@ $$</p>
 <li>使用修正后的数据，在整个窗口wininit中再次测量分裂参数，得到最深层（层1）的分裂参数。</li>
 <li>最后，可以确认两层解决方案是否比单层表观解决方案更准确地描述了介质。这里我们定义多层结果更为准确的条件是：（1）更线性（即（λ2/λ1）multi-layer &lt; （λ2/λ1）single-layer）；（2）两层的快方向具有不同的方向，经过不确定性修正后。</li>
 </ol>
-<p>多层结果的线性度（λ2/λ1）multi-layer通过对每一层的λ2/λ1值进行求和来量化：<br>
-$$<br>
-(λ2/λ1)multi-layer = \sum_{n=1}^n \left( \frac{λ2}{λ1} \right)_n,<br>
-$$<br>
-其中，n表示第n层。</p></div>
+<p>多层结果的线性度（λ2/λ1）multi-layer通过对每一层的λ2/λ1值进行求和来量化：</p>
+<p>$$
+(λ2/λ1)multi-layer = \sum_{n=1}^n \left( \frac{λ2}{λ1} \right)_n,
+$$</p>
+<p>其中，n表示第n层。</p>
+<h4>2.2.3 扩展到n层</h4>
+<p>第2.2.2节特地为清晰起见，描述了两层的多层方法。然而，将该方法扩展到n层在理论上是非常简单的。第2到第4步可以通过连续的小窗口重复进行，使用δt2,app, δt3,app, ..., δtn,app来划分每个窗口。然而，实际上可以独立测量的层数是有限的。</p>
+<ul>
+<li>随着需要反演的层数增加，各种S波相位到达时间更有可能彼此难以区分，因为每层变得更薄，这不可避免地导致延迟时间变小。此外，窗口长度也会变得更小，从而导致较不稳定的解。每一层的分裂导致的能量划分会使S波振幅减少1/2^n，从而降低每个单独S波相位到达的信噪比（SNR）。因此，尽管为了完整性考虑了扩展到n层的情况，但仅提供最多解决两层的例子，因为对于更多层的反演，信号的稳定性和精度难以保证。</li>
+</ul>
+<h3>2.3 SWSPy使用示例</h3>
+<p>SWSPy支持从简单的单一源接收器对到多个接收器和多个源的剪切波分裂自动测量。提供了一个简单的例子，展示如何在多个接收器上测量单一源的剪切波分裂，以及如何进行正演模拟，生成具有剪切波分裂的合成信号。</p>
+<h4>2.3.1 测量地震剪切波分裂</h4>
+<p>SWSPy使用基于Python类的结构实现（见Listing 1），并广泛利用obspy进行地震数据的输入和输出（Krischer等，2015）。通过传入一个包含所有接收器数据流的obspy数据，创建一个<code class="notranslate">splittingObject</code>，并可以指定窗口和参数搜索空间来执行剪切波分裂分析。</p>
+<p>Listing 1展示了如何使用<code class="notranslate">splittingObject</code>来执行剪切波分裂分析：</p>
+<div class="highlight highlight-source-python"><pre class="notranslate"><span class="pl-k">import</span> <span class="pl-s1">swspy</span>, <span class="pl-s1">obspy</span>
+<span class="pl-c"># 创建剪切波分裂对象：</span>
+<span class="pl-s1">st</span> <span class="pl-c1">=</span> <span class="pl-s1">obspy</span>.<span class="pl-c1">read</span>(<span class="pl-c1">&lt;</span><span class="pl-s1">数据路径</span><span class="pl-c1">&gt;</span>)
+<span class="pl-s1">splittingObject</span> <span class="pl-c1">=</span> <span class="pl-s1">swspy</span>.<span class="pl-c1">splitting</span>.<span class="pl-c1">create_splitting_object</span>(<span class="pl-s1">st</span>)
+<span class="pl-c"># 指定一些关键参数...</span>
+<span class="pl-s1">splittingObject</span>.<span class="pl-c1">win_S_pick_tolerance</span> <span class="pl-c1">=</span> <span class="pl-c1">0.1</span>
+<span class="pl-s1">splittingObject</span>.<span class="pl-c1">overall_win_start_pre_fast_S_pick</span> <span class="pl-c1">=</span> <span class="pl-c1">0.3</span>
+<span class="pl-s1">splittingObject</span>.<span class="pl-c1">overall_win_start_post_fast_S_pick</span> <span class="pl-c1">=</span> <span class="pl-c1">0.2</span>
+<span class="pl-s1">splittingObject</span>.<span class="pl-c1">max_t_shift_s</span> <span class="pl-c1">=</span> <span class="pl-c1">1.0</span>
+<span class="pl-c"># 执行分裂分析：</span>
+<span class="pl-s1">splittingObject</span>.<span class="pl-c1">perform_sws_analysis</span>(<span class="pl-s1">coord_system</span><span class="pl-c1">=</span>‘‘<span class="pl-c1">ZNE</span>’’, <span class="pl-s1">sws_method</span><span class="pl-c1">=</span>‘‘<span class="pl-c1">EV</span>’’)
+<span class="pl-c"># 绘制并保存结果：</span>
+<span class="pl-c"># （将splittingObject.sws_result_df保存为csv文件）</span>
+<span class="pl-s1">splittingObject</span>.<span class="pl-c1">plot</span>()
+<span class="pl-s1">splittingObject</span>.<span class="pl-c1">save_result</span>()
+<span class="pl-c">#### 2.3.2 正演模拟</span>
+
+<span class="pl-v">SWSPy还支持正演模拟</span>，<span class="pl-s1">用于生成通过各向异性介质传播的合成地震波形</span>。<span class="pl-v">Listing</span> <span class="pl-c1">2</span><span class="pl-s1">展示了一个示例</span>，<span class="pl-s1">如何生成一个主频为10</span> <span class="pl-v">Hz的S波合成地震波形</span>，<span class="pl-s1">传播通过一个具有60</span>°<span class="pl-s1">快方向和δt</span> <span class="pl-c1">=</span> <span class="pl-c1">0.5</span> <span class="pl-s1">s的层</span>。
+
+<span class="pl-s1">这种正演模拟功能可用于验证SWSPy的性能</span>，<span class="pl-s1">并解决反演问题</span>。<span class="pl-s1">以下是一个使用正演模拟生成合成地震波形的代码示例</span>：
+
+<span class="pl-s">``</span>`<span class="pl-s1">python</span>
+<span class="pl-k">import</span> <span class="pl-s1">swspy</span>
+<span class="pl-c"># 创建源时函数：</span>
+<span class="pl-s1">seismogram_dur_s</span> <span class="pl-c1">=</span> <span class="pl-c1">10.0</span>
+<span class="pl-s1">sampling_rate_hz</span> <span class="pl-c1">=</span> <span class="pl-c1">1000.0</span>
+<span class="pl-s1">st</span> <span class="pl-c1">=</span> <span class="pl-s1">swspy</span>.<span class="pl-c1">splitting</span>.<span class="pl-c1">forward_model</span>.<span class="pl-c1">create_src_time_func</span>(<span class="pl-s1">seismogram_dur_s</span>, <span class="pl-s1">sampling_rate_hz</span>)
+<span class="pl-c"># 指定层的各向异性参数：</span>
+<span class="pl-s1">phi_from_N</span> <span class="pl-c1">=</span> <span class="pl-c1">60</span>
+<span class="pl-s1">dt</span> <span class="pl-c1">=</span> <span class="pl-c1">0.5</span>
+<span class="pl-s1">back_azi</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>
+<span class="pl-s1">event_inclin_angle_at_station</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>
+<span class="pl-c"># 应用分裂：</span>
+<span class="pl-s1">st</span> <span class="pl-c1">=</span> <span class="pl-s1">swspy</span>.<span class="pl-c1">splitting</span>.<span class="pl-c1">forward_model</span>.<span class="pl-c1">add_splitting</span>(<span class="pl-s1">st</span>, <span class="pl-s1">phi_from_N</span>, <span class="pl-s1">dt</span>, <span class="pl-s1">back_azi</span>, <span class="pl-s1">event_inclin_angle_at_station</span>)
+<span class="pl-c">## 3 Examples</span>
+<span class="pl-c">### 3.1 简单的冰震示例</span>
+
+<span class="pl-s1">在此</span>，<span class="pl-s1">我们以冰川上的实际地震为例</span>，<span class="pl-s1">展示如何使用SWSPy进行S波分裂分析</span>，<span class="pl-s1">特别关注指示可靠测量的关键特征</span>。<span class="pl-s1">图5展示了来自南极鲁特福德冰流的单个接收器处的冰震基底粘滑S波到达</span>（<span class="pl-v">Hudson等</span>，<span class="pl-c1">2020</span><span class="pl-s1">a</span>；<span class="pl-v">Smith等</span>，<span class="pl-c1">2015</span>）。
+
+<span class="pl-s1">冰川冰体具有强烈的各向异性结构</span>，<span class="pl-s1">结合南极地区的低噪声水平</span>，<span class="pl-s1">为S波分裂提供了一个理想的实际案例</span>（<span class="pl-v">Smith等</span>，<span class="pl-c1">2017</span>；<span class="pl-v">Harland等</span>，<span class="pl-c1">2013</span>；<span class="pl-v">Kufner等</span>，<span class="pl-c1">2023</span>）。<span class="pl-s1">基底粘滑冰震也提供了理想的例子</span>，<span class="pl-s1">因为它们的S波源极化通常受到良好约束</span>，<span class="pl-s1">通常与冰流方向大致对齐</span>（<span class="pl-s1">相对于北方160</span>°，<span class="pl-v">Smith等</span>，<span class="pl-c1">2015</span>），<span class="pl-s1">在本例中</span>，<span class="pl-s1">通过全波形源机制反演得到了确认</span>（<span class="pl-v">Hudson等</span>，<span class="pl-c1">2020</span><span class="pl-s1">a</span>）。
+<span class="pl-s1">以下是用于量化剪切波分裂结果质量的几个关键特征</span>：
+
+<span class="pl-c1">1.</span> <span class="pl-c1">**</span><span class="pl-s1">检查ZNE坐标系中的原始波形与去除分裂后的波形</span><span class="pl-c1">**</span>（<span class="pl-s1">见图5a</span>）。  
+   <span class="pl-c1">-</span> <span class="pl-v">S波到达波包应位于可能窗口的起始和结束之间</span>（<span class="pl-s1">灰色垂直线</span>）。
+   <span class="pl-c1">-</span> <span class="pl-s1">去除分裂后的波包应比原始数据波包更短</span>。
+
+<span class="pl-c1">2.</span> <span class="pl-c1">**</span><span class="pl-s1">最大化和最小化去除分裂后的P和A分量能量</span><span class="pl-c1">**</span>（<span class="pl-s1">图5b</span>）。  
+   <span class="pl-c1">-</span> <span class="pl-v">P分量与A分量的振幅比表示去除分裂后粒子运动的线性度</span>，<span class="pl-s1">较小的λ2</span><span class="pl-c1">/</span><span class="pl-s1">λ1值表示更线性的结果</span>。  
+   <span class="pl-c1">-</span> <span class="pl-s1">对于冰震</span>，<span class="pl-s1">λ2</span><span class="pl-c1">/</span><span class="pl-s1">λ1</span> <span class="pl-c1">=</span> <span class="pl-c1">0.033</span>，<span class="pl-s1">大部分能量集中在P分量</span>，<span class="pl-s1">仅有少量能量到达A分量</span>。
+
+<span class="pl-c1">3.</span> <span class="pl-c1">**</span><span class="pl-s1">快慢S波相位到达的时间应不同</span><span class="pl-c1">**</span>，<span class="pl-s1">去除分裂后时间应对齐</span>（<span class="pl-s1">见图5c右面板</span>）。  
+   <span class="pl-c1">-</span> <span class="pl-s1">快慢S波相位应在去除分裂前到达不同的时间</span>，<span class="pl-s1">去除分裂后应对齐</span>。
+
+<span class="pl-c1">4.</span> <span class="pl-c1">**</span><span class="pl-s1">在东北平面上大致线性的粒子运动</span><span class="pl-c1">**</span>（<span class="pl-s1">见图5d</span>）。  
+   <span class="pl-c1">-</span> <span class="pl-s1">对于冰震</span>，<span class="pl-s1">粒子运动大致线性</span>，<span class="pl-s1">源极化大约为从北方165</span>° ± <span class="pl-c1">6</span>°，<span class="pl-s1">与冰流方向一致</span>。
+
+<span class="pl-c1">5.</span> <span class="pl-c1">**</span><span class="pl-s1">检查聚类分析的稳定性</span><span class="pl-c1">**</span>（<span class="pl-s1">见图5e</span>）。  
+   <span class="pl-c1">-</span> <span class="pl-s1">聚类样本应有小的不确定性</span>，<span class="pl-s1">从而得到稳定的φ和δt解</span>。  
+   <span class="pl-c1">-</span> <span class="pl-s1">如果样本显示明显的非均匀行为</span>，<span class="pl-s1">结果可能受到周期跳跃等效应的影响</span>。
+
+<span class="pl-c1">6.</span> <span class="pl-c1">**</span><span class="pl-s1">在φ</span>−<span class="pl-s1">δt空间内特征值比呈现明显的最小值</span><span class="pl-c1">**</span>（<span class="pl-s1">见图5f</span>）。  
+   <span class="pl-c1">-</span> <span class="pl-s1">冰震展示了明显的单一全局最小值</span>，<span class="pl-s1">最优解由绿色点及其误差条表示</span>。  
+   <span class="pl-c1">-</span> <span class="pl-s1">φ</span>−<span class="pl-s1">δt空间图有助于检查周期跳跃是否发生</span>。<span class="pl-s1">如果周期跳跃占主导</span>，<span class="pl-s1">可能会看到多个最小值</span>，<span class="pl-s1">并且这些最小值对应的φ值相隔90</span>°。
+
+<span class="pl-c1">7.</span> <span class="pl-c1">**</span><span class="pl-s1">测量质量参数λ2</span><span class="pl-c1">/</span><span class="pl-s1">λ1和QW</span><span class="pl-c1">**</span>。  
+   <span class="pl-c1">-</span> <span class="pl-v">SWSPy可以输出多个质量参数</span>，<span class="pl-s1">λ2</span><span class="pl-c1">/</span><span class="pl-s1">λ1表示结果的线性度</span>。  
+   <span class="pl-c1">-</span> <span class="pl-v">SWSPy还计算Wuestefeld质量因子QW</span>，<span class="pl-c1">QW</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span><span class="pl-s1">表示良好结果</span>，<span class="pl-c1">QW</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span><span class="pl-s1">表示较差结果</span>，<span class="pl-c1">QW</span> <span class="pl-c1">=</span> −<span class="pl-c1">1</span><span class="pl-s1">表示零结果</span>。  
+   <span class="pl-c1">-</span> <span class="pl-s1">对于冰震</span>，<span class="pl-c1">QW</span> <span class="pl-c1">=</span> <span class="pl-c1">0.969</span>，<span class="pl-s1">确认了特征值法和交叉相关方法得到的一致结果</span>。
+
+![<span class="pl-v">Image</span>](<span class="pl-s1">https</span>:<span class="pl-c1">//</span><span class="pl-s1">github</span>.<span class="pl-c1">com</span><span class="pl-c1">/</span><span class="pl-s1">user</span><span class="pl-c1">-</span><span class="pl-s1">attachments</span><span class="pl-c1">/</span><span class="pl-s1">assets</span><span class="pl-c1">/</span><span class="pl-c1">921092</span><span class="pl-s1">bb</span><span class="pl-c1">-</span><span class="pl-c1">0486</span><span class="pl-c1">-</span><span class="pl-c1">4</span><span class="pl-s1">ba8</span><span class="pl-c1">-</span><span class="pl-s1">ba67</span><span class="pl-c1">-</span><span class="pl-s1">bb95d3a66d96</span>)
+<span class="pl-c">### 3.2 远震剪切波分裂</span>
+
+<span class="pl-s1">本节展示了SWSPy在远震剪切波分裂中的表现</span>。<span class="pl-s1">远震剪切波分裂技术</span>，<span class="pl-s1">特别是SKS</span>、<span class="pl-v">PKS和SKKS相位分析</span>，<span class="pl-s1">是用于约束上地幔变形模式的常用方法</span>。<span class="pl-s1">由于这些相位的近垂直入射角和由P波转化为S波导致的径向极化</span>，<span class="pl-s1">使得它们能提供可靠的地幔剪切波分裂测量</span>。
+
+<span class="pl-s1">图6展示了2005年2月5日Mw7</span>.<span class="pl-c1">1</span><span class="pl-c1">级Celebus海地震的数据</span>，<span class="pl-s1">记录于美国加利福尼亚NEE站</span>。<span class="pl-s1">使用SHEBA代码进行的剪切波分裂分析发现了SKS和SKKS的剪切波分裂不一致</span>，<span class="pl-s1">其中SKS为零结果</span>，<span class="pl-s1">而SKKS则表现出明显的剪切波分裂</span>，<span class="pl-s1">得到了φ</span> <span class="pl-c1">=</span> <span class="pl-c1">74</span>° ± <span class="pl-c1">5</span>°，<span class="pl-s1">δt</span> <span class="pl-c1">=</span> <span class="pl-c1">1.05</span> ± <span class="pl-c1">0.07</span><span class="pl-s1">秒的结果</span>。
+
+<span class="pl-s1">使用SWSPy重新测量SKKS相位的剪切波分裂</span>，<span class="pl-s1">得到了φ</span> <span class="pl-c1">=</span> <span class="pl-c1">74.2</span>° ± <span class="pl-c1">14.0</span>°，<span class="pl-s1">δt</span> <span class="pl-c1">=</span> <span class="pl-c1">1.05</span> ± <span class="pl-c1">0.175</span><span class="pl-s1">秒</span>，<span class="pl-s1">与SHEBA结果一致</span>。<span class="pl-s1">我们还能够获取源极化为115</span>° ± <span class="pl-c1">7</span>°，<span class="pl-s1">与SHEBA的测量值115</span>°<span class="pl-s1">以及观察到的背方位角294</span>°<span class="pl-s1">一致</span>，<span class="pl-s1">符合SKS径向极化的假设</span>。
+
+<span class="pl-s1">这个示例仅展示了一个简单的远震应用</span>，<span class="pl-s1">实际中的远震剪切波分裂研究</span>，<span class="pl-s1">特别是针对最下层地幔的研究</span>，<span class="pl-s1">更加复杂</span>。<span class="pl-s1">现代远震剪切波分裂研究采用堆叠和波束形成等预处理方法</span>，<span class="pl-s1">有助于在噪声较大的数据集中识别SKS</span>、<span class="pl-v">SKKS和S3KS相位</span>。
+
+<span class="pl-c">### 3.3 自动化S波分裂分析在火山中多个地震中的应用</span>
+
+<span class="pl-c1">-</span> <span class="pl-s1">本节展示了如何使用SWSPy进行火山中多个地震的自动化S波分裂分析</span>。<span class="pl-s1">随着仪器灵敏度和密度的提高</span>，<span class="pl-s1">以及计算技术的发展</span>，<span class="pl-s1">现今可以处理包含成千上万次地震事件的大型地震目录</span>，<span class="pl-s1">为更高分辨率的S波速度各向异性研究提供了机会</span>。
+
+<span class="pl-c1">-</span> <span class="pl-s1">图7展示了在玻利维亚乌图伦库火山上进行的1356次地震的结果</span>。<span class="pl-s1">该地震目录来源于完全自动化的检测算法</span>。<span class="pl-s1">图7a显示了所有源接收器对的快S波极化的未经滤波分布</span>，<span class="pl-s1">并与数据的过滤子集进行了比较</span>。<span class="pl-s1">经过滤波的子集包含约束良好的测量结果</span>，<span class="pl-s1">这些结果具有较小的不确定性</span>，<span class="pl-s1">并表现出一个主导的各向异性方向</span>，<span class="pl-s1">呈SE</span><span class="pl-c1">-</span><span class="pl-v">NW方向</span>。
+
+<span class="pl-c1">-</span> <span class="pl-s1">为了验证这些快方向是否确实代表了裂缝结构</span>，<span class="pl-s1">将结果与独立测量的断层走向数据进行了对比</span>，<span class="pl-s1">发现快方向与断层走向平行</span>。<span class="pl-s1">乌图伦库火山的衰减层析成像表明</span>，<span class="pl-s1">流体主要存在于具有这种取向的断层中</span>，<span class="pl-s1">受火山区域应力场的控制</span>。
+
+<span class="pl-c1">-</span> <span class="pl-s1">这些S波各向异性结果与独立观测结果一致</span>，<span class="pl-s1">验证了自动化S波分裂方法的有效性</span>。<span class="pl-s1">通过自动化分析方法</span>，<span class="pl-v">SWSPy能够处理大规模数据集</span>，<span class="pl-s1">并为火山流体存在的研究提供了增强的视角</span>。
+<span class="pl-c">### 多层介质示例</span>
+<span class="pl-c">#### 3.4.1 正演模型示例</span>
+
+<span class="pl-s1">我们首先在模拟数据上展示新多层分裂方法的表现</span>，<span class="pl-s1">然后再将其应用于真实案例</span>。<span class="pl-s1">图8展示了一个两层正演模型的结果</span>。<span class="pl-s1">剪切波分裂应用于中心频率为10</span> <span class="pl-v">Hz</span>、<span class="pl-s1">源极化方向为0</span>° <span class="pl-v">N的Ricker小波上两次</span>，<span class="pl-s1">模拟波传播通过两层介质</span>（<span class="pl-s1">φ层1</span> <span class="pl-c1">=</span> <span class="pl-c1">60</span>°，<span class="pl-s1">φ层2</span> <span class="pl-c1">=</span> <span class="pl-c1">40</span>°，<span class="pl-s1">δt层1</span> <span class="pl-c1">=</span> <span class="pl-c1">0.5</span><span class="pl-s1">秒</span>，<span class="pl-s1">δt层2</span> <span class="pl-c1">=</span> <span class="pl-c1">0.2</span><span class="pl-s1">秒</span>）。
+
+<span class="pl-s1">图8a</span><span class="pl-c1">-</span><span class="pl-s1">d展示的表观剪切波分裂测量明显无法找到真实结果</span>。<span class="pl-s1">然而</span>，<span class="pl-s1">φ</span>−<span class="pl-s1">δt空间显示表观测量对两个层次都敏感</span>，<span class="pl-s1">并且在δt</span> <span class="pl-c1">=</span> <span class="pl-c1">0.2</span><span class="pl-s1">秒和δt</span> <span class="pl-c1">=</span> <span class="pl-c1">0.5</span><span class="pl-s1">秒处有明显的最小值</span>。<span class="pl-s1">第一层表现出较强的分裂信号</span>，<span class="pl-s1">因此该层主导了解析</span>。<span class="pl-s1">由于周期跳跃的影响</span>，<span class="pl-s1">在φ</span>−<span class="pl-s1">δt空间中为每一层选择最小值变得具有挑战性</span>。
+
+<span class="pl-s1">通过新的层</span><span class="pl-c1">-</span><span class="pl-s1">by</span><span class="pl-c1">-</span><span class="pl-s1">层分裂测量方法</span>，<span class="pl-s1">成功解析了两层的各向异性</span>，<span class="pl-s1">所有结果都接近真实值</span>，<span class="pl-s1">并且大多数结果与真实值在不确定性范围内一致</span>。<span class="pl-s1">修正后的波形进一步验证了新方法的性能</span>。
+
+![<span class="pl-v">Image</span>](<span class="pl-s1">https</span>:<span class="pl-c1">//</span><span class="pl-s1">github</span>.<span class="pl-c1">com</span><span class="pl-c1">/</span><span class="pl-s1">user</span><span class="pl-c1">-</span><span class="pl-s1">attachments</span><span class="pl-c1">/</span><span class="pl-s1">assets</span><span class="pl-c1">/</span><span class="pl-s1">ff099ab4</span><span class="pl-c1">-</span><span class="pl-s1">d9f8</span><span class="pl-c1">-</span><span class="pl-c1">493</span><span class="pl-s1">b</span><span class="pl-c1">-</span><span class="pl-c1">8</span><span class="pl-s1">a5f</span><span class="pl-c1">-</span><span class="pl-s1">ff9721fdb2f4</span>)
+<span class="pl-s1">a</span><span class="pl-c1">-</span><span class="pl-s1">d部分</span>：<span class="pl-s1">展示了表观的单层测量结果</span>，<span class="pl-s1">包括合成的地震波形和分裂参数的估计</span>。
+<span class="pl-s1">e</span><span class="pl-c1">-</span><span class="pl-s1">h部分</span>：<span class="pl-s1">展示了逐层反演的结果</span>，<span class="pl-s1">其中g图中的蓝色数据表示仅对第二层进行中间校正后的粒子运动</span>。
+<span class="pl-c">#### 3.4.2 冰震示例</span>
+
+<span class="pl-s1">成功的多层S波速度各向异性测量在现实世界中的例子较少</span>，<span class="pl-s1">这主要是因为测量多层分裂的挑战</span>，<span class="pl-s1">而非缺乏多层各向异性介质</span>。<span class="pl-s1">然而</span>，<span class="pl-s1">冰川冰为多层各向异性提供了一个现实的例子</span>。
+
+<span class="pl-s1">图9展示了两层S波分裂结果的水平粒子运动</span>，<span class="pl-s1">并与图5中的单层结果进行了对比</span>。<span class="pl-s1">结果表明</span>，<span class="pl-s1">两层模型比单层模型提供了更好的线性化效果</span>，<span class="pl-s1">特征值比λ2</span><span class="pl-c1">/</span><span class="pl-s1">λ1表明</span>，<span class="pl-s1">两层结果的线性化程度大约是单层结果的两倍</span>。<span class="pl-s1">这证明了两层介质比单层介质更能准确描述观测结果</span>。
+
+<span class="pl-s1">修正后的波形进一步验证了我们新方法的表现</span>，<span class="pl-s1">结果显示两层介质能够有效地解析冰震中的各向异性</span>，<span class="pl-s1">而不是仅仅依靠额外的自由度进行拟合</span>。<span class="pl-s1">尽管多层分裂分析提供了更多自由度</span>，<span class="pl-s1">但需要小心避免过拟合</span>，<span class="pl-s1">尤其是在连续层的快方向一致时</span>。
+
+<span class="pl-c">#### 3.4.3 多层S波分裂的挑战和局限性</span>
+
+<span class="pl-c1">-</span> <span class="pl-s1">尽管本研究中提出的多层方法在合成示例和冰震示例中表现良好</span>，<span class="pl-s1">但由于所需的假设</span>，<span class="pl-s1">这种方法对于那些信号频率相对较低的情况存在局限性</span>。<span class="pl-s1">特别是对于大多数远震剪切波分裂分析或任何情况下</span>，<span class="pl-s1">其中δt小于S波的主周期</span>，<span class="pl-s1">并且地壳层的δt可能大于地幔中的分裂幅度</span>，<span class="pl-s1">该方法可能不适用</span>。
+
+<span class="pl-c1">-</span> <span class="pl-s1">图10展示了这个问题的例子</span>。<span class="pl-s1">通过将剪切波分裂分析应用于具有类似SKS相位到达特征的合成地震图</span>，<span class="pl-s1">我们观察到</span>，<span class="pl-s1">表观单层测量和多层测量均能比原始未修正波形产生更线性化的修正S波到达时间</span>。<span class="pl-s1">然而</span>，<span class="pl-s1">表观单层测量无法正确解析各向异性</span>，<span class="pl-s1">而多层测量虽然解析了第一层</span>，<span class="pl-s1">但第二层的快方向未能解析</span>，<span class="pl-s1">并且与合成层值相差90</span>°。<span class="pl-s1">这一问题源自于表观分裂参数之间的周期性关系</span>，<span class="pl-s1">这导致了在给定层的快方向</span>（<span class="pl-s1">φi</span>）<span class="pl-s1">上的非唯一解</span>，<span class="pl-s1">尤其在δt</span> <span class="pl-c1">&gt;</span> <span class="pl-c1">1</span><span class="pl-c1">/</span><span class="pl-c1">2</span><span class="pl-s1">f时进一步引入了不确定性</span>。
+
+<span class="pl-c1">-</span> <span class="pl-s1">Özalaybey和Savage</span>（<span class="pl-c1">1994</span>）<span class="pl-s1">通过结合多个方位的SKS相位数据来解决此类非唯一解问题</span>，<span class="pl-s1">类似的方法也被其他研究者采用</span>。<span class="pl-s1">虽然SWSPy没有实现这种算法</span>，<span class="pl-s1">但它可以作为多事件反演工作流程的一部分</span>，<span class="pl-s1">在反演之前测量表观分裂参数</span>。
+
+<span class="pl-s1">因此</span>，<span class="pl-s1">尽管多层分裂分析方法展现了潜力</span>，<span class="pl-s1">但在实际应用中仍然面临周期跳跃和非唯一解等挑战</span>，<span class="pl-s1">使用时需要小心处理</span>。
+
+![<span class="pl-v">Image</span>](<span class="pl-s1">https</span>:<span class="pl-c1">//</span><span class="pl-s1">github</span>.<span class="pl-c1">com</span><span class="pl-c1">/</span><span class="pl-s1">user</span><span class="pl-c1">-</span><span class="pl-s1">attachments</span><span class="pl-c1">/</span><span class="pl-s1">assets</span><span class="pl-c1">/</span><span class="pl-c1">237</span><span class="pl-s1">ac071</span><span class="pl-c1">-</span><span class="pl-c1">80</span><span class="pl-s1">c9</span><span class="pl-c1">-</span><span class="pl-c1">4330</span><span class="pl-c1">-</span><span class="pl-s1">a53a</span><span class="pl-c1">-</span><span class="pl-s1">d25d55c0311f</span>)
+
+<span class="pl-c">### 3.5 SWSPy与其他剪切波分裂软件包的比较</span>
+
+<span class="pl-c1">-</span> <span class="pl-s1">为了完整性</span>，<span class="pl-s1">比较了SWSPy在本研究中两个主要极端事件的结果</span>，<span class="pl-s1">分别是图5中的冰震和图6中的SKKS到达</span>。<span class="pl-v">SWSPy与MFAST</span>（<span class="pl-v">Savage等</span>，<span class="pl-c1">2010</span>）<span class="pl-s1">和SHEBA</span>（<span class="pl-v">Wuestefeld等</span>，<span class="pl-c1">2010</span>）<span class="pl-s1">的比较结果见表1</span>。<span class="pl-s1">我们没有包括SplitRacer</span>（<span class="pl-v">Reiss和Rümpker</span>，<span class="pl-c1">2017</span>）<span class="pl-s1">和Pytheas</span>（<span class="pl-v">Spingos等</span>，<span class="pl-c1">2020</span>）<span class="pl-s1">的结果</span>，<span class="pl-s1">因为这些是图形用户界面</span>，<span class="pl-s1">适用性与我们的实现方式有显著差异</span>。
+
+<span class="pl-c1">-</span> <span class="pl-s1">所有分裂测量都使用尽可能相似的参数进行</span>，<span class="pl-s1">包括滤波属性</span>、<span class="pl-s1">数据持续时间和用于聚类的窗口数量</span>。<span class="pl-s1">三个软件包在不确定范围内得到相同的快方向</span>（<span class="pl-s1">φ</span>）<span class="pl-s1">和延迟时间</span>（<span class="pl-s1">δt</span>）。<span class="pl-v">SWSPy的误差较大</span>，<span class="pl-s1">因为我们故意采用比其他软件包更保守的估计方法</span>。<span class="pl-s1">这在表1中的SKKS示例中尤为明显</span>。<span class="pl-s1">尽管如此</span>，<span class="pl-s1">误差仍然仅占结果的一小部分</span>。
+
+<span class="pl-c1">-</span> <span class="pl-s1">这些软件包的差异主要体现在源极化方向上</span>，<span class="pl-v">SWSPy和SHEBA一致</span>，<span class="pl-s1">而MFAST则存在显著差异</span>。<span class="pl-s1">考虑到SWSPy与SHEBA几乎一致的表现</span>，<span class="pl-s1">并且源极化方向的测量与物理设置一致</span>，<span class="pl-s1">我们有信心认为SWSPy的源极化估计是现实的</span>。
+
+<span class="pl-c1">-</span> <span class="pl-s1">我们没有将SWSPy与这些其他方法在计算时间上的表现进行基准测试</span>，<span class="pl-s1">因为SWSPy是并行化的</span>，<span class="pl-s1">而SHEBA和MFAST则不是</span>。<span class="pl-s1">考虑到现代计算机的能力</span>，<span class="pl-s1">大多数用户很可能会利用SWSPy的并行化特性</span>，<span class="pl-s1">这将迅速弥补SWSPy相对于其他软件包的任何低效之处</span>。
+
+![<span class="pl-v">Image</span>](<span class="pl-s1">https</span>:<span class="pl-c1">//</span><span class="pl-s1">github</span>.<span class="pl-c1">com</span><span class="pl-c1">/</span><span class="pl-s1">user</span><span class="pl-c1">-</span><span class="pl-s1">attachments</span><span class="pl-c1">/</span><span class="pl-s1">assets</span><span class="pl-c1">/</span><span class="pl-c1">13</span><span class="pl-s1">a3df5b</span><span class="pl-c1">-</span><span class="pl-s1">dcfa</span><span class="pl-c1">-</span><span class="pl-c1">4889</span><span class="pl-c1">-</span><span class="pl-s1">b8a3</span><span class="pl-c1">-</span><span class="pl-c1">67</span><span class="pl-s1">f00266f40d</span>)
+<span class="pl-c">## 4Disscussion</span>
+
+<span class="pl-c">### 4.1 优势与局限性</span>
+
+<span class="pl-c1">-</span> <span class="pl-v">SWSPy在剪切波分裂和各向异性研究中展现了显著的优势</span>，<span class="pl-s1">特别是在处理高分辨率</span>、<span class="pl-s1">大数据集的自动化分析中</span>。<span class="pl-s1">通过Teanby等人</span>（<span class="pl-c1">2004</span>）<span class="pl-s1">提出的多窗口方法和先进的聚类算法</span>，<span class="pl-v">SWSPy为单个源接收器测量提供了稳定且可靠的结果</span>。<span class="pl-s1">此外</span>，<span class="pl-v">SWSPy实现了三维剪切波分裂测量</span>（<span class="pl-v">Walsh等</span>，<span class="pl-c1">2013</span>），<span class="pl-s1">使其能够在没有显著速度梯度的环境下有效地进行各向异性测量</span>，<span class="pl-s1">这对于钻孔数据或类似设置尤为重要</span>。
+
+<span class="pl-c1">-</span> <span class="pl-s1">针对包含大量源接收器对的大规模数据集</span>，<span class="pl-v">SWSPy提供了完全自动化的工作流程</span>，<span class="pl-s1">其模块化的Python包架构使得工作流程可以灵活适应各种研究需求</span>。<span class="pl-v">SWSPy能够处理成千上万甚至百万级的剪切波分裂测量数据</span>，<span class="pl-s1">这一能力为各向异性层析成像的研究提供了重要支持</span>，<span class="pl-s1">能够显著增加观测数据的数量</span>，<span class="pl-s1">进而降低层析成像中固有的不充分约束问题</span>（<span class="pl-v">Chevrot</span> <span class="pl-s1">et</span> <span class="pl-s1">al</span>., <span class="pl-c1">2004</span>）。<span class="pl-s1">同时</span>，<span class="pl-v">SWSPy提供了多种质量评估指标</span>（<span class="pl-s1">如QW和λ2</span><span class="pl-c1">/</span><span class="pl-s1">λ1</span>）<span class="pl-s1">以及不确定性测量</span>（<span class="pl-s1">如αφ</span>，<span class="pl-s1">αδt</span>），<span class="pl-s1">使得用户能够有效地过滤虚假结果</span>，<span class="pl-s1">提高分析的可靠性</span>。
+
+<span class="pl-c1">-</span> <span class="pl-s1">尽管SWSPy在多层各向异性测量中具有强大的功能</span>，<span class="pl-s1">但其局限性也不可忽视</span>。<span class="pl-s1">首先</span>，<span class="pl-s1">进行多层分析时</span>，<span class="pl-s1">需要满足特定的假设条件</span>，<span class="pl-s1">特别是在信号频率和各向异性强度之间的关系较为复杂时</span>，<span class="pl-v">SWSPy的多层方法可能不适用</span>。<span class="pl-s1">对于此类数据集</span>，<span class="pl-s1">必须谨慎应用该方法</span>，<span class="pl-s1">并仔细考虑假设条件</span>。<span class="pl-s1">其次</span>，<span class="pl-s1">尽管不确定性测量对于去除虚假结果至关重要</span>，<span class="pl-s1">但在某些情况下</span>，<span class="pl-s1">这些测量可能低估了实际的不确定性</span>。<span class="pl-s1">因此</span>，<span class="pl-s1">未来的研究应当着重于改进测量质量指标和更准确地估算不确定性</span>。
+
+<span class="pl-c1">-</span> <span class="pl-s1">此外</span>，<span class="pl-v">SWSPy使用Python编写</span>，<span class="pl-s1">这一面向对象的语言相对于C或Julia等低级语言而言</span>，<span class="pl-s1">计算速度较慢</span>。<span class="pl-s1">为了减少这一限制</span>，<span class="pl-v">SWSPy通过numba进行加速</span>，<span class="pl-s1">成功并行化了计算密集型的函数</span>。<span class="pl-s1">尽管通过使用更底层语言可以进一步提高效率</span>，<span class="pl-s1">但为了提高软件的可访问性和易用性</span>，<span class="pl-v">SWSPy并未采用这种方案</span>。<span class="pl-s1">随着现代计算机性能的提升</span>，<span class="pl-v">SWSPy的并行化优化有效地弥补了性能瓶颈</span>。
+
+<span class="pl-c">### 4.2 剪切波分裂的其他应用</span>
+
+<span class="pl-c1">-</span> <span class="pl-s1">剪切波分裂的应用不仅限于地下各向异性成像</span>，<span class="pl-s1">其在其他领域也有重要的应用</span>。<span class="pl-s1">一个有价值但未充分利用的参数是S波源极化</span>。<span class="pl-v">S波源极化可以为断层方位提供独立的测量</span>，<span class="pl-s1">特别是在双偶极源的情况下</span>（<span class="pl-v">Hudson等</span>，<span class="pl-c1">2023</span>）。<span class="pl-s1">此外</span>，<span class="pl-s1">剪切波分裂的另一个重要成果是各向异性修正波形</span>，<span class="pl-s1">这对于使用各向同性模型进行全波形反演非常重要</span>，<span class="pl-s1">尤其是在反演地震源机制时</span>（<span class="pl-v">Hudson等</span>，<span class="pl-c1">2020</span><span class="pl-s1">a</span>）。<span class="pl-s1">新提出的多层方法将进一步减少多层各向异性介质传播的地震波数据与各向同性全波形模型之间的误差</span>，<span class="pl-s1">提供更加精确的反演结果</span>。
+
+<span class="pl-c1">-</span> <span class="pl-s1">剪切波分裂的另一个应用是在计算地震震级时去除分裂效应</span>。<span class="pl-s1">剪切波分裂可能导致S波相位重叠和互相干扰</span>，<span class="pl-s1">改变表观频率内容</span>，<span class="pl-s1">从而增加矩震级计算中的不确定性</span>（<span class="pl-v">Stork等</span>，<span class="pl-c1">2014</span>）。<span class="pl-s1">将剪切波分裂修正方法轻松融入矩震级计算流程</span>，<span class="pl-s1">能够减少震级目录中的不确定性</span>，<span class="pl-s1">进而有助于改进地震监测</span>（<span class="pl-v">Schultz等</span>，<span class="pl-c1">2021</span>）。
+
+[<span class="pl-v">Paper</span> <span class="pl-s1">link</span>](<span class="pl-s1">https</span>:<span class="pl-c1">//</span><span class="pl-s1">seismica</span>.<span class="pl-c1">library</span>.<span class="pl-c1">mcgill</span>.<span class="pl-c1">ca</span><span class="pl-c1">/</span><span class="pl-s1">article</span><span class="pl-c1">/</span><span class="pl-s1">view</span><span class="pl-c1">/</span><span class="pl-c1">1031</span>)
+[<span class="pl-v">Github</span>  <span class="pl-s1">project</span> <span class="pl-s1">address</span>]（<span class="pl-s1">https</span>:<span class="pl-c1">//</span><span class="pl-s1">github</span>.<span class="pl-c1">com</span><span class="pl-c1">/</span><span class="pl-v">TomSHudson</span><span class="pl-c1">/</span><span class="pl-s1">swspy</span>）
+
+
+
+
+
+</pre></div></div>
 <div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
@@ -263,7 +441,7 @@ if(""!=""){
 </script></div>
 </body>
 <script>
-var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z', 'copy': 'M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z', 'check': 'M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'};
 var utterancesLoad=0;
 
 let themeSettings={
@@ -336,7 +514,70 @@ function iFrameLoading(){
     }
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+    const createClipboardHTML = (codeContent, additionalClasses = '') => `
+        <pre class="notranslate"><code class="notranslate">${codeContent}</code></pre>
+        <div class="clipboard-container position-absolute right-0 top-0 ${additionalClasses}">
+            <clipboard-copy class="ClipboardButton btn m-2 p-0" role="button" style="display: inherit;">
+                <svg height="16" width="16" class="octicon octicon-copy m-2"><path d="${IconList["copy"]}"></path></svg>
+                <svg height="16" width="16" class="octicon octicon-check color-fg-success m-2 d-none"><path d="${IconList["check"]}"></path></svg>
+            </clipboard-copy>
+            <div class="copy-feedback">Copied!</div>
+        </div>
+    `;
 
+    const handleCodeElements = (selector = '') => {
+        document.querySelectorAll(selector).forEach(codeElement => {
+            const codeContent = codeElement.innerHTML;
+            const newStructure = document.createElement('div');
+            newStructure.className = 'snippet-clipboard-content position-relative overflow-auto';
+            newStructure.innerHTML = createClipboardHTML(codeContent);
+
+            const parentElement = codeElement.parentElement;
+            if (selector.includes('highlight')) {
+                parentElement.insertBefore(newStructure, codeElement.nextSibling);
+                parentElement.removeChild(codeElement);
+            } else {
+                parentElement.parentElement.replaceChild(newStructure, parentElement);
+            }
+        });
+    };
+
+    handleCodeElements('pre.notranslate > code.notranslate');
+    handleCodeElements('div.highlight > pre.notranslate');
+
+    let currentFeedback = null;
+    document.querySelectorAll('clipboard-copy').forEach(copyButton => {
+        copyButton.addEventListener('click', () => {
+            const codeContent = copyButton.closest('.snippet-clipboard-content').innerText;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = codeContent;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            const copyIcon = copyButton.querySelector('.octicon-copy');
+            const checkIcon = copyButton.querySelector('.octicon-check');
+            const copyFeedback = copyButton.nextElementSibling;
+
+            if (currentFeedback && currentFeedback !== copyFeedback) {currentFeedback.style.display = 'none';}
+            currentFeedback = copyFeedback;
+
+            copyIcon.classList.add('d-none');
+            checkIcon.classList.remove('d-none');
+            copyFeedback.style.display = 'block';
+            copyButton.style.borderColor = 'var(--color-success-fg)';
+
+            setTimeout(() => {
+                copyIcon.classList.remove('d-none');
+                checkIcon.classList.add('d-none');
+                copyFeedback.style.display = 'none';
+                copyButton.style.borderColor = '';
+            }, 2000);
+        });
+    });
+});
 
 </script>
 <script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
