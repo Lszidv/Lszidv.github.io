@@ -196,6 +196,7 @@ splittingObject.perform_sws_analysis(coord_system=‘‘ZNE’’, sws_method=�
 # （将splittingObject.sws_result_df保存为csv文件）
 splittingObject.plot()
 splittingObject.save_result()
+```
 #### 2.3.2 正演模拟
 
 SWSPy还支持正演模拟，用于生成通过各向异性介质传播的合成地震波形。Listing 2展示了一个示例，如何生成一个主频为10 Hz的S波合成地震波形，传播通过一个具有60°快方向和δt = 0.5 s的层。
@@ -215,6 +216,7 @@ back_azi = 0
 event_inclin_angle_at_station = 0
 # 应用分裂：
 st = swspy.splitting.forward_model.add_splitting(st, phi_from_N, dt, back_azi, event_inclin_angle_at_station)
+
 ## 3 Examples
 ### 3.1 简单的冰震示例
 

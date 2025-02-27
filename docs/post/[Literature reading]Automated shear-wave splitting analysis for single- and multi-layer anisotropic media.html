@@ -273,15 +273,11 @@ $$</p>
 <span class="pl-c"># 绘制并保存结果：</span>
 <span class="pl-c"># （将splittingObject.sws_result_df保存为csv文件）</span>
 <span class="pl-s1">splittingObject</span>.<span class="pl-c1">plot</span>()
-<span class="pl-s1">splittingObject</span>.<span class="pl-c1">save_result</span>()
-<span class="pl-c">#### 2.3.2 正演模拟</span>
-
-<span class="pl-v">SWSPy还支持正演模拟</span>，<span class="pl-s1">用于生成通过各向异性介质传播的合成地震波形</span>。<span class="pl-v">Listing</span> <span class="pl-c1">2</span><span class="pl-s1">展示了一个示例</span>，<span class="pl-s1">如何生成一个主频为10</span> <span class="pl-v">Hz的S波合成地震波形</span>，<span class="pl-s1">传播通过一个具有60</span>°<span class="pl-s1">快方向和δt</span> <span class="pl-c1">=</span> <span class="pl-c1">0.5</span> <span class="pl-s1">s的层</span>。
-
-<span class="pl-s1">这种正演模拟功能可用于验证SWSPy的性能</span>，<span class="pl-s1">并解决反演问题</span>。<span class="pl-s1">以下是一个使用正演模拟生成合成地震波形的代码示例</span>：
-
-<span class="pl-s">``</span>`<span class="pl-s1">python</span>
-<span class="pl-k">import</span> <span class="pl-s1">swspy</span>
+<span class="pl-s1">splittingObject</span>.<span class="pl-c1">save_result</span>()</pre></div>
+<h4>2.3.2 正演模拟</h4>
+<p>SWSPy还支持正演模拟，用于生成通过各向异性介质传播的合成地震波形。Listing 2展示了一个示例，如何生成一个主频为10 Hz的S波合成地震波形，传播通过一个具有60°快方向和δt = 0.5 s的层。</p>
+<p>这种正演模拟功能可用于验证SWSPy的性能，并解决反演问题。以下是一个使用正演模拟生成合成地震波形的代码示例：</p>
+<div class="highlight highlight-source-python"><pre class="notranslate"><span class="pl-k">import</span> <span class="pl-s1">swspy</span>
 <span class="pl-c"># 创建源时函数：</span>
 <span class="pl-s1">seismogram_dur_s</span> <span class="pl-c1">=</span> <span class="pl-c1">10.0</span>
 <span class="pl-s1">sampling_rate_hz</span> <span class="pl-c1">=</span> <span class="pl-c1">1000.0</span>
@@ -293,6 +289,7 @@ $$</p>
 <span class="pl-s1">event_inclin_angle_at_station</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>
 <span class="pl-c"># 应用分裂：</span>
 <span class="pl-s1">st</span> <span class="pl-c1">=</span> <span class="pl-s1">swspy</span>.<span class="pl-c1">splitting</span>.<span class="pl-c1">forward_model</span>.<span class="pl-c1">add_splitting</span>(<span class="pl-s1">st</span>, <span class="pl-s1">phi_from_N</span>, <span class="pl-s1">dt</span>, <span class="pl-s1">back_azi</span>, <span class="pl-s1">event_inclin_angle_at_station</span>)
+
 <span class="pl-c">## 3 Examples</span>
 <span class="pl-c">### 3.1 简单的冰震示例</span>
 
