@@ -21,7 +21,7 @@
 <meta property="og:url" content="https://Lszidv.github.io/post/%5BLiterature%20reading%5DAutomated%20shear-wave%20splitting%20analysis%20for%20single-%20and%20multi-layer%20anisotropic%20media.html">
 <meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
 <title>[Literature reading]Automated shear-wave splitting analysis for single- and multi-layer anisotropic media</title>
-<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
 
 
 </head>
@@ -259,161 +259,183 @@ $$</p>
 <h4>2.3.1 测量地震剪切波分裂</h4>
 <p>SWSPy使用基于Python类的结构实现（见Listing 1），并广泛利用obspy进行地震数据的输入和输出（Krischer等，2015）。通过传入一个包含所有接收器数据流的obspy数据，创建一个<code class="notranslate">splittingObject</code>，并可以指定窗口和参数搜索空间来执行剪切波分裂分析。</p>
 <p>Listing 1展示了如何使用<code class="notranslate">splittingObject</code>来执行剪切波分裂分析：</p>
-<div class="highlight highlight-source-python"><pre class="notranslate"><span class="pl-k">import</span> <span class="pl-s1">swspy</span>, <span class="pl-s1">obspy</span>
-<span class="pl-c"># 创建剪切波分裂对象：</span>
-<span class="pl-s1">st</span> <span class="pl-c1">=</span> <span class="pl-s1">obspy</span>.<span class="pl-c1">read</span>(<span class="pl-c1">&lt;</span><span class="pl-s1">数据路径</span><span class="pl-c1">&gt;</span>)
-<span class="pl-s1">splittingObject</span> <span class="pl-c1">=</span> <span class="pl-s1">swspy</span>.<span class="pl-c1">splitting</span>.<span class="pl-c1">create_splitting_object</span>(<span class="pl-s1">st</span>)
-<span class="pl-c"># 指定一些关键参数...</span>
-<span class="pl-s1">splittingObject</span>.<span class="pl-c1">win_S_pick_tolerance</span> <span class="pl-c1">=</span> <span class="pl-c1">0.1</span>
-<span class="pl-s1">splittingObject</span>.<span class="pl-c1">overall_win_start_pre_fast_S_pick</span> <span class="pl-c1">=</span> <span class="pl-c1">0.3</span>
-<span class="pl-s1">splittingObject</span>.<span class="pl-c1">overall_win_start_post_fast_S_pick</span> <span class="pl-c1">=</span> <span class="pl-c1">0.2</span>
-<span class="pl-s1">splittingObject</span>.<span class="pl-c1">max_t_shift_s</span> <span class="pl-c1">=</span> <span class="pl-c1">1.0</span>
-<span class="pl-c"># 执行分裂分析：</span>
-<span class="pl-s1">splittingObject</span>.<span class="pl-c1">perform_sws_analysis</span>(<span class="pl-s1">coord_system</span><span class="pl-c1">=</span>‘‘<span class="pl-c1">ZNE</span>’’, <span class="pl-s1">sws_method</span><span class="pl-c1">=</span>‘‘<span class="pl-c1">EV</span>’’)
-<span class="pl-c"># 绘制并保存结果：</span>
-<span class="pl-c"># （将splittingObject.sws_result_df保存为csv文件）</span>
-<span class="pl-s1">splittingObject</span>.<span class="pl-c1">plot</span>()
-<span class="pl-s1">splittingObject</span>.<span class="pl-c1">save_result</span>()</pre></div>
+<pre class="notranslate"><code class="notranslate">import swspy, obspy
+# 创建剪切波分裂对象：
+st = obspy.read(&lt;数据路径&gt;)
+splittingObject = swspy.splitting.create_splitting_object(st)
+# 指定一些关键参数...
+splittingObject.win_S_pick_tolerance = 0.1
+splittingObject.overall_win_start_pre_fast_S_pick = 0.3
+splittingObject.overall_win_start_post_fast_S_pick = 0.2
+splittingObject.max_t_shift_s = 1.0
+# 执行分裂分析：
+splittingObject.perform_sws_analysis(coord_system=‘‘ZNE’’, sws_method=‘‘EV’’)
+# 绘制并保存结果：
+# （将splittingObject.sws_result_df保存为csv文件）
+splittingObject.plot()
+splittingObject.save_result()
+</code></pre>
 <h4>2.3.2 正演模拟</h4>
 <p>SWSPy还支持正演模拟，用于生成通过各向异性介质传播的合成地震波形。Listing 2展示了一个示例，如何生成一个主频为10 Hz的S波合成地震波形，传播通过一个具有60°快方向和δt = 0.5 s的层。</p>
 <p>这种正演模拟功能可用于验证SWSPy的性能，并解决反演问题。以下是一个使用正演模拟生成合成地震波形的代码示例：</p>
-<div class="highlight highlight-source-python"><pre class="notranslate"><span class="pl-k">import</span> <span class="pl-s1">swspy</span>
-<span class="pl-c"># 创建源时函数：</span>
-<span class="pl-s1">seismogram_dur_s</span> <span class="pl-c1">=</span> <span class="pl-c1">10.0</span>
-<span class="pl-s1">sampling_rate_hz</span> <span class="pl-c1">=</span> <span class="pl-c1">1000.0</span>
-<span class="pl-s1">st</span> <span class="pl-c1">=</span> <span class="pl-s1">swspy</span>.<span class="pl-c1">splitting</span>.<span class="pl-c1">forward_model</span>.<span class="pl-c1">create_src_time_func</span>(<span class="pl-s1">seismogram_dur_s</span>, <span class="pl-s1">sampling_rate_hz</span>)
-<span class="pl-c"># 指定层的各向异性参数：</span>
-<span class="pl-s1">phi_from_N</span> <span class="pl-c1">=</span> <span class="pl-c1">60</span>
-<span class="pl-s1">dt</span> <span class="pl-c1">=</span> <span class="pl-c1">0.5</span>
-<span class="pl-s1">back_azi</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>
-<span class="pl-s1">event_inclin_angle_at_station</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span>
-<span class="pl-c"># 应用分裂：</span>
-<span class="pl-s1">st</span> <span class="pl-c1">=</span> <span class="pl-s1">swspy</span>.<span class="pl-c1">splitting</span>.<span class="pl-c1">forward_model</span>.<span class="pl-c1">add_splitting</span>(<span class="pl-s1">st</span>, <span class="pl-s1">phi_from_N</span>, <span class="pl-s1">dt</span>, <span class="pl-s1">back_azi</span>, <span class="pl-s1">event_inclin_angle_at_station</span>)
-
-<span class="pl-c">## 3 Examples</span>
-<span class="pl-c">### 3.1 简单的冰震示例</span>
-
-<span class="pl-s1">在此</span>，<span class="pl-s1">我们以冰川上的实际地震为例</span>，<span class="pl-s1">展示如何使用SWSPy进行S波分裂分析</span>，<span class="pl-s1">特别关注指示可靠测量的关键特征</span>。<span class="pl-s1">图5展示了来自南极鲁特福德冰流的单个接收器处的冰震基底粘滑S波到达</span>（<span class="pl-v">Hudson等</span>，<span class="pl-c1">2020</span><span class="pl-s1">a</span>；<span class="pl-v">Smith等</span>，<span class="pl-c1">2015</span>）。
-
-<span class="pl-s1">冰川冰体具有强烈的各向异性结构</span>，<span class="pl-s1">结合南极地区的低噪声水平</span>，<span class="pl-s1">为S波分裂提供了一个理想的实际案例</span>（<span class="pl-v">Smith等</span>，<span class="pl-c1">2017</span>；<span class="pl-v">Harland等</span>，<span class="pl-c1">2013</span>；<span class="pl-v">Kufner等</span>，<span class="pl-c1">2023</span>）。<span class="pl-s1">基底粘滑冰震也提供了理想的例子</span>，<span class="pl-s1">因为它们的S波源极化通常受到良好约束</span>，<span class="pl-s1">通常与冰流方向大致对齐</span>（<span class="pl-s1">相对于北方160</span>°，<span class="pl-v">Smith等</span>，<span class="pl-c1">2015</span>），<span class="pl-s1">在本例中</span>，<span class="pl-s1">通过全波形源机制反演得到了确认</span>（<span class="pl-v">Hudson等</span>，<span class="pl-c1">2020</span><span class="pl-s1">a</span>）。
-<span class="pl-s1">以下是用于量化剪切波分裂结果质量的几个关键特征</span>：
-
-<span class="pl-c1">1.</span> <span class="pl-c1">**</span><span class="pl-s1">检查ZNE坐标系中的原始波形与去除分裂后的波形</span><span class="pl-c1">**</span>（<span class="pl-s1">见图5a</span>）。  
-   <span class="pl-c1">-</span> <span class="pl-v">S波到达波包应位于可能窗口的起始和结束之间</span>（<span class="pl-s1">灰色垂直线</span>）。
-   <span class="pl-c1">-</span> <span class="pl-s1">去除分裂后的波包应比原始数据波包更短</span>。
-
-<span class="pl-c1">2.</span> <span class="pl-c1">**</span><span class="pl-s1">最大化和最小化去除分裂后的P和A分量能量</span><span class="pl-c1">**</span>（<span class="pl-s1">图5b</span>）。  
-   <span class="pl-c1">-</span> <span class="pl-v">P分量与A分量的振幅比表示去除分裂后粒子运动的线性度</span>，<span class="pl-s1">较小的λ2</span><span class="pl-c1">/</span><span class="pl-s1">λ1值表示更线性的结果</span>。  
-   <span class="pl-c1">-</span> <span class="pl-s1">对于冰震</span>，<span class="pl-s1">λ2</span><span class="pl-c1">/</span><span class="pl-s1">λ1</span> <span class="pl-c1">=</span> <span class="pl-c1">0.033</span>，<span class="pl-s1">大部分能量集中在P分量</span>，<span class="pl-s1">仅有少量能量到达A分量</span>。
-
-<span class="pl-c1">3.</span> <span class="pl-c1">**</span><span class="pl-s1">快慢S波相位到达的时间应不同</span><span class="pl-c1">**</span>，<span class="pl-s1">去除分裂后时间应对齐</span>（<span class="pl-s1">见图5c右面板</span>）。  
-   <span class="pl-c1">-</span> <span class="pl-s1">快慢S波相位应在去除分裂前到达不同的时间</span>，<span class="pl-s1">去除分裂后应对齐</span>。
-
-<span class="pl-c1">4.</span> <span class="pl-c1">**</span><span class="pl-s1">在东北平面上大致线性的粒子运动</span><span class="pl-c1">**</span>（<span class="pl-s1">见图5d</span>）。  
-   <span class="pl-c1">-</span> <span class="pl-s1">对于冰震</span>，<span class="pl-s1">粒子运动大致线性</span>，<span class="pl-s1">源极化大约为从北方165</span>° ± <span class="pl-c1">6</span>°，<span class="pl-s1">与冰流方向一致</span>。
-
-<span class="pl-c1">5.</span> <span class="pl-c1">**</span><span class="pl-s1">检查聚类分析的稳定性</span><span class="pl-c1">**</span>（<span class="pl-s1">见图5e</span>）。  
-   <span class="pl-c1">-</span> <span class="pl-s1">聚类样本应有小的不确定性</span>，<span class="pl-s1">从而得到稳定的φ和δt解</span>。  
-   <span class="pl-c1">-</span> <span class="pl-s1">如果样本显示明显的非均匀行为</span>，<span class="pl-s1">结果可能受到周期跳跃等效应的影响</span>。
-
-<span class="pl-c1">6.</span> <span class="pl-c1">**</span><span class="pl-s1">在φ</span>−<span class="pl-s1">δt空间内特征值比呈现明显的最小值</span><span class="pl-c1">**</span>（<span class="pl-s1">见图5f</span>）。  
-   <span class="pl-c1">-</span> <span class="pl-s1">冰震展示了明显的单一全局最小值</span>，<span class="pl-s1">最优解由绿色点及其误差条表示</span>。  
-   <span class="pl-c1">-</span> <span class="pl-s1">φ</span>−<span class="pl-s1">δt空间图有助于检查周期跳跃是否发生</span>。<span class="pl-s1">如果周期跳跃占主导</span>，<span class="pl-s1">可能会看到多个最小值</span>，<span class="pl-s1">并且这些最小值对应的φ值相隔90</span>°。
-
-<span class="pl-c1">7.</span> <span class="pl-c1">**</span><span class="pl-s1">测量质量参数λ2</span><span class="pl-c1">/</span><span class="pl-s1">λ1和QW</span><span class="pl-c1">**</span>。  
-   <span class="pl-c1">-</span> <span class="pl-v">SWSPy可以输出多个质量参数</span>，<span class="pl-s1">λ2</span><span class="pl-c1">/</span><span class="pl-s1">λ1表示结果的线性度</span>。  
-   <span class="pl-c1">-</span> <span class="pl-v">SWSPy还计算Wuestefeld质量因子QW</span>，<span class="pl-c1">QW</span> <span class="pl-c1">=</span> <span class="pl-c1">1</span><span class="pl-s1">表示良好结果</span>，<span class="pl-c1">QW</span> <span class="pl-c1">=</span> <span class="pl-c1">0</span><span class="pl-s1">表示较差结果</span>，<span class="pl-c1">QW</span> <span class="pl-c1">=</span> −<span class="pl-c1">1</span><span class="pl-s1">表示零结果</span>。  
-   <span class="pl-c1">-</span> <span class="pl-s1">对于冰震</span>，<span class="pl-c1">QW</span> <span class="pl-c1">=</span> <span class="pl-c1">0.969</span>，<span class="pl-s1">确认了特征值法和交叉相关方法得到的一致结果</span>。
-
-![<span class="pl-v">Image</span>](<span class="pl-s1">https</span>:<span class="pl-c1">//</span><span class="pl-s1">github</span>.<span class="pl-c1">com</span><span class="pl-c1">/</span><span class="pl-s1">user</span><span class="pl-c1">-</span><span class="pl-s1">attachments</span><span class="pl-c1">/</span><span class="pl-s1">assets</span><span class="pl-c1">/</span><span class="pl-c1">921092</span><span class="pl-s1">bb</span><span class="pl-c1">-</span><span class="pl-c1">0486</span><span class="pl-c1">-</span><span class="pl-c1">4</span><span class="pl-s1">ba8</span><span class="pl-c1">-</span><span class="pl-s1">ba67</span><span class="pl-c1">-</span><span class="pl-s1">bb95d3a66d96</span>)
-<span class="pl-c">### 3.2 远震剪切波分裂</span>
-
-<span class="pl-s1">本节展示了SWSPy在远震剪切波分裂中的表现</span>。<span class="pl-s1">远震剪切波分裂技术</span>，<span class="pl-s1">特别是SKS</span>、<span class="pl-v">PKS和SKKS相位分析</span>，<span class="pl-s1">是用于约束上地幔变形模式的常用方法</span>。<span class="pl-s1">由于这些相位的近垂直入射角和由P波转化为S波导致的径向极化</span>，<span class="pl-s1">使得它们能提供可靠的地幔剪切波分裂测量</span>。
-
-<span class="pl-s1">图6展示了2005年2月5日Mw7</span>.<span class="pl-c1">1</span><span class="pl-c1">级Celebus海地震的数据</span>，<span class="pl-s1">记录于美国加利福尼亚NEE站</span>。<span class="pl-s1">使用SHEBA代码进行的剪切波分裂分析发现了SKS和SKKS的剪切波分裂不一致</span>，<span class="pl-s1">其中SKS为零结果</span>，<span class="pl-s1">而SKKS则表现出明显的剪切波分裂</span>，<span class="pl-s1">得到了φ</span> <span class="pl-c1">=</span> <span class="pl-c1">74</span>° ± <span class="pl-c1">5</span>°，<span class="pl-s1">δt</span> <span class="pl-c1">=</span> <span class="pl-c1">1.05</span> ± <span class="pl-c1">0.07</span><span class="pl-s1">秒的结果</span>。
-
-<span class="pl-s1">使用SWSPy重新测量SKKS相位的剪切波分裂</span>，<span class="pl-s1">得到了φ</span> <span class="pl-c1">=</span> <span class="pl-c1">74.2</span>° ± <span class="pl-c1">14.0</span>°，<span class="pl-s1">δt</span> <span class="pl-c1">=</span> <span class="pl-c1">1.05</span> ± <span class="pl-c1">0.175</span><span class="pl-s1">秒</span>，<span class="pl-s1">与SHEBA结果一致</span>。<span class="pl-s1">我们还能够获取源极化为115</span>° ± <span class="pl-c1">7</span>°，<span class="pl-s1">与SHEBA的测量值115</span>°<span class="pl-s1">以及观察到的背方位角294</span>°<span class="pl-s1">一致</span>，<span class="pl-s1">符合SKS径向极化的假设</span>。
-
-<span class="pl-s1">这个示例仅展示了一个简单的远震应用</span>，<span class="pl-s1">实际中的远震剪切波分裂研究</span>，<span class="pl-s1">特别是针对最下层地幔的研究</span>，<span class="pl-s1">更加复杂</span>。<span class="pl-s1">现代远震剪切波分裂研究采用堆叠和波束形成等预处理方法</span>，<span class="pl-s1">有助于在噪声较大的数据集中识别SKS</span>、<span class="pl-v">SKKS和S3KS相位</span>。
-
-<span class="pl-c">### 3.3 自动化S波分裂分析在火山中多个地震中的应用</span>
-
-<span class="pl-c1">-</span> <span class="pl-s1">本节展示了如何使用SWSPy进行火山中多个地震的自动化S波分裂分析</span>。<span class="pl-s1">随着仪器灵敏度和密度的提高</span>，<span class="pl-s1">以及计算技术的发展</span>，<span class="pl-s1">现今可以处理包含成千上万次地震事件的大型地震目录</span>，<span class="pl-s1">为更高分辨率的S波速度各向异性研究提供了机会</span>。
-
-<span class="pl-c1">-</span> <span class="pl-s1">图7展示了在玻利维亚乌图伦库火山上进行的1356次地震的结果</span>。<span class="pl-s1">该地震目录来源于完全自动化的检测算法</span>。<span class="pl-s1">图7a显示了所有源接收器对的快S波极化的未经滤波分布</span>，<span class="pl-s1">并与数据的过滤子集进行了比较</span>。<span class="pl-s1">经过滤波的子集包含约束良好的测量结果</span>，<span class="pl-s1">这些结果具有较小的不确定性</span>，<span class="pl-s1">并表现出一个主导的各向异性方向</span>，<span class="pl-s1">呈SE</span><span class="pl-c1">-</span><span class="pl-v">NW方向</span>。
-
-<span class="pl-c1">-</span> <span class="pl-s1">为了验证这些快方向是否确实代表了裂缝结构</span>，<span class="pl-s1">将结果与独立测量的断层走向数据进行了对比</span>，<span class="pl-s1">发现快方向与断层走向平行</span>。<span class="pl-s1">乌图伦库火山的衰减层析成像表明</span>，<span class="pl-s1">流体主要存在于具有这种取向的断层中</span>，<span class="pl-s1">受火山区域应力场的控制</span>。
-
-<span class="pl-c1">-</span> <span class="pl-s1">这些S波各向异性结果与独立观测结果一致</span>，<span class="pl-s1">验证了自动化S波分裂方法的有效性</span>。<span class="pl-s1">通过自动化分析方法</span>，<span class="pl-v">SWSPy能够处理大规模数据集</span>，<span class="pl-s1">并为火山流体存在的研究提供了增强的视角</span>。
-<span class="pl-c">### 多层介质示例</span>
-<span class="pl-c">#### 3.4.1 正演模型示例</span>
-
-<span class="pl-s1">我们首先在模拟数据上展示新多层分裂方法的表现</span>，<span class="pl-s1">然后再将其应用于真实案例</span>。<span class="pl-s1">图8展示了一个两层正演模型的结果</span>。<span class="pl-s1">剪切波分裂应用于中心频率为10</span> <span class="pl-v">Hz</span>、<span class="pl-s1">源极化方向为0</span>° <span class="pl-v">N的Ricker小波上两次</span>，<span class="pl-s1">模拟波传播通过两层介质</span>（<span class="pl-s1">φ层1</span> <span class="pl-c1">=</span> <span class="pl-c1">60</span>°，<span class="pl-s1">φ层2</span> <span class="pl-c1">=</span> <span class="pl-c1">40</span>°，<span class="pl-s1">δt层1</span> <span class="pl-c1">=</span> <span class="pl-c1">0.5</span><span class="pl-s1">秒</span>，<span class="pl-s1">δt层2</span> <span class="pl-c1">=</span> <span class="pl-c1">0.2</span><span class="pl-s1">秒</span>）。
-
-<span class="pl-s1">图8a</span><span class="pl-c1">-</span><span class="pl-s1">d展示的表观剪切波分裂测量明显无法找到真实结果</span>。<span class="pl-s1">然而</span>，<span class="pl-s1">φ</span>−<span class="pl-s1">δt空间显示表观测量对两个层次都敏感</span>，<span class="pl-s1">并且在δt</span> <span class="pl-c1">=</span> <span class="pl-c1">0.2</span><span class="pl-s1">秒和δt</span> <span class="pl-c1">=</span> <span class="pl-c1">0.5</span><span class="pl-s1">秒处有明显的最小值</span>。<span class="pl-s1">第一层表现出较强的分裂信号</span>，<span class="pl-s1">因此该层主导了解析</span>。<span class="pl-s1">由于周期跳跃的影响</span>，<span class="pl-s1">在φ</span>−<span class="pl-s1">δt空间中为每一层选择最小值变得具有挑战性</span>。
-
-<span class="pl-s1">通过新的层</span><span class="pl-c1">-</span><span class="pl-s1">by</span><span class="pl-c1">-</span><span class="pl-s1">层分裂测量方法</span>，<span class="pl-s1">成功解析了两层的各向异性</span>，<span class="pl-s1">所有结果都接近真实值</span>，<span class="pl-s1">并且大多数结果与真实值在不确定性范围内一致</span>。<span class="pl-s1">修正后的波形进一步验证了新方法的性能</span>。
-
-![<span class="pl-v">Image</span>](<span class="pl-s1">https</span>:<span class="pl-c1">//</span><span class="pl-s1">github</span>.<span class="pl-c1">com</span><span class="pl-c1">/</span><span class="pl-s1">user</span><span class="pl-c1">-</span><span class="pl-s1">attachments</span><span class="pl-c1">/</span><span class="pl-s1">assets</span><span class="pl-c1">/</span><span class="pl-s1">ff099ab4</span><span class="pl-c1">-</span><span class="pl-s1">d9f8</span><span class="pl-c1">-</span><span class="pl-c1">493</span><span class="pl-s1">b</span><span class="pl-c1">-</span><span class="pl-c1">8</span><span class="pl-s1">a5f</span><span class="pl-c1">-</span><span class="pl-s1">ff9721fdb2f4</span>)
-<span class="pl-s1">a</span><span class="pl-c1">-</span><span class="pl-s1">d部分</span>：<span class="pl-s1">展示了表观的单层测量结果</span>，<span class="pl-s1">包括合成的地震波形和分裂参数的估计</span>。
-<span class="pl-s1">e</span><span class="pl-c1">-</span><span class="pl-s1">h部分</span>：<span class="pl-s1">展示了逐层反演的结果</span>，<span class="pl-s1">其中g图中的蓝色数据表示仅对第二层进行中间校正后的粒子运动</span>。
-<span class="pl-c">#### 3.4.2 冰震示例</span>
-
-<span class="pl-s1">成功的多层S波速度各向异性测量在现实世界中的例子较少</span>，<span class="pl-s1">这主要是因为测量多层分裂的挑战</span>，<span class="pl-s1">而非缺乏多层各向异性介质</span>。<span class="pl-s1">然而</span>，<span class="pl-s1">冰川冰为多层各向异性提供了一个现实的例子</span>。
-
-<span class="pl-s1">图9展示了两层S波分裂结果的水平粒子运动</span>，<span class="pl-s1">并与图5中的单层结果进行了对比</span>。<span class="pl-s1">结果表明</span>，<span class="pl-s1">两层模型比单层模型提供了更好的线性化效果</span>，<span class="pl-s1">特征值比λ2</span><span class="pl-c1">/</span><span class="pl-s1">λ1表明</span>，<span class="pl-s1">两层结果的线性化程度大约是单层结果的两倍</span>。<span class="pl-s1">这证明了两层介质比单层介质更能准确描述观测结果</span>。
-
-<span class="pl-s1">修正后的波形进一步验证了我们新方法的表现</span>，<span class="pl-s1">结果显示两层介质能够有效地解析冰震中的各向异性</span>，<span class="pl-s1">而不是仅仅依靠额外的自由度进行拟合</span>。<span class="pl-s1">尽管多层分裂分析提供了更多自由度</span>，<span class="pl-s1">但需要小心避免过拟合</span>，<span class="pl-s1">尤其是在连续层的快方向一致时</span>。
-
-<span class="pl-c">#### 3.4.3 多层S波分裂的挑战和局限性</span>
-
-<span class="pl-c1">-</span> <span class="pl-s1">尽管本研究中提出的多层方法在合成示例和冰震示例中表现良好</span>，<span class="pl-s1">但由于所需的假设</span>，<span class="pl-s1">这种方法对于那些信号频率相对较低的情况存在局限性</span>。<span class="pl-s1">特别是对于大多数远震剪切波分裂分析或任何情况下</span>，<span class="pl-s1">其中δt小于S波的主周期</span>，<span class="pl-s1">并且地壳层的δt可能大于地幔中的分裂幅度</span>，<span class="pl-s1">该方法可能不适用</span>。
-
-<span class="pl-c1">-</span> <span class="pl-s1">图10展示了这个问题的例子</span>。<span class="pl-s1">通过将剪切波分裂分析应用于具有类似SKS相位到达特征的合成地震图</span>，<span class="pl-s1">我们观察到</span>，<span class="pl-s1">表观单层测量和多层测量均能比原始未修正波形产生更线性化的修正S波到达时间</span>。<span class="pl-s1">然而</span>，<span class="pl-s1">表观单层测量无法正确解析各向异性</span>，<span class="pl-s1">而多层测量虽然解析了第一层</span>，<span class="pl-s1">但第二层的快方向未能解析</span>，<span class="pl-s1">并且与合成层值相差90</span>°。<span class="pl-s1">这一问题源自于表观分裂参数之间的周期性关系</span>，<span class="pl-s1">这导致了在给定层的快方向</span>（<span class="pl-s1">φi</span>）<span class="pl-s1">上的非唯一解</span>，<span class="pl-s1">尤其在δt</span> <span class="pl-c1">&gt;</span> <span class="pl-c1">1</span><span class="pl-c1">/</span><span class="pl-c1">2</span><span class="pl-s1">f时进一步引入了不确定性</span>。
-
-<span class="pl-c1">-</span> <span class="pl-s1">Özalaybey和Savage</span>（<span class="pl-c1">1994</span>）<span class="pl-s1">通过结合多个方位的SKS相位数据来解决此类非唯一解问题</span>，<span class="pl-s1">类似的方法也被其他研究者采用</span>。<span class="pl-s1">虽然SWSPy没有实现这种算法</span>，<span class="pl-s1">但它可以作为多事件反演工作流程的一部分</span>，<span class="pl-s1">在反演之前测量表观分裂参数</span>。
-
-<span class="pl-s1">因此</span>，<span class="pl-s1">尽管多层分裂分析方法展现了潜力</span>，<span class="pl-s1">但在实际应用中仍然面临周期跳跃和非唯一解等挑战</span>，<span class="pl-s1">使用时需要小心处理</span>。
-
-![<span class="pl-v">Image</span>](<span class="pl-s1">https</span>:<span class="pl-c1">//</span><span class="pl-s1">github</span>.<span class="pl-c1">com</span><span class="pl-c1">/</span><span class="pl-s1">user</span><span class="pl-c1">-</span><span class="pl-s1">attachments</span><span class="pl-c1">/</span><span class="pl-s1">assets</span><span class="pl-c1">/</span><span class="pl-c1">237</span><span class="pl-s1">ac071</span><span class="pl-c1">-</span><span class="pl-c1">80</span><span class="pl-s1">c9</span><span class="pl-c1">-</span><span class="pl-c1">4330</span><span class="pl-c1">-</span><span class="pl-s1">a53a</span><span class="pl-c1">-</span><span class="pl-s1">d25d55c0311f</span>)
-
-<span class="pl-c">### 3.5 SWSPy与其他剪切波分裂软件包的比较</span>
-
-<span class="pl-c1">-</span> <span class="pl-s1">为了完整性</span>，<span class="pl-s1">比较了SWSPy在本研究中两个主要极端事件的结果</span>，<span class="pl-s1">分别是图5中的冰震和图6中的SKKS到达</span>。<span class="pl-v">SWSPy与MFAST</span>（<span class="pl-v">Savage等</span>，<span class="pl-c1">2010</span>）<span class="pl-s1">和SHEBA</span>（<span class="pl-v">Wuestefeld等</span>，<span class="pl-c1">2010</span>）<span class="pl-s1">的比较结果见表1</span>。<span class="pl-s1">我们没有包括SplitRacer</span>（<span class="pl-v">Reiss和Rümpker</span>，<span class="pl-c1">2017</span>）<span class="pl-s1">和Pytheas</span>（<span class="pl-v">Spingos等</span>，<span class="pl-c1">2020</span>）<span class="pl-s1">的结果</span>，<span class="pl-s1">因为这些是图形用户界面</span>，<span class="pl-s1">适用性与我们的实现方式有显著差异</span>。
-
-<span class="pl-c1">-</span> <span class="pl-s1">所有分裂测量都使用尽可能相似的参数进行</span>，<span class="pl-s1">包括滤波属性</span>、<span class="pl-s1">数据持续时间和用于聚类的窗口数量</span>。<span class="pl-s1">三个软件包在不确定范围内得到相同的快方向</span>（<span class="pl-s1">φ</span>）<span class="pl-s1">和延迟时间</span>（<span class="pl-s1">δt</span>）。<span class="pl-v">SWSPy的误差较大</span>，<span class="pl-s1">因为我们故意采用比其他软件包更保守的估计方法</span>。<span class="pl-s1">这在表1中的SKKS示例中尤为明显</span>。<span class="pl-s1">尽管如此</span>，<span class="pl-s1">误差仍然仅占结果的一小部分</span>。
-
-<span class="pl-c1">-</span> <span class="pl-s1">这些软件包的差异主要体现在源极化方向上</span>，<span class="pl-v">SWSPy和SHEBA一致</span>，<span class="pl-s1">而MFAST则存在显著差异</span>。<span class="pl-s1">考虑到SWSPy与SHEBA几乎一致的表现</span>，<span class="pl-s1">并且源极化方向的测量与物理设置一致</span>，<span class="pl-s1">我们有信心认为SWSPy的源极化估计是现实的</span>。
-
-<span class="pl-c1">-</span> <span class="pl-s1">我们没有将SWSPy与这些其他方法在计算时间上的表现进行基准测试</span>，<span class="pl-s1">因为SWSPy是并行化的</span>，<span class="pl-s1">而SHEBA和MFAST则不是</span>。<span class="pl-s1">考虑到现代计算机的能力</span>，<span class="pl-s1">大多数用户很可能会利用SWSPy的并行化特性</span>，<span class="pl-s1">这将迅速弥补SWSPy相对于其他软件包的任何低效之处</span>。
-
-![<span class="pl-v">Image</span>](<span class="pl-s1">https</span>:<span class="pl-c1">//</span><span class="pl-s1">github</span>.<span class="pl-c1">com</span><span class="pl-c1">/</span><span class="pl-s1">user</span><span class="pl-c1">-</span><span class="pl-s1">attachments</span><span class="pl-c1">/</span><span class="pl-s1">assets</span><span class="pl-c1">/</span><span class="pl-c1">13</span><span class="pl-s1">a3df5b</span><span class="pl-c1">-</span><span class="pl-s1">dcfa</span><span class="pl-c1">-</span><span class="pl-c1">4889</span><span class="pl-c1">-</span><span class="pl-s1">b8a3</span><span class="pl-c1">-</span><span class="pl-c1">67</span><span class="pl-s1">f00266f40d</span>)
-<span class="pl-c">## 4Disscussion</span>
-
-<span class="pl-c">### 4.1 优势与局限性</span>
-
-<span class="pl-c1">-</span> <span class="pl-v">SWSPy在剪切波分裂和各向异性研究中展现了显著的优势</span>，<span class="pl-s1">特别是在处理高分辨率</span>、<span class="pl-s1">大数据集的自动化分析中</span>。<span class="pl-s1">通过Teanby等人</span>（<span class="pl-c1">2004</span>）<span class="pl-s1">提出的多窗口方法和先进的聚类算法</span>，<span class="pl-v">SWSPy为单个源接收器测量提供了稳定且可靠的结果</span>。<span class="pl-s1">此外</span>，<span class="pl-v">SWSPy实现了三维剪切波分裂测量</span>（<span class="pl-v">Walsh等</span>，<span class="pl-c1">2013</span>），<span class="pl-s1">使其能够在没有显著速度梯度的环境下有效地进行各向异性测量</span>，<span class="pl-s1">这对于钻孔数据或类似设置尤为重要</span>。
-
-<span class="pl-c1">-</span> <span class="pl-s1">针对包含大量源接收器对的大规模数据集</span>，<span class="pl-v">SWSPy提供了完全自动化的工作流程</span>，<span class="pl-s1">其模块化的Python包架构使得工作流程可以灵活适应各种研究需求</span>。<span class="pl-v">SWSPy能够处理成千上万甚至百万级的剪切波分裂测量数据</span>，<span class="pl-s1">这一能力为各向异性层析成像的研究提供了重要支持</span>，<span class="pl-s1">能够显著增加观测数据的数量</span>，<span class="pl-s1">进而降低层析成像中固有的不充分约束问题</span>（<span class="pl-v">Chevrot</span> <span class="pl-s1">et</span> <span class="pl-s1">al</span>., <span class="pl-c1">2004</span>）。<span class="pl-s1">同时</span>，<span class="pl-v">SWSPy提供了多种质量评估指标</span>（<span class="pl-s1">如QW和λ2</span><span class="pl-c1">/</span><span class="pl-s1">λ1</span>）<span class="pl-s1">以及不确定性测量</span>（<span class="pl-s1">如αφ</span>，<span class="pl-s1">αδt</span>），<span class="pl-s1">使得用户能够有效地过滤虚假结果</span>，<span class="pl-s1">提高分析的可靠性</span>。
-
-<span class="pl-c1">-</span> <span class="pl-s1">尽管SWSPy在多层各向异性测量中具有强大的功能</span>，<span class="pl-s1">但其局限性也不可忽视</span>。<span class="pl-s1">首先</span>，<span class="pl-s1">进行多层分析时</span>，<span class="pl-s1">需要满足特定的假设条件</span>，<span class="pl-s1">特别是在信号频率和各向异性强度之间的关系较为复杂时</span>，<span class="pl-v">SWSPy的多层方法可能不适用</span>。<span class="pl-s1">对于此类数据集</span>，<span class="pl-s1">必须谨慎应用该方法</span>，<span class="pl-s1">并仔细考虑假设条件</span>。<span class="pl-s1">其次</span>，<span class="pl-s1">尽管不确定性测量对于去除虚假结果至关重要</span>，<span class="pl-s1">但在某些情况下</span>，<span class="pl-s1">这些测量可能低估了实际的不确定性</span>。<span class="pl-s1">因此</span>，<span class="pl-s1">未来的研究应当着重于改进测量质量指标和更准确地估算不确定性</span>。
-
-<span class="pl-c1">-</span> <span class="pl-s1">此外</span>，<span class="pl-v">SWSPy使用Python编写</span>，<span class="pl-s1">这一面向对象的语言相对于C或Julia等低级语言而言</span>，<span class="pl-s1">计算速度较慢</span>。<span class="pl-s1">为了减少这一限制</span>，<span class="pl-v">SWSPy通过numba进行加速</span>，<span class="pl-s1">成功并行化了计算密集型的函数</span>。<span class="pl-s1">尽管通过使用更底层语言可以进一步提高效率</span>，<span class="pl-s1">但为了提高软件的可访问性和易用性</span>，<span class="pl-v">SWSPy并未采用这种方案</span>。<span class="pl-s1">随着现代计算机性能的提升</span>，<span class="pl-v">SWSPy的并行化优化有效地弥补了性能瓶颈</span>。
-
-<span class="pl-c">### 4.2 剪切波分裂的其他应用</span>
-
-<span class="pl-c1">-</span> <span class="pl-s1">剪切波分裂的应用不仅限于地下各向异性成像</span>，<span class="pl-s1">其在其他领域也有重要的应用</span>。<span class="pl-s1">一个有价值但未充分利用的参数是S波源极化</span>。<span class="pl-v">S波源极化可以为断层方位提供独立的测量</span>，<span class="pl-s1">特别是在双偶极源的情况下</span>（<span class="pl-v">Hudson等</span>，<span class="pl-c1">2023</span>）。<span class="pl-s1">此外</span>，<span class="pl-s1">剪切波分裂的另一个重要成果是各向异性修正波形</span>，<span class="pl-s1">这对于使用各向同性模型进行全波形反演非常重要</span>，<span class="pl-s1">尤其是在反演地震源机制时</span>（<span class="pl-v">Hudson等</span>，<span class="pl-c1">2020</span><span class="pl-s1">a</span>）。<span class="pl-s1">新提出的多层方法将进一步减少多层各向异性介质传播的地震波数据与各向同性全波形模型之间的误差</span>，<span class="pl-s1">提供更加精确的反演结果</span>。
-
-<span class="pl-c1">-</span> <span class="pl-s1">剪切波分裂的另一个应用是在计算地震震级时去除分裂效应</span>。<span class="pl-s1">剪切波分裂可能导致S波相位重叠和互相干扰</span>，<span class="pl-s1">改变表观频率内容</span>，<span class="pl-s1">从而增加矩震级计算中的不确定性</span>（<span class="pl-v">Stork等</span>，<span class="pl-c1">2014</span>）。<span class="pl-s1">将剪切波分裂修正方法轻松融入矩震级计算流程</span>，<span class="pl-s1">能够减少震级目录中的不确定性</span>，<span class="pl-s1">进而有助于改进地震监测</span>（<span class="pl-v">Schultz等</span>，<span class="pl-c1">2021</span>）。
-
-[<span class="pl-v">Paper</span> <span class="pl-s1">link</span>](<span class="pl-s1">https</span>:<span class="pl-c1">//</span><span class="pl-s1">seismica</span>.<span class="pl-c1">library</span>.<span class="pl-c1">mcgill</span>.<span class="pl-c1">ca</span><span class="pl-c1">/</span><span class="pl-s1">article</span><span class="pl-c1">/</span><span class="pl-s1">view</span><span class="pl-c1">/</span><span class="pl-c1">1031</span>)
-[<span class="pl-v">Github</span>  <span class="pl-s1">project</span> <span class="pl-s1">address</span>]（<span class="pl-s1">https</span>:<span class="pl-c1">//</span><span class="pl-s1">github</span>.<span class="pl-c1">com</span><span class="pl-c1">/</span><span class="pl-v">TomSHudson</span><span class="pl-c1">/</span><span class="pl-s1">swspy</span>）
-
-
-
-
-
-</pre></div></div>
+<pre class="notranslate"><code class="notranslate">import swspy
+# 创建源时函数：
+seismogram_dur_s = 10.0
+sampling_rate_hz = 1000.0
+st = swspy.splitting.forward_model.create_src_time_func(seismogram_dur_s, sampling_rate_hz)
+# 指定层的各向异性参数：
+phi_from_N = 60
+dt = 0.5
+back_azi = 0
+event_inclin_angle_at_station = 0
+# 应用分裂：
+st = swspy.splitting.forward_model.add_splitting(st, phi_from_N, dt, back_azi, event_inclin_angle_at_station)
+</code></pre>
+<h2>3 Examples</h2>
+<h3>3.1 简单的冰震示例</h3>
+<p>在此，我们以冰川上的实际地震为例，展示如何使用SWSPy进行S波分裂分析，特别关注指示可靠测量的关键特征。图5展示了来自南极鲁特福德冰流的单个接收器处的冰震基底粘滑S波到达（Hudson等，2020a；Smith等，2015）。</p>
+<p>冰川冰体具有强烈的各向异性结构，结合南极地区的低噪声水平，为S波分裂提供了一个理想的实际案例（Smith等，2017；Harland等，2013；Kufner等，2023）。基底粘滑冰震也提供了理想的例子，因为它们的S波源极化通常受到良好约束，通常与冰流方向大致对齐（相对于北方160°，Smith等，2015），在本例中，通过全波形源机制反演得到了确认（Hudson等，2020a）。<br>
+以下是用于量化剪切波分裂结果质量的几个关键特征：</p>
+<ol>
+<li>
+<p><strong>检查ZNE坐标系中的原始波形与去除分裂后的波形</strong>（见图5a）。</p>
+<ul>
+<li>S波到达波包应位于可能窗口的起始和结束之间（灰色垂直线）。</li>
+<li>去除分裂后的波包应比原始数据波包更短。</li>
+</ul>
+</li>
+<li>
+<p><strong>最大化和最小化去除分裂后的P和A分量能量</strong>（图5b）。</p>
+<ul>
+<li>P分量与A分量的振幅比表示去除分裂后粒子运动的线性度，较小的λ2/λ1值表示更线性的结果。</li>
+<li>对于冰震，λ2/λ1 = 0.033，大部分能量集中在P分量，仅有少量能量到达A分量。</li>
+</ul>
+</li>
+<li>
+<p><strong>快慢S波相位到达的时间应不同</strong>，去除分裂后时间应对齐（见图5c右面板）。</p>
+<ul>
+<li>快慢S波相位应在去除分裂前到达不同的时间，去除分裂后应对齐。</li>
+</ul>
+</li>
+<li>
+<p><strong>在东北平面上大致线性的粒子运动</strong>（见图5d）。</p>
+<ul>
+<li>对于冰震，粒子运动大致线性，源极化大约为从北方165° ± 6°，与冰流方向一致。</li>
+</ul>
+</li>
+<li>
+<p><strong>检查聚类分析的稳定性</strong>（见图5e）。</p>
+<ul>
+<li>聚类样本应有小的不确定性，从而得到稳定的φ和δt解。</li>
+<li>如果样本显示明显的非均匀行为，结果可能受到周期跳跃等效应的影响。</li>
+</ul>
+</li>
+<li>
+<p><strong>在φ−δt空间内特征值比呈现明显的最小值</strong>（见图5f）。</p>
+<ul>
+<li>冰震展示了明显的单一全局最小值，最优解由绿色点及其误差条表示。</li>
+<li>φ−δt空间图有助于检查周期跳跃是否发生。如果周期跳跃占主导，可能会看到多个最小值，并且这些最小值对应的φ值相隔90°。</li>
+</ul>
+</li>
+<li>
+<p><strong>测量质量参数λ2/λ1和QW</strong>。</p>
+<ul>
+<li>SWSPy可以输出多个质量参数，λ2/λ1表示结果的线性度。</li>
+<li>SWSPy还计算Wuestefeld质量因子QW，QW = 1表示良好结果，QW = 0表示较差结果，QW = −1表示零结果。</li>
+<li>对于冰震，QW = 0.969，确认了特征值法和交叉相关方法得到的一致结果。</li>
+</ul>
+</li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/921092bb-0486-4ba8-ba67-bb95d3a66d96"><img src="https://github.com/user-attachments/assets/921092bb-0486-4ba8-ba67-bb95d3a66d96" alt="Image" style="max-width: 100%;"></a></p>
+<h3>3.2 远震剪切波分裂</h3>
+<p>本节展示了SWSPy在远震剪切波分裂中的表现。远震剪切波分裂技术，特别是SKS、PKS和SKKS相位分析，是用于约束上地幔变形模式的常用方法。由于这些相位的近垂直入射角和由P波转化为S波导致的径向极化，使得它们能提供可靠的地幔剪切波分裂测量。</p>
+<p>图6展示了2005年2月5日Mw7.1级Celebus海地震的数据，记录于美国加利福尼亚NEE站。使用SHEBA代码进行的剪切波分裂分析发现了SKS和SKKS的剪切波分裂不一致，其中SKS为零结果，而SKKS则表现出明显的剪切波分裂，得到了φ = 74° ± 5°，δt = 1.05 ± 0.07秒的结果。</p>
+<p>使用SWSPy重新测量SKKS相位的剪切波分裂，得到了φ = 74.2° ± 14.0°，δt = 1.05 ± 0.175秒，与SHEBA结果一致。我们还能够获取源极化为115° ± 7°，与SHEBA的测量值115°以及观察到的背方位角294°一致，符合SKS径向极化的假设。</p>
+<p>这个示例仅展示了一个简单的远震应用，实际中的远震剪切波分裂研究，特别是针对最下层地幔的研究，更加复杂。现代远震剪切波分裂研究采用堆叠和波束形成等预处理方法，有助于在噪声较大的数据集中识别SKS、SKKS和S3KS相位。</p>
+<h3>3.3 自动化S波分裂分析在火山中多个地震中的应用</h3>
+<ul>
+<li>
+<p>本节展示了如何使用SWSPy进行火山中多个地震的自动化S波分裂分析。随着仪器灵敏度和密度的提高，以及计算技术的发展，现今可以处理包含成千上万次地震事件的大型地震目录，为更高分辨率的S波速度各向异性研究提供了机会。</p>
+</li>
+<li>
+<p>图7展示了在玻利维亚乌图伦库火山上进行的1356次地震的结果。该地震目录来源于完全自动化的检测算法。图7a显示了所有源接收器对的快S波极化的未经滤波分布，并与数据的过滤子集进行了比较。经过滤波的子集包含约束良好的测量结果，这些结果具有较小的不确定性，并表现出一个主导的各向异性方向，呈SE-NW方向。</p>
+</li>
+<li>
+<p>为了验证这些快方向是否确实代表了裂缝结构，将结果与独立测量的断层走向数据进行了对比，发现快方向与断层走向平行。乌图伦库火山的衰减层析成像表明，流体主要存在于具有这种取向的断层中，受火山区域应力场的控制。</p>
+</li>
+<li>
+<p>这些S波各向异性结果与独立观测结果一致，验证了自动化S波分裂方法的有效性。通过自动化分析方法，SWSPy能够处理大规模数据集，并为火山流体存在的研究提供了增强的视角。</p>
+</li>
+</ul>
+<h3>多层介质示例</h3>
+<h4>3.4.1 正演模型示例</h4>
+<p>我们首先在模拟数据上展示新多层分裂方法的表现，然后再将其应用于真实案例。图8展示了一个两层正演模型的结果。剪切波分裂应用于中心频率为10 Hz、源极化方向为0° N的Ricker小波上两次，模拟波传播通过两层介质（φ层1 = 60°，φ层2 = 40°，δt层1 = 0.5秒，δt层2 = 0.2秒）。</p>
+<p>图8a-d展示的表观剪切波分裂测量明显无法找到真实结果。然而，φ−δt空间显示表观测量对两个层次都敏感，并且在δt = 0.2秒和δt = 0.5秒处有明显的最小值。第一层表现出较强的分裂信号，因此该层主导了解析。由于周期跳跃的影响，在φ−δt空间中为每一层选择最小值变得具有挑战性。</p>
+<p>通过新的层-by-层分裂测量方法，成功解析了两层的各向异性，所有结果都接近真实值，并且大多数结果与真实值在不确定性范围内一致。修正后的波形进一步验证了新方法的性能。</p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/ff099ab4-d9f8-493b-8a5f-ff9721fdb2f4"><img src="https://github.com/user-attachments/assets/ff099ab4-d9f8-493b-8a5f-ff9721fdb2f4" alt="Image" style="max-width: 100%;"></a><br>
+a-d部分：展示了表观的单层测量结果，包括合成的地震波形和分裂参数的估计。<br>
+e-h部分：展示了逐层反演的结果，其中g图中的蓝色数据表示仅对第二层进行中间校正后的粒子运动。</p>
+<h4>3.4.2 冰震示例</h4>
+<p>成功的多层S波速度各向异性测量在现实世界中的例子较少，这主要是因为测量多层分裂的挑战，而非缺乏多层各向异性介质。然而，冰川冰为多层各向异性提供了一个现实的例子。</p>
+<p>图9展示了两层S波分裂结果的水平粒子运动，并与图5中的单层结果进行了对比。结果表明，两层模型比单层模型提供了更好的线性化效果，特征值比λ2/λ1表明，两层结果的线性化程度大约是单层结果的两倍。这证明了两层介质比单层介质更能准确描述观测结果。</p>
+<p>修正后的波形进一步验证了我们新方法的表现，结果显示两层介质能够有效地解析冰震中的各向异性，而不是仅仅依靠额外的自由度进行拟合。尽管多层分裂分析提供了更多自由度，但需要小心避免过拟合，尤其是在连续层的快方向一致时。</p>
+<h4>3.4.3 多层S波分裂的挑战和局限性</h4>
+<ul>
+<li>
+<p>尽管本研究中提出的多层方法在合成示例和冰震示例中表现良好，但由于所需的假设，这种方法对于那些信号频率相对较低的情况存在局限性。特别是对于大多数远震剪切波分裂分析或任何情况下，其中δt小于S波的主周期，并且地壳层的δt可能大于地幔中的分裂幅度，该方法可能不适用。</p>
+</li>
+<li>
+<p>图10展示了这个问题的例子。通过将剪切波分裂分析应用于具有类似SKS相位到达特征的合成地震图，我们观察到，表观单层测量和多层测量均能比原始未修正波形产生更线性化的修正S波到达时间。然而，表观单层测量无法正确解析各向异性，而多层测量虽然解析了第一层，但第二层的快方向未能解析，并且与合成层值相差90°。这一问题源自于表观分裂参数之间的周期性关系，这导致了在给定层的快方向（φi）上的非唯一解，尤其在δt &gt; 1/2f时进一步引入了不确定性。</p>
+</li>
+<li>
+<p>Özalaybey和Savage（1994）通过结合多个方位的SKS相位数据来解决此类非唯一解问题，类似的方法也被其他研究者采用。虽然SWSPy没有实现这种算法，但它可以作为多事件反演工作流程的一部分，在反演之前测量表观分裂参数。</p>
+</li>
+</ul>
+<p>因此，尽管多层分裂分析方法展现了潜力，但在实际应用中仍然面临周期跳跃和非唯一解等挑战，使用时需要小心处理。</p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/237ac071-80c9-4330-a53a-d25d55c0311f"><img src="https://github.com/user-attachments/assets/237ac071-80c9-4330-a53a-d25d55c0311f" alt="Image" style="max-width: 100%;"></a></p>
+<h3>3.5 SWSPy与其他剪切波分裂软件包的比较</h3>
+<ul>
+<li>
+<p>为了完整性，比较了SWSPy在本研究中两个主要极端事件的结果，分别是图5中的冰震和图6中的SKKS到达。SWSPy与MFAST（Savage等，2010）和SHEBA（Wuestefeld等，2010）的比较结果见表1。我们没有包括SplitRacer（Reiss和Rümpker，2017）和Pytheas（Spingos等，2020）的结果，因为这些是图形用户界面，适用性与我们的实现方式有显著差异。</p>
+</li>
+<li>
+<p>所有分裂测量都使用尽可能相似的参数进行，包括滤波属性、数据持续时间和用于聚类的窗口数量。三个软件包在不确定范围内得到相同的快方向（φ）和延迟时间（δt）。SWSPy的误差较大，因为我们故意采用比其他软件包更保守的估计方法。这在表1中的SKKS示例中尤为明显。尽管如此，误差仍然仅占结果的一小部分。</p>
+</li>
+<li>
+<p>这些软件包的差异主要体现在源极化方向上，SWSPy和SHEBA一致，而MFAST则存在显著差异。考虑到SWSPy与SHEBA几乎一致的表现，并且源极化方向的测量与物理设置一致，我们有信心认为SWSPy的源极化估计是现实的。</p>
+</li>
+<li>
+<p>我们没有将SWSPy与这些其他方法在计算时间上的表现进行基准测试，因为SWSPy是并行化的，而SHEBA和MFAST则不是。考虑到现代计算机的能力，大多数用户很可能会利用SWSPy的并行化特性，这将迅速弥补SWSPy相对于其他软件包的任何低效之处。</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/13a3df5b-dcfa-4889-b8a3-67f00266f40d"><img src="https://github.com/user-attachments/assets/13a3df5b-dcfa-4889-b8a3-67f00266f40d" alt="Image" style="max-width: 100%;"></a></p>
+<h2>4Disscussion</h2>
+<h3>4.1 优势与局限性</h3>
+<ul>
+<li>
+<p>SWSPy在剪切波分裂和各向异性研究中展现了显著的优势，特别是在处理高分辨率、大数据集的自动化分析中。通过Teanby等人（2004）提出的多窗口方法和先进的聚类算法，SWSPy为单个源接收器测量提供了稳定且可靠的结果。此外，SWSPy实现了三维剪切波分裂测量（Walsh等，2013），使其能够在没有显著速度梯度的环境下有效地进行各向异性测量，这对于钻孔数据或类似设置尤为重要。</p>
+</li>
+<li>
+<p>针对包含大量源接收器对的大规模数据集，SWSPy提供了完全自动化的工作流程，其模块化的Python包架构使得工作流程可以灵活适应各种研究需求。SWSPy能够处理成千上万甚至百万级的剪切波分裂测量数据，这一能力为各向异性层析成像的研究提供了重要支持，能够显著增加观测数据的数量，进而降低层析成像中固有的不充分约束问题（Chevrot et al., 2004）。同时，SWSPy提供了多种质量评估指标（如QW和λ2/λ1）以及不确定性测量（如αφ，αδt），使得用户能够有效地过滤虚假结果，提高分析的可靠性。</p>
+</li>
+<li>
+<p>尽管SWSPy在多层各向异性测量中具有强大的功能，但其局限性也不可忽视。首先，进行多层分析时，需要满足特定的假设条件，特别是在信号频率和各向异性强度之间的关系较为复杂时，SWSPy的多层方法可能不适用。对于此类数据集，必须谨慎应用该方法，并仔细考虑假设条件。其次，尽管不确定性测量对于去除虚假结果至关重要，但在某些情况下，这些测量可能低估了实际的不确定性。因此，未来的研究应当着重于改进测量质量指标和更准确地估算不确定性。</p>
+</li>
+<li>
+<p>此外，SWSPy使用Python编写，这一面向对象的语言相对于C或Julia等低级语言而言，计算速度较慢。为了减少这一限制，SWSPy通过numba进行加速，成功并行化了计算密集型的函数。尽管通过使用更底层语言可以进一步提高效率，但为了提高软件的可访问性和易用性，SWSPy并未采用这种方案。随着现代计算机性能的提升，SWSPy的并行化优化有效地弥补了性能瓶颈。</p>
+</li>
+</ul>
+<h3>4.2 剪切波分裂的其他应用</h3>
+<ul>
+<li>
+<p>剪切波分裂的应用不仅限于地下各向异性成像，其在其他领域也有重要的应用。一个有价值但未充分利用的参数是S波源极化。S波源极化可以为断层方位提供独立的测量，特别是在双偶极源的情况下（Hudson等，2023）。此外，剪切波分裂的另一个重要成果是各向异性修正波形，这对于使用各向同性模型进行全波形反演非常重要，尤其是在反演地震源机制时（Hudson等，2020a）。新提出的多层方法将进一步减少多层各向异性介质传播的地震波数据与各向同性全波形模型之间的误差，提供更加精确的反演结果。</p>
+</li>
+<li>
+<p>剪切波分裂的另一个应用是在计算地震震级时去除分裂效应。剪切波分裂可能导致S波相位重叠和互相干扰，改变表观频率内容，从而增加矩震级计算中的不确定性（Stork等，2014）。将剪切波分裂修正方法轻松融入矩震级计算流程，能够减少震级目录中的不确定性，进而有助于改进地震监测（Schultz等，2021）。</p>
+</li>
+</ul>
+<p><a href="https://seismica.library.mcgill.ca/article/view/1031" rel="nofollow">Paper link</a><br>
+[Github  project address]（<a href="https://github.com/TomSHudson/swspy%EF%BC%89">https://github.com/TomSHudson/swspy）</a></p></div>
 <div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>

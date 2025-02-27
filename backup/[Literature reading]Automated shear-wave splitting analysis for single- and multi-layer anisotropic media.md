@@ -180,7 +180,7 @@ SWSPy支持从简单的单一源接收器对到多个接收器和多个源的剪
 SWSPy使用基于Python类的结构实现（见Listing 1），并广泛利用obspy进行地震数据的输入和输出（Krischer等，2015）。通过传入一个包含所有接收器数据流的obspy数据，创建一个`splittingObject`，并可以指定窗口和参数搜索空间来执行剪切波分裂分析。
 
 Listing 1展示了如何使用`splittingObject`来执行剪切波分裂分析：
-```python
+```
 import swspy, obspy
 # 创建剪切波分裂对象：
 st = obspy.read(<数据路径>)
@@ -203,7 +203,7 @@ SWSPy还支持正演模拟，用于生成通过各向异性介质传播的合成
 
 这种正演模拟功能可用于验证SWSPy的性能，并解决反演问题。以下是一个使用正演模拟生成合成地震波形的代码示例：
 
-```python
+```
 import swspy
 # 创建源时函数：
 seismogram_dur_s = 10.0
@@ -216,7 +216,7 @@ back_azi = 0
 event_inclin_angle_at_station = 0
 # 应用分裂：
 st = swspy.splitting.forward_model.add_splitting(st, phi_from_N, dt, back_azi, event_inclin_angle_at_station)
-
+```
 ## 3 Examples
 ### 3.1 简单的冰震示例
 
