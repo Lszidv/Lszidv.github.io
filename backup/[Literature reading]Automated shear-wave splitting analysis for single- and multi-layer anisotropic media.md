@@ -251,8 +251,8 @@ st = swspy.splitting.forward_model.add_splitting(st, phi_from_N, dt, back_azi, e
    - SWSPy可以输出多个质量参数，λ2/λ1表示结果的线性度。  
    - SWSPy还计算Wuestefeld质量因子QW，QW = 1表示良好结果，QW = 0表示较差结果，QW = −1表示零结果。  
    - 对于冰震，QW = 0.969，确认了特征值法和交叉相关方法得到的一致结果。
-
 ![Image](https://github.com/user-attachments/assets/921092bb-0486-4ba8-ba67-bb95d3a66d96)
+
 ### 3.2 远震剪切波分裂
 
 本节展示了SWSPy在远震剪切波分裂中的表现。远震剪切波分裂技术，特别是SKS、PKS和SKKS相位分析，是用于约束上地幔变形模式的常用方法。由于这些相位的近垂直入射角和由P波转化为S波导致的径向极化，使得它们能提供可靠的地幔剪切波分裂测量。

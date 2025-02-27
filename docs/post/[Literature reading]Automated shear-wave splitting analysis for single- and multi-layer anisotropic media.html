@@ -342,11 +342,11 @@ st = swspy.splitting.forward_model.add_splitting(st, phi_from_N, dt, back_azi, e
 <ul>
 <li>SWSPy可以输出多个质量参数，λ2/λ1表示结果的线性度。</li>
 <li>SWSPy还计算Wuestefeld质量因子QW，QW = 1表示良好结果，QW = 0表示较差结果，QW = −1表示零结果。</li>
-<li>对于冰震，QW = 0.969，确认了特征值法和交叉相关方法得到的一致结果。</li>
+<li>对于冰震，QW = 0.969，确认了特征值法和交叉相关方法得到的一致结果。<br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/921092bb-0486-4ba8-ba67-bb95d3a66d96"><img src="https://github.com/user-attachments/assets/921092bb-0486-4ba8-ba67-bb95d3a66d96" alt="Image" style="max-width: 100%;"></a></li>
 </ul>
 </li>
 </ol>
-<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/921092bb-0486-4ba8-ba67-bb95d3a66d96"><img src="https://github.com/user-attachments/assets/921092bb-0486-4ba8-ba67-bb95d3a66d96" alt="Image" style="max-width: 100%;"></a></p>
 <h3>3.2 远震剪切波分裂</h3>
 <p>本节展示了SWSPy在远震剪切波分裂中的表现。远震剪切波分裂技术，特别是SKS、PKS和SKKS相位分析，是用于约束上地幔变形模式的常用方法。由于这些相位的近垂直入射角和由P波转化为S波导致的径向极化，使得它们能提供可靠的地幔剪切波分裂测量。</p>
 <p>图6展示了2005年2月5日Mw7.1级Celebus海地震的数据，记录于美国加利福尼亚NEE站。使用SHEBA代码进行的剪切波分裂分析发现了SKS和SKKS的剪切波分裂不一致，其中SKS为零结果，而SKKS则表现出明显的剪切波分裂，得到了φ = 74° ± 5°，δt = 1.05 ± 0.07秒的结果。</p>
