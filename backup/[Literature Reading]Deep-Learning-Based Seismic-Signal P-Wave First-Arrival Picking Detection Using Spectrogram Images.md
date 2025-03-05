@@ -1,0 +1,37 @@
+## Abstract
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[Paper Link](https://www.mdpi.com/2079-9292/13/1/229#:~:text=spectrogram%20images%20and%20used%20as,precise%20FAP%20detection%20capabilities%20in)
