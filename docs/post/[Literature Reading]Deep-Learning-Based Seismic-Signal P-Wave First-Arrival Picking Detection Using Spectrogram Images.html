@@ -12,79 +12,11 @@
     </script>
 <meta name="description" content="## Abstract
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[Paper Link](https://www.mdpi.com/2079-9292/13/1/229#:~:text=spectrogram%20images%20and%20used%20as,precise%20FAP%20detection%20capabilities%20in)。">
+- **P波首波拾取（First-Arrival Picking, FAP）** 对多个工业领域至关重要，包括**煤炭与石油勘探、隧道施工、水力压裂和地震预警系统**。">
 <meta property="og:title" content="[Literature Reading]Deep-Learning-Based Seismic-Signal P-Wave First-Arrival Picking Detection Using Spectrogram Images">
 <meta property="og:description" content="## Abstract
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[Paper Link](https://www.mdpi.com/2079-9292/13/1/229#:~:text=spectrogram%20images%20and%20used%20as,precise%20FAP%20detection%20capabilities%20in)。">
+- **P波首波拾取（First-Arrival Picking, FAP）** 对多个工业领域至关重要，包括**煤炭与石油勘探、隧道施工、水力压裂和地震预警系统**。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://Lszidv.github.io/post/%5BLiterature%20Reading%5DDeep-Learning-Based%20Seismic-Signal%20P-Wave%20First-Arrival%20Picking%20Detection%20Using%20Spectrogram%20Images.html">
 <meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
@@ -146,6 +78,241 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </div>
     <div id="content">
 <div class="markdown-body" id="postBody"><h2>Abstract</h2>
+<ul>
+<li><strong>P波首波拾取（First-Arrival Picking, FAP）</strong> 对多个工业领域至关重要，包括<strong>煤炭与石油勘探、隧道施工、水力压裂和地震预警系统</strong>。</li>
+<li>现有方法包括：
+<ul>
+<li><strong>人工识别</strong>：耗时且易受主观误差影响。</li>
+<li><strong>STA/LTA 算法</strong>：基于<strong>短时平均（STA）/长时平均（LTA）</strong> 的比值计算，但在<strong>实时背景噪声</strong>下性能下降。</li>
+</ul>
+</li>
+<li><strong>本研究提出了一种基于 U-Net 深度学习模型的新方法</strong>，结合 <strong>频谱图转换（Spectrogram Transformation）</strong> 处理地震信号，以提高P波FAP的检测精度。</li>
+<li><strong>数据处理步骤</strong>：
+<ol>
+<li><strong>模拟地震信号</strong>：使用 <strong>随机模型仿真程序</strong> 生成<strong>类似于韩国地震环境</strong>的地震信号。</li>
+<li><strong>添加高斯白噪声（WGN）</strong>，模拟真实环境中的背景噪声。</li>
+<li><strong>转换为二维频谱图</strong>，用于 <strong>U-Net 模型训练</strong>，确保高精度P波FAP检测。</li>
+</ol>
+</li>
+<li><strong>实验结果</strong>： <strong>均方误差（MSE）</strong>    <strong>平均绝对误差（MAE）</strong>    <strong>均方根误差（RMSE）</strong></li>
+</ul>
+<hr>
+<h2>Introduction</h2>
+<h3><strong>1. 研究背景</strong></h3>
+<ul>
+<li><strong>微震监测技术（Microseismic Monitoring Technology）</strong> 的核心在于 <strong>精准检测 P 波首波（FAP, First-Arrival Picking）</strong>。</li>
+<li><strong>微震事件来源</strong>：
+<ul>
+<li><strong>自然微震</strong>：构造活动、火山喷发。</li>
+<li><strong>工业诱发微震</strong>：煤炭与石油勘探、隧道施工、水力压裂、地热发电。</li>
+</ul>
+</li>
+<li><strong>水力压裂（Hydraulic Fracturing）</strong> 作为 <strong>页岩气开采的核心技术</strong>，但 <strong>可能增加地震活动风险</strong>：<strong>高压流体注入</strong> 导致 <strong>孔隙压力变化</strong>，可能诱发地震。</li>
+</ul>
+<h3><strong>2. 现有 P 波 FAP 检测方法及其局限性</strong></h3>
+<ul>
+<li><strong>人工检测（Manual Detection）</strong>：
+<ul>
+<li><strong>依赖地震学家的经验</strong>，但 <strong>耗时、数据密集，易受主观误差影响</strong>，降低可靠性。</li>
+</ul>
+</li>
+<li><strong>STA/LTA 算法（Short-Term Average / Long-Term Average）</strong>：
+<ul>
+<li>计算 <strong>短时平均（STA）/ 长时平均（LTA）</strong> 的比值，检测信号突变：</li>
+</ul>
+</li>
+</ul>
+<p>$$
+R(t) = \frac{\text{STA}(t)}{\text{LTA}(t)}
+$$</p>
+<ul>
+<li><strong>缺点</strong>：
+<ul>
+<li>易受 <strong>背景噪声影响</strong>，导致 <strong>信号与噪声界限模糊</strong>。</li>
+<li>对 <strong>弱微震事件的检测性能较低</strong>。</li>
+</ul>
+</li>
+</ul>
+<h3><strong>3. 近年来人工智能（AI）在 P 波 FAP 识别中的应用</strong></h3>
+<ul>
+<li>
+<p><strong>Zhu 等人（2021）</strong>：</p>
+<ul>
+<li>提出 <strong>基于统计分析（DA）、机器学习（Logistic Regression、kNN、SVM）和 CNN 深度学习</strong> 的 P 波 FAP 分类模型。</li>
+<li>CNN 方法超越 STA/LTA 方法，但分类准确率仅 <strong>91.71%</strong>，仍存在提升空间。</li>
+</ul>
+</li>
+<li>
+<p><strong>U-Net 在 FAP 识别中的应用</strong>：</p>
+<ul>
+<li><strong>Zhang 等人（2022）</strong>：提出 <strong>MT-Net</strong>，结合 <strong>U-Net 和多通道数据</strong>，提高 <strong>地震相位和 FAP 识别准确率</strong>。</li>
+<li><strong>Guo（2023）</strong>：提出 <strong>U-Net++</strong>，采用 <strong>更深层网络结构</strong>，提高检测精度。</li>
+<li><strong>问题</strong>：
+<ul>
+<li>尽管 <strong>U-Net 结构表现优异</strong>，但在 <strong>SSIM（结构相似性）和 PSNR（峰值信噪比）</strong> 评估下仍有残留误差，影响检测可靠性。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3><strong>4. 本研究贡献</strong></h3>
+<h2>..</h2>
+<h2>2.P-wave FAP model</h2>
+<h3><strong>2.1 研究流程</strong></h3>
+<ul>
+<li><strong>使用 SMSIM（随机模型仿真）</strong> 生成 <strong>不同振幅的地震信号</strong>，并 <strong>针对韩国地质环境建模</strong>。</li>
+<li><strong>引入高斯白噪声（WGN）</strong>，模拟 <strong>真实背景噪声</strong>，并进行 <strong>信号预处理</strong>：
+<ul>
+<li><strong>短时傅里叶变换（STFT）</strong> 将 <strong>一维信号转换为二维频谱图</strong>，便于深度学习提取特征。</li>
+</ul>
+</li>
+<li><strong>采用 U-Net 结构</strong> 设计 <strong>P 波 FAP 检测模型</strong>，并 <strong>调整超参数</strong> 以优化检测性能。</li>
+<li><strong>模型性能评估</strong> 采用 <strong>MSE、MAE、RMSE、SSIM 和 PSNR</strong>，验证 <strong>检测的可靠性和稳定性</strong>。</li>
+</ul>
+<h3><strong>2.2 研究贡献</strong></h3>
+<p>..</p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/c4146ea4-1198-4ddc-a5b8-cb75b92e4da6"><img src="https://github.com/user-attachments/assets/c4146ea4-1198-4ddc-a5b8-cb75b92e4da6" alt="Image" style="max-width: 100%;"></a></p>
+<hr>
+<h2>3. Experimental Details</h2>
+<h3><strong>3.1 地震信号数据</strong></h3>
+<h4><strong>1. 真实数据集的挑战</strong></h4>
+<ul>
+<li>采集真实地震信号需要 <strong>安装传感器</strong>，并进行 <strong>人工核验 P 波 FAP</strong>，但 <strong>数据获取成本高，难以满足深度学习训练需求</strong>。</li>
+</ul>
+<h4><strong>2. 使用 SMSIM 生成合成地震数据</strong>- 采用 <strong>SMSIM（随机模型仿真）</strong>，<strong>加入高斯白噪声（WGN）</strong></h4>
+<h4><strong>3. 频谱图转换</strong>- 通过 <strong>短时傅里叶变换（STFT）</strong> 将 <strong>地震波形转换为频谱图</strong>，增强 <strong>P 波特征提取能力</strong>。</h4>
+<h4><strong>4. 数据覆盖范围</strong></h4>
+<ul>
+<li>生成数据涵盖 <strong>不同震级、震源深度、震中距</strong>，并包括 <strong>高噪声环境下的信号</strong>，提高模型的泛化能力。</li>
+<li><strong>表 2</strong> 详细列出了 <strong>应力降、质量因子、震级和震中距</strong>，确保数据符合 <strong>真实地震的传播特性</strong>。</li>
+<li><strong>图 2</strong> 结果表明 <strong>信号振幅随震级增加而增大，随震中距增加而减小</strong>，验证了 <strong>SMSIM 生成数据的合理性</strong>。</li>
+</ul>
+<h3><strong>3.2 WGN（白高斯噪声）在地震信号处理中的应用</strong></h3>
+<h4><strong>1. WGN 的基本概念</strong></h4>
+<ul>
+<li><strong>白高斯噪声（White Gaussian Noise, WGN）</strong> 是<strong>信号处理和概率论中的关键概念</strong>，表示<strong>服从高斯分布的随机噪声</strong>。</li>
+<li><strong>WGN 的特点</strong>：
+<ul>
+<li><strong>均值为 0</strong>，方差为 ( \sigma^2 )，满足正态分布。</li>
+<li><strong>可用于模拟环境背景噪声</strong>，广泛应用于 <strong>信号分析、通信系统设计、实验与仿真</strong> 等领域。</li>
+</ul>
+</li>
+<li><strong>数学模型</strong>：</li>
+</ul>
+<p>$$
+\text{PDF}(x) = \frac{1}{\sigma \sqrt{2\pi}} \times \exp \left( -\frac{1}{2} \left( \frac{x - \mu}{\sigma} \right)^2 \right)
+$$</p>
+<ul>
+<li><strong>( \mu )</strong>：均值（本研究中 ( \mu = 0 )）。</li>
+<li><strong>( \sigma )</strong>：标准差，控制噪声强度。</li>
+</ul>
+<h4><strong>2. WGN 在地震信号处理中的作用</strong></h4>
+<ul>
+<li><strong>用于添加噪声</strong>，模拟真实环境下的地震数据。</li>
+<li><strong>用于建立噪声模型</strong>，提高地震数据分析的可靠性。</li>
+<li><strong>WGN 可以表示为时间序列信号</strong>：</li>
+</ul>
+<p>$$
+x(t) = N(0, \sigma^2)
+$$</p>
+<ul>
+<li><strong>( x(t) )</strong>：时间 ( t ) 处的噪声值，服从高斯分布。</li>
+<li><strong>噪声信号的生成</strong>：
+<ul>
+<li>通过向原始信号 ( s(t) ) 添加 WGN，得到噪声信号：</li>
+</ul>
+</li>
+</ul>
+<p>$$
+p(t) = s(t) + x(t)
+$$</p>
+<ul>
+<li><strong>( p(t) )</strong>：添加 WGN 后的信号。</li>
+<li><strong>( s(t) )</strong>：原始地震信号。</li>
+<li><strong>( x(t) )</strong>：WGN 噪声。</li>
+</ul>
+<h4><strong>3. SNR（信噪比）计算</strong></h4>
+<ul>
+<li><strong>SNR（Signal-to-Noise Ratio）</strong> 用于衡量信号相对于噪声的相对强度：</li>
+</ul>
+<p>$$
+\text{SNR} = \frac{P_s}{P_n} = 10 \log_{10} \left( \frac{\sigma_s}{\sigma_n} \right)
+$$</p>
+<ul>
+<li>
+<p><strong>( P_s )</strong>：信号功率。</p>
+</li>
+<li>
+<p><strong>( P_n )</strong>：噪声功率。</p>
+</li>
+<li>
+<p><strong>( \sigma_s )</strong> 和 <strong>( \sigma_n )</strong> 分别是信号和噪声的标准差。</p>
+</li>
+<li>
+<p><strong>总信号功率计算</strong>：</p>
+<p>$$<br>
+P = L \times \frac{1}{N} \sum_{i=0}^{N-1} |S_i|^2<br>
+$$</p>
+<ul>
+<li>
+<strong>( P )</strong>：信号功率。</li>
+<li>
+<strong>( L )</strong>：缩放因子，调节噪声水平。</li>
+<li>
+<strong>( N )</strong>：信号样本数。</li>
+<li>
+<strong>( S_i )</strong>：单个信号样本点的值。</li>
+</ul>
+</li>
+</ul>
+<h5><strong>4. WGN 对地震信号的影响</strong></h5>
+<ul>
+<li><strong>影响因素</strong>：
+<ul>
+<li><strong>震中距（Epicentral Distance）</strong>：
+<ul>
+<li><strong>震中距越近</strong> → <strong>信号振幅大</strong>，WGN 影响小。</li>
+<li><strong>震中距越远</strong> → <strong>信号振幅衰减</strong>，WGN 影响增大。</li>
+</ul>
+</li>
+<li><strong>震级（Magnitude）</strong>：
+<ul>
+<li><strong>震级高</strong> → <strong>信号能量大</strong>，WGN 干扰小。</li>
+<li><strong>震级低</strong> → <strong>信号能量小</strong>，WGN 影响显著。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>实验验证（图 3, 4）</strong>：
+<ul>
+<li><strong>使用 WGN 合成地震信号</strong>，测试不同 SNR 对信号的影响。</li>
+<li><strong>SNR 变化情况</strong>：
+<ul>
+<li><strong>SNR 高（&gt; 0 dB）</strong> → 信号清晰，WGN 影响小。</li>
+<li><strong>SNR 低（≤ -10 dB）</strong> → 信号模糊，WGN 影响显著。</li>
+</ul>
+</li>
+<li><strong>不同噪声环境下的数据集</strong>：
+<ul>
+<li><strong>清晰的 P 波 FAP 信号</strong>（低噪声）。</li>
+<li><strong>模糊的 P 波 FAP 信号</strong>（中等噪声）。</li>
+<li><strong>高背景噪声下的 P 波 FAP 信号</strong>（高噪声）。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4><strong>5. 研究贡献</strong></h4>
+<ul>
+<li><strong>构建 WGN 合成地震数据集</strong>，提高模型的 <strong>抗噪性</strong>。</li>
+<li><strong>调整 SNR（-1, -5, -10 dB）</strong>，生成 <strong>30,000 条地震信号</strong>，测试 <strong>深度学习模型在不同噪声水平下的检测能力</strong>。</li>
+<li><strong>证明 WGN 影响随震级、震中距变化</strong>：
+<ul>
+<li>震级高、震中距短 → <strong>信号强，WGN 影响小</strong>。</li>
+<li>震级低、震中距长 → <strong>信号弱，WGN 影响大</strong>。</li>
+</ul>
+</li>
+</ul>
 <p><a href="https://www.mdpi.com/2079-9292/13/1/229#:~:text=spectrogram%20images%20and%20used%20as,precise%20FAP%20detection%20capabilities%20in" rel="nofollow">Paper Link</a></p></div>
 <div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
 
@@ -247,6 +414,6 @@ function iFrameLoading(){
 
 
 </script>
-
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 </html>
