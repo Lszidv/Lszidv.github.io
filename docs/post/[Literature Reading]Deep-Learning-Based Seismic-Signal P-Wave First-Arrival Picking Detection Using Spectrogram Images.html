@@ -239,31 +239,19 @@ $$</p>
 \text{SNR} = \frac{P_s}{P_n} = 10 \log_{10} \left( \frac{\sigma_s}{\sigma_n} \right)
 $$</p>
 <ul>
-<li>
-<p><strong>( P_s )</strong>：信号功率。</p>
-</li>
-<li>
-<p><strong>( P_n )</strong>：噪声功率。</p>
-</li>
-<li>
-<p><strong>( \sigma_s )</strong> 和 <strong>( \sigma_n )</strong> 分别是信号和噪声的标准差。</p>
-</li>
-<li>
-<p><strong>总信号功率计算</strong>：</p>
-<p>$$<br>
-P = L \times \frac{1}{N} \sum_{i=0}^{N-1} |S_i|^2<br>
+<li><strong>( P_s )</strong>：信号功率。</li>
+<li><strong>( P_n )</strong>：噪声功率。</li>
+<li><strong>( \sigma_s )</strong> 和 <strong>( \sigma_n )</strong> 分别是信号和噪声的标准差。</li>
+<li><strong>总信号功率计算</strong>：</li>
+</ul>
+<p>$$
+P = L \times \frac{1}{N} \sum_{i=0}^{N-1} |S_i|^2
 $$</p>
 <ul>
-<li>
-<strong>( P )</strong>：信号功率。</li>
-<li>
-<strong>( L )</strong>：缩放因子，调节噪声水平。</li>
-<li>
-<strong>( N )</strong>：信号样本数。</li>
-<li>
-<strong>( S_i )</strong>：单个信号样本点的值。</li>
-</ul>
-</li>
+<li><strong>( P )</strong>：信号功率。</li>
+<li><strong>( L )</strong>：缩放因子，调节噪声水平。</li>
+<li><strong>( N )</strong>：信号样本数。</li>
+<li><strong>( S_i )</strong>：单个信号样本点的值。</li>
 </ul>
 <h5><strong>4. WGN 对地震信号的影响</strong></h5>
 <ul>
@@ -312,6 +300,64 @@ $$</p>
 <li>震级低、震中距长 → <strong>信号弱，WGN 影响大</strong>。</li>
 </ul>
 </li>
+</ul>
+<h3><strong>3.3 频谱图转换（Spectrogram Transformation）</strong></h3>
+<h4><strong>1. 研究目标</strong></h4>
+<ul>
+<li><strong>采用 STFT（短时傅里叶变换）进行频谱图转换</strong>，分析 <strong>30,000 条地震信号</strong> 的时频特性。</li>
+<li><strong>研究不同窗口大小（Window Size）对 P 波 FAP 识别的影响</strong>，优化频谱图生成策略，以增强深度学习模型的检测能力。</li>
+</ul>
+<h4><strong>2. STFT 变换原理</strong></h4>
+<ul>
+<li><strong>STFT（短时傅里叶变换）</strong> 将 <strong>一维时间信号转换为二维频谱图</strong>：</li>
+</ul>
+<p>$$
+STFT(t, \omega) = \int_{-\infty}^{\infty} x(\tau) \omega(\tau - t) e^{-j\omega\tau} d\tau
+$$</p>
+<ul>
+<li><strong>( x(\tau) )</strong>：原始信号函数。</li>
+<li><strong>( \omega(\tau - t) )</strong>：窗口函数（控制计算区域）。</li>
+<li><strong>离散化计算</strong>：</li>
+</ul>
+<p>$$
+STFT(m, l) = \sum_{n=-\infty}^{\infty} x(n) \omega(n - m) e^{-2\pi j n l / L}
+$$</p>
+<ul>
+<li>由于地震信号是离散的，STFT 通过 <strong>分段计算</strong> 进行时频分析。</li>
+</ul>
+<h4><strong>3. 频谱图转换的实验</strong></h4>
+<ul>
+<li><strong>使用 Python SciPy 进行 STFT 计算</strong>，并尝试不同窗口大小：
+<ul>
+<li><strong>窗口小</strong> → 时间分辨率高，频率分辨率低，导致 P 波 FAP 参考点模糊。</li>
+<li><strong>窗口大</strong> → 频率分辨率高，时间分辨率低，使 P 波 FAP 关键点变得不清晰。</li>
+<li><strong>目标</strong>：<strong>找到最佳窗口大小</strong>，确保 FAP 识别的准确性。</li>
+</ul>
+</li>
+</ul>
+<h4><strong>4. 频谱图数据集</strong></h4>
+<ul>
+<li><strong>数据预处理</strong>（图 6 展示示例）：
+<ol>
+<li><strong>SMSIM 生成原始地震信号</strong>。</li>
+<li><strong>转换为频谱图</strong>，分析其时频特性。</li>
+<li><strong>加入 WGN 噪声</strong>，模拟真实环境中的噪声信号。</li>
+<li><strong>构建 P 波 FAP 标注点</strong>，用于监督学习。</li>
+</ol>
+</li>
+<li><strong>数据构建</strong>：
+<ul>
+<li><strong>30,000 张频谱图</strong> 作为 <strong>U-Net 输入</strong>。</li>
+<li><strong>30,000 个 P 波 FAP 参考点</strong> 作为 <strong>U-Net 目标输出</strong>。</li>
+<li><strong>总数据量：60,000 个数据点</strong>，训练集 60%，验证集 20%，测试集 20%。</li>
+</ul>
+</li>
+</ul>
+<h4><strong>5. 研究贡献</strong></h4>
+<ul>
+<li><strong>验证窗口大小对 P 波 FAP 识别的影响</strong>，优化 STFT 计算策略。</li>
+<li><strong>构建 30,000 条高质量频谱图数据集</strong>，提升深度学习模型的训练效果。</li>
+<li><strong>综合测试不同 SNR（信噪比）条件</strong>，确保模型在高噪声环境下仍能稳定识别 P 波 FAP。</li>
 </ul>
 <p><a href="https://www.mdpi.com/2079-9292/13/1/229#:~:text=spectrogram%20images%20and%20used%20as,precise%20FAP%20detection%20capabilities%20in" rel="nofollow">Paper Link</a></p></div>
 <div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
