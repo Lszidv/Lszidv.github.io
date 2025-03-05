@@ -359,6 +359,81 @@ $$</p>
 <li><strong>构建 30,000 条高质量频谱图数据集</strong>，提升深度学习模型的训练效果。</li>
 <li><strong>综合测试不同 SNR（信噪比）条件</strong>，确保模型在高噪声环境下仍能稳定识别 P 波 FAP。</li>
 </ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/d5d3df89-8d6a-4dc9-a5ad-09bf7c310389"><img src="https://github.com/user-attachments/assets/d5d3df89-8d6a-4dc9-a5ad-09bf7c310389" alt="Image" style="max-width: 100%;"></a></p>
+<h2>3.4. U-Net Model</h2>
+<h3><strong>3.4.1 U-Net 结构</strong></h3>
+<ul>
+<li>U-Net 由 <strong>编码器（Encoder）和解码器（Decoder）</strong> 组成，采用 <strong>对称结构</strong> 。</li>
+<li><strong>编码器</strong>：卷积（Conv 3×3）+ ReLU + 最大池化（Max Pooling）。</li>
+<li><strong>解码器</strong>：上采样（Upsampling）+ 反卷积（Conv Transpose）。</li>
+<li>采用 <strong>跳跃连接（Skip Connections）</strong>，增强 P 波 FAP 识别能力。</li>
+<li>研究优化 <strong>窗口大小、卷积层深度</strong> 以适配地震信号数据。</li>
+</ul>
+<h3><strong>3.4.2 超参数优化（Hyperparameter Optimization）</strong></h3>
+<h4><strong>1. 训练参数</strong></h4>
+<ul>
+<li><strong>优化器</strong>：Adam（自适应优化）</li>
+<li><strong>学习率</strong>：0.01, 0.001, 0.0001, 0.00001（逐步降低）</li>
+<li><strong>批量大小</strong>：64</li>
+<li><strong>训练周期</strong>：100</li>
+<li><strong>损失函数</strong>：MSE（均方误差）</li>
+</ul>
+<h4><strong>2. 学习率调整（ReduceLROnPlateau）</strong></h4>
+<ul>
+<li><strong>Patience</strong>：2（若 2 个 Epoch 训练无提升，则调整学习率）</li>
+<li><strong>最小学习率</strong>：0.001 × 当前学习率</li>
+<li><strong>衰减因子</strong>：0.5（每次调整学习率 × 0.5）</li>
+</ul>
+<h4><strong>3. 模型检查点（ModelCheckpoint）</strong></h4>
+<ul>
+<li><strong>基于 PSNR 选择最佳模型</strong></li>
+<li><strong>每 1 个 Epoch 进行检查点保存</strong></li>
+</ul>
+<h3><strong>3.4.3 模型评估指标（Model Evaluation Metrics）</strong></h3>
+<h4><strong>1. 主要评估指标</strong></h4>
+<ul>
+<li><strong>MSE（均方误差）</strong>：
+<ul>
+<li>衡量预测图像与真实图像之间的像素级误差。</li>
+</ul>
+</li>
+</ul>
+<p>$$
+MSE = \frac{1}{N} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2
+$$</p>
+<ul>
+<li>
+<p><strong>MSE 越低，模型精度越高</strong>。</p>
+</li>
+<li>
+<p><strong>PSNR（峰值信噪比）</strong>：</p>
+<ul>
+<li>衡量预测图像与真实图像之间的质量损失。</li>
+</ul>
+</li>
+</ul>
+<p>$$
+PSNR = 10 \log_{10} \left( \frac{R^2}{MSE} \right)
+$$</p>
+<ul>
+<li>
+<p><strong>PSNR 越高，图像质量越好</strong>。</p>
+</li>
+<li>
+<p><strong>SSIM（结构相似性指数）</strong>：</p>
+<ul>
+<li>衡量图像在亮度、对比度和结构上的相似性。</li>
+</ul>
+</li>
+</ul>
+<p>$$
+SSIM(x, y) = \frac{(2\mu_x\mu_y + c_1)(2\sigma_{xy} + c_2)}{(\mu_x^2 + \mu_y^2 + c_1)(\sigma_x^2 + \sigma_y^2 + c_2)}
+$$</p>
+<ul>
+<li><strong>SSIM 越接近 1，图像相似度越高</strong>。</li>
+</ul>
+<hr>
+<h2>4. Experimental Results</h2>
 <p><a href="https://www.mdpi.com/2079-9292/13/1/229#:~:text=spectrogram%20images%20and%20used%20as,precise%20FAP%20detection%20capabilities%20in" rel="nofollow">Paper Link</a></p></div>
 <div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
 
