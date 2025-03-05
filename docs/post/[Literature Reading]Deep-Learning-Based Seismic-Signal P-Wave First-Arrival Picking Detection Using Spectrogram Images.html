@@ -434,6 +434,178 @@ $$</p>
 </ul>
 <hr>
 <h2>4. Experimental Results</h2>
+<h3><strong>4.1 U-Net 训练与验证结果</strong></h3>
+<h4><strong>1. 训练趋势</strong></h4>
+<ul>
+<li>随着 <strong>Epoch 增加</strong>，MSE 下降，SSIM &amp; PSNR 上升，模型稳定收敛。</li>
+<li><strong>窗口大小 64 &amp; 重叠 32</strong> 是最优选择，MSE = 0.006, SSIM = 0.943, PSNR = 22.296。</li>
+</ul>
+<h4><strong>2. 不同 SNR 的影响</strong></h4>
+<p>..</p>
+<h4><strong>3. 研究贡献</strong></h4>
+<ul>
+<li><strong>确定窗口大小 64 为最优参数，提高 P 波 FAP 识别效果</strong>。</li>
+<li><strong>调整学习率优化高噪声数据处理，提高模型泛化能力</strong>。</li>
+<li><strong>U-Net 适用于 SNRdB = -1 至 -10 的地震信号，鲁棒性强</strong>。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/56f4ef6a-9997-48b8-858b-044e79c28f0c"><img src="https://github.com/user-attachments/assets/56f4ef6a-9997-48b8-858b-044e79c28f0c" alt="Image" style="max-width: 100%;"></a></p>
+<h3><strong>4.2 U-Net 模型评估与地震信号 P 波 FAP 预测</strong></h3>
+<h4><strong>1. 评估实验</strong></h4>
+<ul>
+<li><strong>目标</strong>：测试 U-Net 模型在不同 SNR（信噪比）环境下的 P 波 FAP 识别能力。</li>
+<li><strong>测试集</strong>：共 6000 条数据，窗口大小 64，SNRdB 设定为 <strong>-1、-5、-10</strong>。</li>
+<li><strong>评估指标</strong>：
+<ul>
+<li><strong>MSE（均方误差）</strong>：预测误差的大小。</li>
+<li><strong>SSIM（结构相似性指数）</strong>：预测图像与真实图像的相似度。</li>
+<li><strong>PSNR（峰值信噪比）</strong>：预测图像的质量。</li>
+</ul>
+</li>
+</ul>
+<h4><strong>2. 评估结果</strong></h4>
+<ul>
+<li><strong>整体趋势</strong>：
+<ul>
+<li><strong>MSE 随噪声增加而上升</strong>，表示预测误差增大。</li>
+<li><strong>SSIM 在 SNRdB = -1 时最高</strong>，说明低噪声环境下 U-Net 预测最准确。</li>
+<li><strong>PSNR 在 SNRdB = -10 时明显下降</strong>，图像质量受噪声影响较大。</li>
+</ul>
+</li>
+</ul>
+<h5><strong>（1）SNRdB = -1（低噪声）</strong></h5>
+<ul>
+<li><strong>最佳预测性能</strong>：
+<ul>
+<li><strong>MSE = 0.006</strong></li>
+<li><strong>SSIM = 0.943</strong></li>
+<li><strong>PSNR = 22.23</strong></li>
+</ul>
+</li>
+<li><strong>分析</strong>：
+<ul>
+<li><strong>P 波 FAP 特征清晰，U-Net 预测无误</strong>。</li>
+<li><strong>即使 FAP 位置稍有模糊，模型仍能准确检测</strong>。</li>
+</ul>
+</li>
+</ul>
+<h5><strong>（2）SNRdB = -5（中等噪声）</strong></h5>
+<ul>
+<li><strong>预测性能</strong>：
+<ul>
+<li><strong>MSE = 0.0061</strong></li>
+<li><strong>SSIM = 0.943</strong></li>
+<li><strong>PSNR = 22.18</strong></li>
+</ul>
+</li>
+<li><strong>分析</strong>：
+<ul>
+<li><strong>WGN 信号干扰增强，输入图像质量下降</strong>。</li>
+<li><strong>P 波 FAP 仍然可识别，但预测精度略有下降</strong>。</li>
+</ul>
+</li>
+</ul>
+<h5><strong>（3）SNRdB = -10（高噪声）</strong></h5>
+<ul>
+<li><strong>预测性能</strong>：
+<ul>
+<li><strong>MSE = 0.0064</strong></li>
+<li><strong>SSIM = 0.942</strong></li>
+<li><strong>PSNR = 21.92</strong></li>
+</ul>
+</li>
+<li><strong>分析</strong>：
+<ul>
+<li><strong>输入图像质量下降更严重，FAP 变得模糊</strong>。</li>
+<li><strong>尽管噪声极高，U-Net 仍然能够检测 P 波 FAP</strong>，但 SSIM 和 PSNR 明显下降。</li>
+</ul>
+</li>
+</ul>
+<h4><strong>3. 预测结果可视化</strong></h4>
+<ul>
+<li>
+<p><strong>图 11（SNRdB = -1）</strong></p>
+<ul>
+<li><strong>(a)</strong>：FAP 清晰 → 预测无误。</li>
+<li><strong>(b)</strong>：FAP 较模糊 → 仍然预测正确。</li>
+</ul>
+</li>
+<li>
+<p><strong>图 12（SNRdB = -5）</strong></p>
+<ul>
+<li><strong>WGN 干扰增强，FAP 变得模糊</strong>，导致预测精度下降。</li>
+</ul>
+</li>
+<li>
+<p><strong>图 13（SNRdB = -10）</strong></p>
+<ul>
+<li><strong>极端噪声环境下，FAP 仍然可识别</strong>，但图像质量下降。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2>5.Discussion and Comparison with Similar Works</h2>
+<h3><strong>1. 以往研究的特点</strong></h3>
+<ul>
+<li><strong>使用时序地震信号或添加 WGN 噪声的信号</strong> 作为 U-Net 训练数据。</li>
+<li><strong>主要优化深度学习框架的超参数和结构</strong>（如 CNN、RNN、U-Net）。</li>
+</ul>
+<h3><strong>2. 本研究的创新</strong></h3>
+<ul>
+<li><strong>提出 STFT + U-Net 方法</strong>，使用 <strong>2D 频谱图</strong> 作为输入数据。</li>
+<li><strong>相比直接使用时序信号，频谱图包含更多 P 波特征信息</strong>，提高检测性能。</li>
+<li><strong>STFT + U-Net 在 P 波 FAP 识别中表现更优</strong>，提高了 U-Net 对 P 波特征的学习能力。</li>
+</ul>
+<h3><strong>3. 研究对比</strong></h3>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th><strong>方法</strong></th>
+<th><strong>MSE（均方误差）</strong></th>
+<th><strong>MAE（平均绝对误差）</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>以往研究 [25, 27]</td>
+<td>0.06</td>
+<td>1.21</td>
+</tr>
+<tr>
+<td><strong>本研究（STFT + U-Net）</strong></td>
+<td><strong>0.0031</strong></td>
+<td><strong>0.0177</strong></td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<ul>
+<li><strong>MSE 下降 19.35 倍</strong>，表明预测误差显著减少。</li>
+<li><strong>MAE 下降 68.42 倍</strong>，说明模型预测更接近真实值。</li>
+</ul>
+<hr>
+<h2><strong>6. 结论</strong></h2>
+<h3><strong>1. 研究方法</strong></h3>
+<ul>
+<li><strong>使用 SMSIM 生成地震信号，合成 WGN 模拟噪声</strong>。</li>
+<li><strong>使用 STFT 频谱图转换地震信号，并训练基于 U-Net 的 P 波 FAP 识别模型</strong>。</li>
+<li><strong>通过超参数优化，提高 U-Net 检测 P 波 FAP 的能力</strong>。</li>
+</ul>
+<h3><strong>2. 研究成果</strong></h3>
+<ul>
+<li><strong>模型在无噪声和高噪声环境下均成功检测 P 波 FAP，误差较低</strong>。</li>
+<li><strong>在 SNRdB = -1 至 -10 之间均表现良好，证明模型的抗噪能力</strong>。</li>
+<li><strong>可应用于微震监测、地震预警等多个领域，提高地震事件的预测精度</strong>。</li>
+</ul>
+<h3><strong>3. 现存问题</strong></h3>
+<ul>
+<li><strong>PSNR 下降表明高噪声环境仍影响图像质量</strong>。</li>
+<li><strong>需要进一步优化背景噪声去除，提高模型在真实环境中的适应性</strong>。</li>
+</ul>
+<h3><strong>4. 未来研究</strong></h3>
+<ul>
+<li><strong>探索不同深度学习架构（如 Transformer、ResNet）以优化 P 波 FAP 识别</strong>。</li>
+<li><strong>研究新的背景噪声去除方法，减少信号干扰</strong>。</li>
+<li><strong>使用真实地震数据进行训练和验证，提高模型泛化能力</strong>。</li>
+</ul>
 <p><a href="https://www.mdpi.com/2079-9292/13/1/229#:~:text=spectrogram%20images%20and%20used%20as,precise%20FAP%20detection%20capabilities%20in" rel="nofollow">Paper Link</a></p></div>
 <div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
 
@@ -493,7 +665,11 @@ console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 
 <script>
 document.getElementById("pathHome").setAttribute("d",IconList["home"]);
 document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
-
+cmButton=document.getElementById("cmButton");
+    span=document.createElement("span");
+    span.setAttribute("class","Counter");
+    span.innerHTML="1";
+    cmButton.appendChild(span);
 
 
 function openComments(){
