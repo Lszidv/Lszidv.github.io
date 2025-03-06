@@ -105,9 +105,7 @@
 - **波形模型（Waveform-Based）**
 - **频谱模型（Spectrum-Based）**
 - **对比 SeisCLIP 频谱编码器与传统方法**
-
 ![Image](https://github.com/user-attachments/assets/8c95c553-55f9-49ea-81b1-e43ec9a9d090)
-
 ---
 # 3.RESULTS
  ##**A. 事件分类（Event Classification）**
@@ -166,7 +164,7 @@
   - **Fine-Tune 分类正确率最高**。
   - **Frozen 仍然比 Baseline 强，说明预训练特征有效**。
 ---
-##4. DISCUSSION
+# 4. DISCUSSION
 ### **1. SeisCLIP 预训练特征分析与可视化**
 SeisCLIP 采用 **预训练（Pretraining）+ 微调（Fine-Tuning）** 方式，在多个地震学任务中展现优异性能。  
 通过 **t-SNE 降维分析**，可视化 **Frozen、Scratch、Fine-Tuned** 三种训练策略的特征分布，以理解模型学习到的特征。
@@ -227,7 +225,7 @@ SeisCLIP 在 **多台站任务** 中计算效率和适用性成为关键因素�
 **解决方案**
 - **发布三种不同频谱尺寸的预训练模型**，提高适应性，使不同任务可选择合适的模型进行微调。
 ---
-##5.CONCLUSION
+# 5.CONCLUSION
 **SeisCLIP 作为地震学基础模型**
 - **我们提出了一种基础模型（Foundation Model），用于事件分类、地震定位和震源机制分析。**
 - **不同于传统深度学习方法，我们的方法先进行预训练，再进行微调，提高泛化能力。**
