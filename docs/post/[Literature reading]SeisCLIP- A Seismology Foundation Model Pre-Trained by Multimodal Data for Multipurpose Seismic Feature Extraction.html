@@ -10,11 +10,15 @@
         let theme = localStorage.getItem("meek_theme") || "light";
         document.documentElement.setAttribute("data-color-mode", theme);
     </script>
-<meta name="description" content="## Abstract 
-。">
+<meta name="description" content="# Abstract 
+### **SeisCLIP: 基于对比学习的地震学基础模型**
+
+- **核心目标**：解决地震学研究中标注数据稀缺和模型区域泛化能力不足的问题。">
 <meta property="og:title" content="[Literature reading]SeisCLIP: A Seismology Foundation Model Pre-Trained by Multimodal Data for Multipurpose Seismic Feature Extraction">
-<meta property="og:description" content="## Abstract 
-。">
+<meta property="og:description" content="# Abstract 
+### **SeisCLIP: 基于对比学习的地震学基础模型**
+
+- **核心目标**：解决地震学研究中标注数据稀缺和模型区域泛化能力不足的问题。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://Lszidv.github.io/post/%5BLiterature%20reading%5DSeisCLIP-%20A%20Seismology%20Foundation%20Model%20Pre-Trained%20by%20Multimodal%20Data%20for%20Multipurpose%20Seismic%20Feature%20Extraction.html">
 <meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
@@ -75,7 +79,180 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </div>
 </div>
     <div id="content">
-<div class="markdown-body" id="postBody"><h2>Abstract</h2></div>
+<div class="markdown-body" id="postBody"><h1>Abstract</h1>
+<h3><strong>SeisCLIP: 基于对比学习的地震学基础模型</strong></h3>
+<ul>
+<li><strong>核心目标</strong>：解决地震学研究中标注数据稀缺和模型区域泛化能力不足的问题。</li>
+<li><strong>方法</strong>：
+<ul>
+<li>1.采用 <strong>对比学习</strong> 进行预训练；2.结合 <strong>Transformer 频谱编码器</strong> 和 <strong>MLP 事件信息编码器</strong>。</li>
+</ul>
+</li>
+<li><strong>优势</strong>：
+<ul>
+<li>1.适用于<strong>多个地震学任务</strong>（分类、定位、震源机制分析）；2.在<strong>不同区域数据集</strong>上表现优于基线方法；3.仅需少量数据即可微调。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h1>1.Introduction</h1>
+<h3>** 研究背景**</h3>
+<ul>
+<li>
+<p><strong>机器学习（ML）与深度学习（DL）</strong> 在多个地震学任务中优于传统方法：</p>
+<ul>
+<li><strong>去噪、震相拾取、地震检测、震源机制分析、地震预测</strong> 等。</li>
+</ul>
+</li>
+<li>
+<p><strong>现有方法局限性</strong>：</p>
+<ul>
+<li><strong>单任务模型</strong> 无法适应数据不足的任务。</li>
+<li><strong>迁移学习（TL）</strong> 受限于特定子领域。</li>
+<li><strong>基础模型（Foundation Model）</strong> 能提升泛化能力。</li>
+</ul>
+</li>
+<li>
+<p><strong>定义</strong>：先 <strong>预训练</strong>，再 <strong>微调（Fine-tuning）</strong>，适应多个下游任务。</p>
+</li>
+</ul>
+<h3><strong>预训练策略</strong></h3>
+<ul>
+<li><strong>生成式学习</strong>（如 BERT、MAE）：   通过 <strong>遮蔽部分数据</strong> 进行预测。</li>
+<li><strong>对比式学习</strong>（如 CLIP）：让匹配样本对靠近，错误样本远离。</li>
+</ul>
+<h3><strong>地震学基础模型</strong></h3>
+<ul>
+<li><strong>StorSeismic（BERT-based）</strong> 和 <strong>SFM（MAE-based）</strong> 主要用于 <strong>地震勘探</strong>（2D 数据）。</li>
+<li><strong>SeisCLIP（对比学习）</strong>：
+<ul>
+<li>结合 <strong>地震频谱</strong>（Transformer 编码）和 <strong>事件信息</strong>（MLP 编码）。</li>
+<li>采用 <strong>STEAD 数据集</strong> 进行多模态训练。</li>
+</ul>
+</li>
+</ul>
+<h3><strong>结论</strong></h3>
+<ul>
+<li><strong>挑战</strong>：
+<ul>
+<li>2D 地震模型难适用于 1D 波形。</li>
+<li>任务间数据不均衡。</li>
+</ul>
+</li>
+<li><strong>解决方案</strong>：
+<ul>
+<li><strong>SeisCLIP</strong> 采用 <strong>对比学习</strong> 进行 <strong>多模态预训练</strong>。</li>
+<li>结合 <strong>Transformer+MLP</strong> 提取 <strong>地震特征</strong>。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h1>2.Methods</h1>
+<h3>A. 地震学基础模型的架构</h3>
+<h4><strong>1. 研究目标</strong></h4>
+<ul>
+<li>提出 <strong>SeisCLIP</strong>，采用 <strong>对比学习（Contrastive Learning）</strong> 进行 <strong>预训练</strong>。</li>
+<li>解决 <strong>长序列地震波形处理的计算开销问题</strong>，提高模型在 <strong>地震学任务</strong> 中的适用性。</li>
+</ul>
+<h4><strong>2. 网络架构</strong></h4>
+<ul>
+<li><strong>双分支编码器</strong>
+<ul>
+<li><strong>频谱分支（Spectrum Branch）</strong>：
+<ul>
+<li><strong>STFT 转换地震波形为频谱</strong>，采用 <strong>VIT-small</strong> （图像识别）进行编码。</li>
+</ul>
+</li>
+<li><strong>事件信息分支（Information Branch）</strong>：
+<ul>
+<li>处理 <strong>P/S 波到时、震源距离等 8 种参数</strong>，并使用 <strong>MLP 进行编码</strong>。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4><strong>3. 训练策略</strong></h4>
+<ul>
+<li><strong>采用频谱表示</strong>，(波形太长)减少计算开销，提高 Transformer 处理地震数据的适用性。</li>
+<li><strong>对比学习（Contrastive Learning）</strong>：
+<ul>
+<li>让模型学习 <strong>匹配正确的频谱与事件信息</strong>，提高泛化能力。</li>
+</ul>
+</li>
+<li><strong>训练样本结构</strong>
+<ul>
+<li><strong>三通道频谱数据 + 八种事件信息</strong>，分别输入到编码器进行联合训练。</li>
+</ul>
+</li>
+</ul>
+<h2><strong>B. 预训练和验证的数据准备</strong></h2>
+<ul>
+<li>采用 <strong>STEAD 数据集</strong>，包含 <strong>1,030,000 条地震信号</strong> 和 <strong>8 种事件信息</strong>。</li>
+<li>训练集：<strong>1,000,000 条</strong>，验证集：<strong>30,000 条</strong>。</li>
+</ul>
+<p><strong>下游任务数据集</strong></p>
+<h3><strong>（1）地震定位（Localization）</strong></h3>
+<ul>
+<li><strong>数据来源</strong>：日本地震数据，<strong>M &gt; 2</strong>，<strong>包含 2011 年东日本大地震</strong>。</li>
+<li><strong>地震站</strong>：NIED Hi-net，<strong>提供高分辨率三分量地震数据</strong>。</li>
+<li><strong>数据划分</strong>：
+<ul>
+<li>训练集：<strong>10,000</strong></li>
+<li>验证集：<strong>1,000</strong></li>
+<li>测试集：<strong>1,000</strong></li>
+</ul>
+</li>
+</ul>
+<h3><strong>（2）震源机制分析（Focal Mechanism Analysis）</strong></h3>
+<ul>
+<li><strong>数据来源</strong>：日本地震数据，<strong>M &gt; 3</strong>，2011-2016 年，JMA 提供震源机制解。</li>
+<li><strong>数据划分</strong>：训练集：<strong>随机划分</strong>，具体信息见 <strong>表 II</strong>。</li>
+</ul>
+<p><strong>数据预处理</strong></p>
+<ul>
+<li><strong>所有波形数据</strong> 统一处理：<strong>截取 60 秒片段</strong>；<strong>100 Hz 采样率</strong>；<strong>STFT 转换为时频谱</strong>； <strong>均值-标准差归一化</strong></li>
+</ul>
+<h2><strong>C. 通过对比学习（Contrastive Learning）预训练 SeisCLIP</strong></h2>
+<p><strong>预训练策略</strong></p>
+<ul>
+<li><strong>目标</strong>：
+<ul>
+<li><strong>联合训练</strong> 频谱编码器和信息编码器，使其学习 <strong>匹配的地震频谱与事件信息</strong>。</li>
+</ul>
+</li>
+<li><strong>对比学习（Contrastive Learning）</strong>：
+<ul>
+<li><strong>最大化真实样本对的余弦相似度</strong>。</li>
+<li><strong>最小化错误匹配样本对的余弦相似度</strong>（共 N² - N 个错误组合）。</li>
+</ul>
+</li>
+<li><strong>优化策略</strong>：采用 <strong>对称交叉熵损失</strong> 确保训练稳定。</li>
+</ul>
+<p><strong>训练细节</strong></p>
+<ul>
+<li><strong>超参数设置</strong>： <strong>学习率（Learning Rate）</strong> = 1e-4； <strong>批量大小（Batch Size）</strong> = 192； <strong>训练轮数（Epochs）</strong> = 100</li>
+<li><strong>模型选择</strong>： <strong>第 55 轮的模型在验证集上表现最佳</strong>，被选为最终预训练模型。</li>
+<li><strong>模型部署</strong></li>
+<li>训练完成后，<strong>SeisCLIP 频谱编码器可直接用于下游任务</strong>：<strong>事件分类</strong>； <strong>地震定位</strong>；<strong>震源机制分析</strong></li>
+</ul>
+<h2><strong>D. SeisCLIP 在下游任务中的应用</strong></h2>
+<p><strong>下游任务</strong>: <strong>事件分类（Event Classification）</strong>;<strong>地震定位（Earthquake Localization）</strong>;<strong>震源机制分析（Focal Mechanism Analysis）</strong></p>
+<p><strong>训练策略</strong></p>
+<ul>
+<li><strong>Fine-Tune</strong>：微调 <strong>预训练的 VIT-small 频谱编码器</strong>。</li>
+<li><strong>Frozen</strong>：冻结编码器，只训练任务层。</li>
+<li><strong>Scratch</strong>：不使用 SeisCLIP 预训练权重，从零训练。</li>
+</ul>
+<p><strong>基线模型对比</strong></p>
+<ul>
+<li><strong>波形模型（Waveform-Based）</strong></li>
+<li><strong>频谱模型（Spectrum-Based）</strong></li>
+<li><strong>对比 SeisCLIP 频谱编码器与传统方法</strong></li>
+</ul>
+<hr>
+<h1>3.RESULTS</h1>
+<hr>
+<p><a href="https://ieeexplore.ieee.org/document/10400506" rel="nofollow">Paper Link</a></p></div>
 <div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
