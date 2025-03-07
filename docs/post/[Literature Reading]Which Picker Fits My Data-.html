@@ -166,7 +166,360 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <li><strong>未来模型开发者</strong> 可以轻松将其方法与已有基准测试进行比较。</li>
 </ul>
 </li>
-</ul></div>
+</ul>
+<hr>
+<h1>2. 数据与方法</h1>
+<h2>2.1 任务与评估指标</h2>
+<p>模型在<strong>输入波形长度</strong> 和 <strong>输出格式</strong> 方面存在差异。  定义了 <strong>三个通用任务</strong>，并为每个模型设定了适用于该任务的评估方式。</p>
+<h3>2.1.1 任务 1 —— 事件检测</h3>
+<h4><strong>任务定义</strong></h4>
+<ul>
+<li><strong>输入</strong>：给定 <strong>30 秒的地震波形窗口</strong>。</li>
+<li><strong>目标</strong>：判断该窗口内是否包含 <strong>事件起始点</strong>（即 <strong>第一波震相到时</strong>）。</li>
+<li><strong>数据处理</strong>：
+<ul>
+<li><strong>剔除地震尾波（coda）</strong>，因其是否应归类为事件仍存在不确定性。</li>
+</ul>
+</li>
+</ul>
+<h4><strong>(1) 受试者工作特征曲线 (ROC) 和曲线下面积 (AUC)</strong></h4>
+<ul>
+<li>
+<p><strong>ROC 曲线</strong>（Receiver Operating Characteristic）：</p>
+<ul>
+<li>通过 <strong>真阳性率 (True Positive Rate, TPR) 与 假阳性率 (False Positive Rate, FPR)</strong> 的变化关系，衡量模型在 <strong>不同决策阈值</strong> 下的性能。</li>
+<li><strong>应用背景不同，所需的 FPR 和 TPR 取舍不同</strong>：
+<ul>
+<li><strong>低地震活动区</strong>（使用简单拾取关联算法）：需要 <strong>FPR &lt; 0.01</strong>，避免误报过多。</li>
+<li><strong>高地震活动区</strong>（使用双曲拾取关联算法，如 Woollam et al., 2020）：<strong>FPR &lt; 0.05</strong> 即可接受。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>AUC（曲线下面积，Area Under Curve）</strong>：</p>
+<ul>
+<li>AUC = 1：<strong>完美模型</strong>（没有误判）。</li>
+<li>AUC = 0.5：<strong>随机猜测</strong>（模型无效）。</li>
+</ul>
+</li>
+</ul>
+<h4><strong>(2) F1 分数</strong></h4>
+<ul>
+<li><strong>定义</strong>：
+<ul>
+<li><strong>F1 分数</strong>（F1-score）是 <strong>精确率（Precision）和召回率（Recall）</strong> 的调和平均数。</li>
+<li><strong>Precision</strong>（精确率）：正确检测到的事件占 <strong>所有检测到的事件</strong> 的比例。</li>
+<li><strong>Recall</strong>（召回率）：正确检测到的事件占 <strong>所有实际发生的事件</strong> 的比例。</li>
+<li><strong>公式</strong>：</li>
+</ul>
+</li>
+</ul>
+<p>$$
+F1 = 2 \times \frac{{\text{Precision} \times \text{Recall}}}{{\text{Precision} + \text{Recall}}}
+$$</p>
+<ul>
+<li>
+<p><strong>意义</strong>：</p>
+<ul>
+<li><strong>综合衡量模型的 "敏感性"（Sensitivity）和 "特异性"（Specificity）</strong>。</li>
+<li><strong>适用于地震事件检测</strong>，因为它能权衡 <strong>误报率（False Positives）与 漏报率（False Negatives）</strong>。</li>
+</ul>
+</li>
+<li>
+<p><strong>F1 分数的阈值优化</strong>： - <strong>F1 依赖于决策阈值</strong>，需要在不同应用场景下优化 <strong>最优阈值</strong>。</p>
+</li>
+</ul>
+<h3>2.1.2 任务 2 —— 震相识别 (Phase Identification)</h3>
+<h4><strong>任务定义</strong></h4>
+<ul>
+<li><strong>输入</strong>：一个 <strong>10 秒的波形窗口</strong>，其中包含 <strong>一个震相</strong>。</li>
+<li><strong>目标</strong>：判断该震相是 <strong>P 波</strong> 还是 <strong>S 波</strong>（ <strong>简化处理</strong>：不进一步区分 ）</li>
+</ul>
+<h4><strong>与任务 1（事件检测）的区别</strong></h4>
+<ul>
+<li><strong>任务 1（事件检测）</strong>：区分 <strong>地震事件</strong> 和 <strong>噪声</strong>（类别划分清晰）。</li>
+<li><strong>任务 2（震相识别）</strong>：区分 <strong>P 波</strong> 和 <strong>S 波</strong>，但两者类别划分是 <strong>对称的</strong>（没有固定的正负类）。</li>
+</ul>
+<h4><strong>评估指标</strong></h4>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th><strong>指标</strong></th>
+<th><strong>衡量内容</strong></th>
+<th><strong>作用</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MCC（Matthews 相关系数）</strong></td>
+<td>计算混淆矩阵的相关性</td>
+<td>适用于二分类问题，尤其适用于类别不均衡情况</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<ul>
+<li>
+<p><strong>为什么不用 AUC、ROC、F1 分数？</strong></p>
+<ul>
+<li>这些指标 <strong>依赖于正负类别的定义</strong>，但 P 波 vs. S 波 没有固定的正负类，因此不适用。</li>
+<li>MCC <strong>适用于对称二分类任务</strong>，可稳定衡量 P/S 分类的准确性。</li>
+</ul>
+</li>
+<li>
+<p><strong>MCC 评分范围</strong>：</p>
+<ul>
+<li><strong>MCC = 1</strong> → 完全正确分类； <strong>MCC = 0</strong> → 随机分类，无有效信息；<strong>MCC = -1</strong> → 完全错误分类。</li>
+</ul>
+</li>
+<li>
+<p><strong>阈值优化</strong>：- MCC <strong>受决策阈值影响</strong>，需在 <strong>2.5 章节</strong> 进一步优化。</p>
+</li>
+</ul>
+<h3>2.1.3 任务 3 —— 震相到时拾取 (Onset Time Picking)</h3>
+<h3><strong>任务定义</strong></h3>
+<ul>
+<li><strong>输入</strong>：一个 <strong>10 秒的波形窗口</strong>，包含一个 <strong>已知类型（P 或 S）的震相</strong>。</li>
+<li><strong>目标</strong>：准确拾取 <strong>震相到时</strong>（Onset Time）。</li>
+</ul>
+<h4><strong>评估方法</strong></h4>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th><strong>评估指标</strong></th>
+<th><strong>作用</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>残差（Residuals）</strong></td>
+<td>预测到时 vs. 真实到时的误差</td>
+</tr>
+<tr>
+<td><strong>高残差比例</strong></td>
+<td>计算误差超过设定阈值（0.45s/1.5s）的样本占比</td>
+</tr>
+<tr>
+<td><strong>RMSE（均方根误差）</strong></td>
+<td>受离群值影响较大，适用于整体误差评估</td>
+</tr>
+<tr>
+<td><strong>MAE（平均绝对误差）</strong></td>
+<td>受离群值影响较小，适用于稳定性评估</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<ul>
+<li>
+<p><strong>误差定义</strong>：</p>
+<ul>
+<li><strong>残差 = 机器学习预测的震相到时 - 真实参考震相到时</strong>。</li>
+<li>误差越小，模型越精准。</li>
+</ul>
+</li>
+<li>
+<p><strong>分析方式</strong>：</p>
+<ul>
+<li><strong>直方图</strong> 可视化残差分布，检测误差模式。</li>
+<li><strong>RMSE vs. MAE 对比</strong>：
+<ul>
+<li><strong>RMSE 更关注大误差</strong>（适用于误差较大的情况）。</li>
+<li><strong>MAE 更关注整体误差平均水平</strong>（适用于误差较稳定的情况）。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2>2.2 数据集 (Datasets)</h2>
+<h3><strong>数据来源</strong></h3>
+<p>本研究在 <strong>SeisBench</strong> 平台上使用了 <strong>八个数据集</strong>：</p>
+<ul>
+<li><strong>六个数据集</strong>（ETHZ, INSTANCE, Iquique, LenDB, SCEDC, STEAD）主要包含 <strong>本地到区域地震事件（震中距 &lt;10°）</strong>。</li>
+<li><strong>两个数据集</strong>（GEOFON, NEIC）主要包含 <strong>远震事件（震中距 ≥10°）</strong>。</li>
+</ul>
+<h3><strong>数据集筛选</strong></h3>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th><strong>数据集</strong></th>
+<th><strong>事件类型</strong></th>
+<th><strong>适用于任务</strong></th>
+<th><strong>备注</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SCEDC</strong></td>
+<td>本地 &amp; 区域地震</td>
+<td>任务 1, 2, 3</td>
+<td>超过 800 万条波形</td>
+</tr>
+<tr>
+<td><strong>ETHZ</strong></td>
+<td>本地 &amp; 区域地震</td>
+<td>任务 1, 2, 3</td>
+<td>高质量人工标注</td>
+</tr>
+<tr>
+<td><strong>NEIC</strong></td>
+<td>远震</td>
+<td>任务 2, 3</td>
+<td>不适用于任务 1</td>
+</tr>
+<tr>
+<td><strong>LenDB</strong></td>
+<td>本地地震</td>
+<td>任务 1</td>
+<td>无人工 P/S 标注，排除任务 2, 3</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<h3><strong>数据标准化</strong></h3>
+<ul>
+<li><strong>所有数据集重采样至 100 Hz</strong>，确保模型公平评估。</li>
+<li><strong>数据集已预先划分为训练集、开发集和测试集</strong>，以保证实验一致性。</li>
+</ul>
+<h2>2.3 已评估的模型概述</h2>
+<h2><strong>总结</strong></h2>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th><strong>模型名称</strong></th>
+<th><strong>任务支持</strong></th>
+<th><strong>输入长度</strong></th>
+<th><strong>网络结构</strong></th>
+<th><strong>训练数据</strong></th>
+<th><strong>适用场景</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>BasicPhaseAE</strong></td>
+<td>事件检测、震相识别、震相拾取</td>
+<td><strong>6s（100 Hz）</strong></td>
+<td>U-Net</td>
+<td>智利 Iquique 11,000 震相数据</td>
+<td>小型数据集，近场震相拾取</td>
+</tr>
+<tr>
+<td><strong>CRED</strong></td>
+<td>事件检测</td>
+<td><strong>30s（100 Hz）</strong></td>
+<td>CNN + RNN</td>
+<td>北加州 55 万地震 + 55 万噪声</td>
+<td>长时窗口事件检测，低信噪比环境</td>
+</tr>
+<tr>
+<td><strong>DPP</strong></td>
+<td>事件检测、震相拾取</td>
+<td><strong>5s（100 Hz）</strong></td>
+<td>CNN + Bi-LSTM</td>
+<td>智利 Mw 8.1 &amp; 7.7 震相数据</td>
+<td>高噪声环境，数据有限场景</td>
+</tr>
+<tr>
+<td><strong>EQTransformer</strong></td>
+<td>事件检测、震相识别、震相拾取</td>
+<td><strong>60s（100 Hz）</strong></td>
+<td>CNN + LSTM + Transformer</td>
+<td>STEAD</td>
+<td>远震 &amp; 复杂震相分析，自动化地震监测</td>
+</tr>
+<tr>
+<td><strong>GPD</strong></td>
+<td>事件检测、震相识别、震相拾取</td>
+<td><strong>4s（100 Hz）</strong></td>
+<td>CNN</td>
+<td>南加州 450 万地震波形</td>
+<td>短时窗口震相分类，远震低频震相检测</td>
+</tr>
+<tr>
+<td><strong>PhaseNet</strong></td>
+<td>事件检测、震相识别、震相拾取</td>
+<td><strong>30s（100 Hz）</strong></td>
+<td>U-Net</td>
+<td>北加州 77.95 万震相数据</td>
+<td>远震震相拾取，高噪声环境</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<ul>
+<li><strong>BasicPhaseAE 适用于小型数据集的震相拾取</strong>。</li>
+<li><strong>CRED 适用于长时窗口事件检测</strong>，适合 <strong>远震 &amp; 低信噪比环境</strong>。</li>
+<li><strong>DPP 适用于高噪声环境的震相拾取</strong>，适合 <strong>小型数据集</strong>。</li>
+<li><strong>EQTransformer 适用于远震 &amp; 复杂震相分析</strong>，适合 <strong>自动化地震监测</strong>。</li>
+<li><strong>GPD 适用于短时间窗口震相分类</strong>，适合 <strong>实时地震检测</strong>。</li>
+<li><strong>PhaseNet 适用于远震震相拾取</strong>，适合 <strong>高噪声环境</strong>。</li>
+</ul>
+<h2>2.4 训练部分</h2>
+<ul>
+<li><strong>基准测试基于 SeisBench 框架</strong>，实现 <strong>标准化数据处理和模型训练</strong>。</li>
+<li><strong>采用混合窗口策略</strong>，确保 <strong>训练数据包含足够的震相样本，同时提升泛化能力</strong>。</li>
+<li><strong>未对 P/S 波重新采样</strong>，除 GEOFON 数据集外，P/S 样本未出现严重不均衡。</li>
+<li><strong>采用 Adam 优化器</strong>，训练 <strong>100 轮</strong>，但受 <strong>48 小时墙时限制</strong>。</li>
+<li><strong>整个训练与评估消耗 4,000 GPU 小时 + 260,000 CPU 线程小时</strong>，确保模型全面评测。</li>
+</ul>
+<h2>2.5 阈值和超参数选择</h2>
+<h3><strong>决策阈值选择</strong></h3>
+<ul>
+<li><strong>任务 1（事件检测）</strong>：优化 <strong>ROC-AUC</strong>，并提供 <strong>F1 分数的最佳阈值</strong> 作为参考。</li>
+<li><strong>任务 2（震相识别）</strong>：优化 <strong>MCC</strong> 以选择 <strong>P/S 波分类阈值</strong>。</li>
+<li><strong>任务 3（震相拾取）</strong>：基于 <strong>开发集选择最佳决策阈值</strong>，确保各数据集适应性。</li>
+</ul>
+<h3><strong>超参数优化</strong></h3>
+<ul>
+<li><strong>固定模型架构</strong>，仅优化 <strong>梯度下降参数</strong>：
+<ul>
+<li><strong>批量大小（batch size）</strong>：固定为 <strong>1024</strong>。</li>
+<li><strong>学习率（learning rate）</strong>：测试 <strong>10⁻²、10⁻³ 和 10⁻⁴</strong>。</li>
+</ul>
+</li>
+<li><strong>模型选择标准</strong>：
+<ul>
+<li><strong>AUC（任务 1）</strong></li>
+<li><strong>MCC（任务 2）</strong></li>
+<li><strong>标准偏差（任务 3）</strong></li>
+</ul>
+</li>
+<li><strong>计算成本考虑</strong>：
+<ul>
+<li><strong>未进行大规模超参数搜索</strong>，因 Adam 优化器本身对超参数较为鲁棒（Kingma &amp; Ba, 2014）。</li>
+</ul>
+</li>
+</ul>
+<h2>2.6 基准方法（Baseline）</h2>
+<h3><strong>1. P 波拾取基准方法</strong></h3>
+<ul>
+<li>采用 <strong>Baer-Kradolfer 拾取器</strong>（Baer &amp; Kradolfer, 1987）作为 P 波到时拾取的基准方法。</li>
+<li><strong>参数设定</strong>：
+<ul>
+<li><strong>最小 &amp; 最大事件检测时间</strong>。</li>
+<li><strong>双阈值设定</strong>（第二个阈值为第一个阈值的一半）。</li>
+<li><strong>带通滤波（Butterworth filter）</strong> 以减少噪声。</li>
+</ul>
+</li>
+</ul>
+<h3><strong>2. 参数优化</strong></h3>
+<ul>
+<li><strong>传统方法无法使用梯度下降优化</strong>，需使用 <strong>高斯优化（Gaussian Optimization）</strong>：
+<ul>
+<li>以 <strong>RMSE（均方根误差）</strong> 作为优化目标。</li>
+<li><strong>25 个初始点，500 次进一步评估</strong>。</li>
+</ul>
+</li>
+<li><strong>优化计算成本</strong>：
+<ul>
+<li><strong>仅在 2500 个 P 波拾取点上评估</strong>，减少计算负担。</li>
+</ul>
+</li>
+</ul>
+<h3><strong>3. 未包含的基准方法</strong></h3>
+<ul>
+<li><strong>未使用传统事件检测方法</strong>，因其 <strong>误报率高，无法直接比较</strong>。</li>
+<li><strong>未使用 S 波拾取基准</strong>，因 <strong>传统 S 波拾取依赖额外信息（震源距离 &amp; 方位角）</strong>，参数调整难度较大。</li>
+</ul>
+<hr>
+<h1>3. Results</h1></div>
 <div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
@@ -267,6 +620,6 @@ function iFrameLoading(){
 
 
 </script>
-
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 </html>
