@@ -776,6 +776,59 @@ $$</p>
 </li>
 </ul>
 <hr>
+<h1>4.Discussion</h1>
+<h2>4.1 模型在波形示例上的比较总结</h2>
+<p><strong>主要发现</strong></p>
+<ul>
+<li><strong>INSTANCE 数据集的 P 波标注偏晚 0.5 秒</strong>，深度学习模型学到了更一致的拾取标准。</li>
+<li><strong>ETHZ 数据集上的 DPP 过早拾取震相</strong>，可能是 <strong>预测曲线过早跃升</strong>。</li>
+<li><strong>GEOFON 训练的模型在远震数据上的 P 波拾取误差低于 0.2 秒</strong>，表现良好。</li>
+<li><strong>INSTANCE 训练的模型无法泛化到远震数据，拾取震相完全随机</strong>。</li>
+</ul>
+<h2>4.2 采样率调整的跨域应用</h2>
+<p><strong>主要发现</strong></p>
+<ul>
+<li><strong>S 波检测任务在降采样后未见显著性能提升</strong>。</li>
+<li><strong>原始模型对 S 波的检测性能已经较好，因此降采样影响较小</strong>。</li>
+<li><strong>S 波标注数据主要集中在信噪比较高、震中距适中的情况，因此天生误差较小</strong>。</li>
+<li><strong>S 波的振幅谱在区域数据和远震数据中的差异较小，而 P 波的频谱变化更大</strong>。</li>
+</ul>
+<p><strong>主要结论</strong></p>
+<ul>
+<li><strong>降采样对 S 波拾取的影响较小，可能不如对 P 波拾取重要</strong>。</li>
+<li><strong>P 波的频谱变化更大，因此降采样对 P 波拾取有较大影响，而 S 波在不同数据集中的频谱变化较小</strong>。</li>
+<li><strong>未来可以探索其他方法来优化 S 波拾取，而非单纯降低采样率</strong>。</li>
+</ul>
+<h2>4.3计算需求 (Computational Demand)</h2>
+<p><strong>计算资源与硬件环境</strong></p>
+<ul>
+<li><strong>所有模型均在相同的计算环境下训练</strong>：
+<ul>
+<li><strong>Nvidia A100 GPU（40GB 显存）</strong>，确保基准测试的公平性。</li>
+</ul>
+</li>
+<li><strong>显存占用情况</strong>：
+<ul>
+<li><strong>除 DPP（LSTM）和 GPD（滑动窗口方法）外，所有模型显存占用均低于 10GB（batch size = 1024）</strong>。</li>
+<li><strong>LSTM 计算需求较高</strong>，存储长序列时占用较大显存。</li>
+<li><strong>GPD 采用滑动窗口（sliding window approach）</strong>，需要多次计算，导致显存需求更高。<br>
+<strong>计算瓶颈分析</strong></li>
+</ul>
+</li>
+<li><strong>GPU 计算受限（GPU-bound）</strong>：
+<ul>
+<li><strong>EQTransformer、DPP 拾取器（DPP picker networks）、CRED</strong> 主要受 <strong>GPU 计算能力限制</strong>，GPU 利用率接近 100%。</li>
+<li><strong>GPD 在推理阶段同样受 GPU 计算能力限制</strong>，但由于滑动窗口方法，推理速度仍然较慢。</li>
+</ul>
+</li>
+<li><strong>CPU 或内存带宽限制（CPU/memory bus bound）</strong>：
+<ul>
+<li><strong>BasicPhaseAE、PhaseNet 等模型 GPU 负载远低于 100%</strong>，说明可能受到 <strong>CPU 或内存带宽的限制</strong>。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h1>5.开放问题</h1>
 <p><a href="https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2021JB023499" rel="nofollow">Paper Link</a></p></div>
 <div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
 
@@ -835,7 +888,11 @@ console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 
 <script>
 document.getElementById("pathHome").setAttribute("d",IconList["home"]);
 document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
-
+cmButton=document.getElementById("cmButton");
+    span=document.createElement("span");
+    span.setAttribute("class","Counter");
+    span.innerHTML="1";
+    cmButton.appendChild(span);
 
 
 function openComments(){
