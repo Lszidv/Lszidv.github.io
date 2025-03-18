@@ -10,9 +10,11 @@
         let theme = localStorage.getItem("meek_theme") || "light";
         document.documentElement.setAttribute("data-color-mode", theme);
     </script>
-<meta name="description" content="">
+<meta name="description" content="# Abstract
+- 随着全球收集到的地震数据量不断增加，分析这些数据的能力已无法跟上数据的增长，因为迄今为止，这些数据集主要依赖人工专家的监督方式进行分析。">
 <meta property="og:title" content="[Literature Reading] NA Clustering earthquake signals and background noises in continuous seismic data with unsupervised deep learning(section)">
-<meta property="og:description" content="">
+<meta property="og:description" content="# Abstract
+- 随着全球收集到的地震数据量不断增加，分析这些数据的能力已无法跟上数据的增长，因为迄今为止，这些数据集主要依赖人工专家的监督方式进行分析。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://Lszidv.github.io/post/%5BLiterature%20Reading%5D%20NA%20Clustering%20earthquake%20signals%20and%20background%20noises%20in%20continuous%20seismic%20data%20with%20unsupervised%20deep%20learning%28section%29.html">
 <meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
@@ -73,7 +75,85 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </div>
 </div>
     <div id="content">
-<div class="markdown-body" id="postBody"></div>
+<div class="markdown-body" id="postBody"><h1>Abstract</h1>
+<ul>
+<li>随着全球收集到的地震数据量不断增加，分析这些数据的能力已无法跟上数据的增长，因为迄今为止，这些数据集主要依赖人工专家的监督方式进行分析。此外，进行的分析可能会受到地震学家采用的标准模型的强烈偏见。为了应对这两种挑战，我们开发了一种新的无监督机器学习框架，用于检测和聚类连续地震记录中的地震信号。我们的方法结合了深度散射网络和高斯混合模型，用于对地震信号片段进行聚类，并检测新型结构。为了展示该框架的强大功能，我们分析了2017年6月格林兰Nuugaatsiaq滑坡期间获取的地震数据。我们展示了盲目检测并恢复了在主滑坡破裂之前记录的重复性前兆地震活动，这表明我们的方法可能会为地震学活动的预测提供更有信息的预测。</li>
+</ul>
+<hr>
+<h1>Results</h1>
+<h2>Seismic records of the 2017 Nuugaatsiaq landslide</h2>
+<ul>
+<li>将低幅度前兆地震信号的聚类与检测方法应用于2017年6月格林兰Nuugaatsiaq滑坡事件。该滑坡引发海啸并造成四人受伤。通过分析东向分量的地震记录，发现滑坡前约9小时有重复的小型地震事件，表现为加速行为。这些信号具有低幅度和平滑的包络线，并且被背景噪声掩盖，传统的STA/LTA方法无法有效识别。</li>
+<li>模板匹配策略通过交叉相关性搜索与预定义模板相似的事件。尽管该方法对频段、模板质量等敏感，但在大数据集上应用受限。无监督模板匹配方法通过自相关处理所有时间段作为潜在模板事件，但因计算资源限制，这在大数据集上几乎不可行。</li>
+<li>提出了一种盲目检测方法，用于检测前兆地震事件。即使前兆信号在手动检查中不可见，我们的方法仍能准确检测。聚类是一项探索性任务，目的是简化进一步的分析，如模板选择和模板匹配检测。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/60a10c91-490d-4e04-8a5f-08eceb7d4ff7"><img src="https://github.com/user-attachments/assets/60a10c91-490d-4e04-8a5f-08eceb7d4ff7" width="300" height="400" style="max-width: 100%;"></a></p>
+---
+## Feature extraction from a learnable deep scattering network
+<h3>Feature extraction from a learnable deep scattering network</h3>
+<h3>Feature extraction from a learnable deep scattering network</h3>
+<h4>1. <strong>深度散射网络架构</strong></h4>
+<p>深度散射网络（Deep Scattering Network, DSN）是一种基于小波变换的信号处理架构，旨在通过逐层卷积和模运算从输入信号中提取多尺度特征。在地震信号分析中，深度散射网络特别适用于处理非平稳信号（如地震波），因为它能够有效地同时分析信号的时域和频域特性。</p>
+<ul>
+<li>
+<p><strong>母小波的作用</strong>：母小波是网络的核心组件，负责对输入信号进行多尺度分解。母小波的选择和优化直接影响到信号特征的提取效果。通过对母小波进行扩展和插值，网络能够调整不同频率范围的滤波器组，满足信号多尺度分析的需求。</p>
+</li>
+<li>
+<p><strong>多层次卷积操作</strong>：深度散射网络通过多个卷积层（conv1，conv2，conv3）逐步提取信号的局部特征。每一层的卷积操作提取信号的时频信息，并通过模运算计算信号的幅度特征，从而突出信号的变化而忽略平稳部分。</p>
+</li>
+</ul>
+<h4>2. <strong>小波变换在地震波分析中的作用</strong></h4>
+<p>地震波通常包含高频（快速变化）和低频（持续震动）成分，且具有非平稳性。小波变换在地震波分析中的作用非常显著，因为它能够同时提供信号的时域和频域信息，从而揭示信号在不同时间尺度上的变化。</p>
+<ul>
+<li>
+<p><strong>多尺度分析</strong>：小波变换通过不同尺度的小波滤波器，能够捕捉信号在不同频率范围上的细节。这使得网络能够同时处理信号的短时细节和长期历史特征。例如，地震前兆信号的频率可能会随时间增加，而小波变换能够有效追踪这种频率变化，并分析其时频特性。</p>
+</li>
+<li>
+<p><strong>局部化特性</strong>：小波变换相较于傅里叶变换的优势在于其局部化特性，即能够在时域中准确定位信号的突变或变化。在地震信号分析中，这对于捕捉短时的高频突发事件（如地震震颤）尤其重要。</p>
+</li>
+</ul>
+<h4>3. <strong>深度散射网络的操作流程</strong></h4>
+<p>深度散射网络通过小波卷积和模运算层逐层提取地震信号的特征。具体流程如下：</p>
+<ul>
+<li>
+<p><strong>输入信号</strong>：多通道地震信号作为输入数据进入网络（图中“Data (channels)”）。每一层使用母小波滤波器组对信号进行卷积，得到信号的多尺度表示。</p>
+</li>
+<li>
+<p><strong>池化与降采样</strong>：在每一层的卷积后，使用平均池化操作（pool1、pool2）对特征进行降采样，降低数据量，并提升计算效率。池化操作去除了高频噪声，保留了信号的主要结构特征。</p>
+</li>
+<li>
+<p><strong>散射系数计算与低维潜在空间形成</strong>：通过池化和拼接操作，网络最终获得了散射系数，这些系数在多时间和频率尺度上形成了信号的高维表示。然后，使用维度约简方法将这些散射系数映射到低维潜在空间，便于后续的聚类分析。</p>
+</li>
+<li>
+<p><strong>高斯混合模型聚类</strong>：在低维潜在空间中，使用高斯混合模型对信号进行聚类，帮助识别不同类型的地震活动。这一过程使得网络能够对地震信号进行分类，从而提高对地震活动的预测能力。</p>
+</li>
+</ul>
+<h4>4. <strong>优化与训练</strong></h4>
+<p>深度散射网络的优化通过Adam随机梯度下降法进行，目标是最小化聚类的负对数似然函数。每一层的母小波都通过该优化过程进行调整，使得网络能够高效地提取信号的特征。通过对母小波的插值和扩展，确保每一层的滤波器组能够更好地适应输入信号的特性。</p>
+<h4>5. <strong>深度散射网络的优势</strong></h4>
+<p>深度散射网络相比传统的卷积神经网络（CNN）具有许多优势：</p>
+<ul>
+<li>
+<p><strong>可解释性</strong>：深度散射网络的结构和操作过程较为清晰，每一层的操作都基于小波变换，这使得网络的功能更加可解释。与深度CNN不同，深度散射网络的滤波器具有明确的物理意义，有助于理解和分析地震信号的处理过程。</p>
+</li>
+<li>
+<p><strong>局部不变性</strong>：散射系数对于局部时间平移、信号变形和重叠具有不变性，这使得该网络能够在面对不同来源的噪声或信号变化时，依然能够提取稳定的特征。</p>
+</li>
+<li>
+<p><strong>高效的多尺度处理</strong>：网络通过多层小波卷积和池化操作，能够有效地提取不同时间尺度和频率尺度上的特征，特别适合处理地震信号这种非平稳且频率变化较大的信号。</p>
+</li>
+</ul>
+<h4>6. <strong>应用范围</strong></h4>
+<p>深度散射网络的设计特别适用于以下应用场景：</p>
+<ul>
+<li>
+<p><strong>地震信号分析</strong>：本网络尤其适用于处理短时冲击性地震信号（如地震波、震颤等），并能在合理的计算成本下高效提取信号的多尺度特征。对于更长时间的地震信号（如背景噪声），可以通过增加网络的深度来进一步分析。</p>
+</li>
+<li>
+<p><strong>信号分类与预测</strong>：通过聚类分析，深度散射网络能够将不同类型的地震信号进行分类，为地震活动的预测提供支持。通过小波变换的局部化特性和多尺度分析，网络能够在多变的信号环境中提取有用的特征。<br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/b4198b20-3e01-4372-b08a-097acc24d973"><img src="https://github.com/user-attachments/assets/b4198b20-3e01-4372-b08a-097acc24d973" alt="Image" style="max-width: 100%;"></a></p>
+</li>
+</ul></div>
 <div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
