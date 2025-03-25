@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="# 摘要
+
+- 剪切波（S波）速度在油藏表征、流体识别和预叠加反演中至关重要。">
+<meta property="og:title" content="[Literature Reading]Shear wave velocity prediction based on 1DCNN-BiLSTM network with attention mechanism">
+<meta property="og:description" content="# 摘要
+
+- 剪切波（S波）速度在油藏表征、流体识别和预叠加反演中至关重要。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://Lszidv.github.io/post/%5BLiterature%20Reading%5DShear%20wave%20velocity%20prediction%20based%20on%201DCNN-BiLSTM%20network%20with%20attention%20mechanism.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
+<title>[Literature Reading]Shear wave velocity prediction based on 1DCNN-BiLSTM network with attention mechanism</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">[Literature Reading]Shear wave velocity prediction based on 1DCNN-BiLSTM network with attention mechanism</h1>
+<div class="title-right">
+    <a href="https://Lszidv.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/Lszidv/Lszidv.github.io/issues/39" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h1>摘要</h1>
+<ul>
+<li>剪切波（S波）速度在油藏表征、流体识别和预叠加反演中至关重要。然而，直接通过偶极声波测井获取S波速度的成本较高，且传统预测方法存在精度差、泛化能力不足以及神经网络训练问题。为解决这些问题，本文提出了一种低成本、可靠的深度学习（DL）方法，用于从实际测井数据中预测S波速度。</li>
+<li>该方法设计了一个对深度序列测井数据敏感的新网络，包含1D卷积层、双向长短时记忆（BiLSTM）层、注意力层和全连接层。通过卷积层提取局部特征，BiLSTM层捕捉长期序列特征，注意力层进一步提升重要特征的权重，最后通过全连接层建立测井数据与S波速度的非线性映射。</li>
+<li>应用于现场数据并与LSTM网络、反向传播神经网络（BPNN）和经验公式进行比较，结果表明，该方法具有更高的预测精度（$R^2$ &gt; 0.95，RMSE &lt; 57 m/s，MAE &lt; 35 m/s），展示了其优越的性能和广泛应用潜力。</li>
+</ul>
+<hr>
+<h1>1. Introduction</h1>
+<ul>
+<li>
+<p>剪切波（S波）速度是油藏预测中的重要参数，广泛应用于油藏岩性、物理性质以及流体识别和预测（Russell et al., 2003; Rezaee et al., 2007; Oloruntobi and Butt, 2020）。准确的S波速度测井数据对预叠加地震反演和地震属性分析也至关重要。然而，由于S波测井成本较高，许多油田区域，特别是老井中，S波速度数据难以获得（Bagheripour et al., 2015; Chen T. et al., 2022）。为解决这一问题，学者们提出了三类主要的S波速度预测方法：经验公式、岩石物理建模和机器学习预测（Liu et al., 2023）。</p>
+</li>
+<li>
+<p>经验公式方法依赖于现场已有的测井数据，通过统计分析这些数据与S波速度之间的关系。Pickett（1963）通过分析大量测井速度数据，建立了石灰岩中P波和S波速度的经验公式；Castagna（1985）提出了碎屑岩的泥岩线方程，描述了P波和S波速度的关系；Han（1986）从墨西哥湾的砂岩样本中推导了超声波速度与孔隙度和粘土矿物含量之间的回归关系。尽管这些经验公式计算效率较高，广泛应用于实际勘探中，但随着对勘探精度要求的提升，这些方法在复杂油藏环境下的预测精度较低，无法满足实际需要（Oh et al., 2018; Jiang et al., 2022）。</p>
+</li>
+<li>
+<p>岩石物理建模方法通过建立弹性参数与油藏参数之间的关系，从而比经验公式提供更为可靠的S波速度预测（Gassmann, 1951; Pride et al., 2004）。例如，Xu和White（1995）将Gassmann方程与Kuster-Toksöz模型相结合，提出了Xu-White模型用于砂泥岩油藏的S波速度预测。尽管岩石物理模型提供了更高的预测精度，但其鲁棒性较差，实际数据中常包含噪声，导致预测结果不确定。此外，岩石物理建模方法需要大量的参数（如流体分布、孔隙结构和矿物成分等），计算效率低，限制了其在实际应用中的广泛使用。</p>
+</li>
+<li>
+<p>随着深度学习（DL）技术的发展，机器学习和深度学习方法在S波速度预测中展现了强大的能力（Mousavi et al., 2016; Saad et al., 2021）。传统的神经网络方法仅能建立测井数据与S波速度之间的点对点关系，未能充分考虑测井曲线深度变化模式，导致精度有限。近年来，递归神经网络（RNN）和卷积神经网络（CNN）被广泛应用于S波速度预测（Sun and Liu, 2020; Zhang et al., 2020; Wang et al., 2022）。RNN可以捕捉序列数据的长时依赖关系，但容易遇到梯度爆炸或消失的问题（Bengio et al., 1994），而CNN则在提取局部特征方面具有优势，但对于长序列的特征提取效果较差（Wang and Peng, 2019; Zhang et al., 2021）。这些问题促使学者们尝试将注意力机制引入到网络中，以提高模型的表现（Harsuko and Alkhalifah, 2022; Yang et al., 2023）。</p>
+</li>
+</ul>
+<hr>
+<h1>2. Methods</h1>
+<h2>2.1 BiLSTM</h2>
+<ul>
+<li>
+<p>双向长短期记忆（BiLSTM）网络的基本单元是LSTM网络，能够提取测井曲线的长期特征。与LSTM网络相比，BiLSTM在识别测井曲线深度方向的模式上更有效。LSTM网络通过遗忘门、输入门和输出门来控制信息的选择和记忆，从而避免了RNN中的梯度消失和梯度爆炸问题。</p>
+</li>
+<li>
+<p><strong>遗忘门</strong>：通过sigmoid函数控制上一时间步和当前时间步信息的保留。</p>
+</li>
+<li>
+<p><strong>输入门</strong>：由两部分组成，通过sigmoid和tanh函数来选择存储到记忆单元的新信息。</p>
+</li>
+<li>
+<p><strong>记忆单元</strong>：结合当前和上一时间步的信息得到当前的记忆值。</p>
+</li>
+<li>
+<p><strong>输出门</strong>：控制输出信息的生成。</p>
+</li>
+<li>
+<p>反向LSTM网络与正向LSTM网络结构相反，双向LSTM网络通过结合正向和反向LSTM层来同时学习数据中的正向和反向模式，增强了对时序数据的捕捉能力。</p>
+</li>
+<li>
+<p>双向LSTM网络在时间步$t$的输出由正向和反向LSTM层的输出结合得到，能够更准确地捕捉序列中的全局信息。</p>
+</li>
+</ul>
+<h2>2.2 Attention Mechanism</h2>
+<ul>
+<li>
+<p>注意力机制的原理是将有限的注意力资源集中在关键的信息上，忽略无关信息，从而提取出更为重要的特征。通过引入注意力机制，神经网络能够自动聚焦于输入特征中的关键部分，提升模型的性能和泛化能力。</p>
+</li>
+<li>
+<p>具体而言，LSTM层的输出特征作为注意力层的输入，注意力机制计算特征的权重，并将加权后的特征传递到全连接层。注意力机制通过归一化操作得到每个特征的权重，帮助网络聚焦于最重要的信息。</p>
+</li>
+</ul>
+<h2>2.3 1DCNN-BiLSTM-Attention Network</h2>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/b9978a6b-038c-41d1-9104-6b111c227b01"><img src="https://github.com/user-attachments/assets/b9978a6b-038c-41d1-9104-6b111c227b01" alt="Image" style="max-width: 100%;"></a></p>
+<ul>
+<li>1DCNN-BiLSTM-Attention网络首先通过1DCNN层和ReLU激活函数提取测井曲线的短期特征，并通过最大池化层进行特征下采样以降低维度。接着，将提取的短期特征输入BiLSTM层提取长期特征，再将这些长期特征输入注意力机制层，根据特征对S波速度的重要性重新分配权重，最终通过全连接层建立提取特征与S波速度之间的非线性关系。</li>
+</ul>
+<hr>
+<h1>3 Network Building and Training</h1>
+<h2>3.1 Input Feature Selection</h2>
+<ul>
+<li>输入特征选择是构建神经网络的重要步骤。本研究通过计算皮尔逊相关系数，选择与S波速度高度相关的测井曲线作为1DCNN-BiLSTM-Attention网络的输入特征。利用实际油田区域四口井的测井数据，计算了声波时间差曲线（AC）、补偿中子曲线（CNL）、密度曲线（DEN）、伽马曲线（GR）与剪切波时间差曲线（DTS）之间的皮尔逊相关系数。通过热力分析图显示，AC与DTS相关性最强，表明P波速度在S波速度预测中占主导地位。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/1b737720-6931-420f-b14e-8991d8fff43b"><img src="https://github.com/user-attachments/assets/1b737720-6931-420f-b14e-8991d8fff43b" alt="Image" style="max-width: 100%;"></a></p>
+<h2>3.2 Input Feature Normalization</h2>
+<p>输入特征归一化在机器学习和深度学习中广泛应用。由于不同测井曲线的数值变化范围较大，未处理的数据可能导致长时间的训练和网络无法收敛，从而影响预测模型的精度。因此，本研究采用最小-最大法将测井数据缩放到[0-1]的范围，公式如下：</p>
+<p>$$
+X_{norm} = \frac{X - X_{min}}{X_{max} - X_{min}}
+$$</p>
+<p>其中，$X_{norm}$为归一化后的值，$X$为原始测井数据，$X_{max}$和$X_{min}$分别为测井数据的最大值和最小值。</p>
+<h2>3.3 Network Evaluation Approach</h2>
+<ul>
+<li>为了评估本研究提出的方法与传统S波速度预测方法的预测性能，使用了决定系数（$R^2$）、均方根误差（RMSE）和平均绝对误差（MAE）。其具体表达式如下：</li>
+</ul>
+<p>$$
+RMSE = \sqrt{\frac{1}{N} \sum_{i=1}^{N} (y_i - p_i)^2}
+$$</p>
+<p>$$
+MAE = \frac{1}{N} \sum_{i=1}^{N} |y_i - p_i|
+$$</p>
+<p>$$
+R^2 = 1 - \frac{\sum_{i=1}^{N} (y_i - p_i)^2}{\sum_{i=1}^{N} (y_i - \bar{y})^2}
+$$</p>
+<h2>其中，$y_i$为真实值，$p_i$为预测值，$\bar{y}$为真实S波速度的平均值，$N$为测试集的数量。</h2>
+<h1>4 Applications and Results</h1>
+<ul>
+<li>我们进行了两项实验来测试1DCNN-BiLSTM-Attention网络，使用了来自实际油田区域四口井的数据。第一项实验针对同一口井，使用井A的一部分数据训练预测模型，然后用井A剩余的数据进行测试。第二项实验针对不同井，使用井A和井B的数据训练神经网络，并将训练好的网络应用于井C和井D。为了评估模型的准确性，我们将该模型的预测结果与传统方法（如LSTM网络、BPNN和经验公式）的预测结果进行了比较。</li>
+</ul>
+<h2>4.1 Comparison of the Same Well</h2>
+<ul>
+<li>
+<p>第一项实验是针对同一口井的不同S波速度预测方法的比较。井A的测井数据范围为1,452到2,835.5米，采样间隔为0.125米，去除异常值后共有11070个有效数据。使用1,452–2,559米的数据进行神经网络训练，2,559至2,835.5米的数据作为测试集进行预测。网络超参数通过控制变量法进行设置，最终超参数设置为时间步长4、LSTM神经元和卷积核数量32、卷积核大小4×4、学习率0.005，损失函数为均方误差（MSE），优化算法为Adam。</p>
+</li>
+<li>
+<p>网络训练结果显示，1DCNN-BiLSTM-Attention网络在45个epoch后收敛，损失值最小，预测结果最接近真实值。与LSTM网络、BPNN和经验公式相比，1DCNN-BiLSTM-Attention网络的预测精度分别提高了11.58%、24.41%和54.74%；MAE和RMSE分别减少了37.86%、54.48%、75.56%和43.96%、55.84%、84.14%。1DCNN-BiLSTM-Attention网络能够深入探索测井曲线的关联与模式，从而获得更准确的预测结果。</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/a9dd90a3-f684-4f1c-bdf1-fd4a69623f43"><img src="https://github.com/user-attachments/assets/a9dd90a3-f684-4f1c-bdf1-fd4a69623f43" alt="Image" style="max-width: 100%;"></a></p>
+<h2>4.2 Comparison of the Different Wells</h2>
+<ul>
+<li>
+<p>第二项实验是对不同井的S波速度预测方法进行比较。使用井A和井B的25,755组数据作为训练集，井C（1957–2250米）和井D（1948–2220米）的4,103组数据作为测试集，验证网络的预测性能和泛化能力。与其他三种方法的预测结果进行比较，结果显示1DCNN-BiLSTM-Attention网络的预测结果最接近真实测量值，且经验公式的预测性能显著较差。1DCNN-BiLSTM-Attention网络的$R^2$分别为0.9752和0.9680，显著高于其他三种方法，预测精度提高了17.99%至81.89%，预测误差低于4%（井C）和3%（井D）。1DCNN-BiLSTM-Attention网络具有最好的预测精度和优秀的泛化能力。</p>
+</li>
+<li>
+<p><strong>相同井的比较：在同一口井（井A）上应用该网络，展示了1DCNN-BiLSTM-Attention网络相较于LSTM、BPNN和经验公式的优越性。</strong></p>
+</li>
+<li>
+<p><strong>不同井的比较：在不同井（井C和井D）上验证网络的泛化能力，发现该网络能够很好地推广到未见数据，展示了强大的泛化能力。</strong></p>
+</li>
+</ul>
+<hr>
+<h2>5 Discussion</h2>
+<ul>
+<li>本文提出了一种新的深度学习框架用于S波速度预测，构建了包括1DCNN、BiLSTM网络和全连接神经网络的新型网络，结合了CNN和LSTM网络在特征提取中的优势，并引入了注意力机制。然而，该网络依赖于高质量的标注数据，其强大的预测能力依赖于充足的标注数据，通常需要使用合成数据来训练网络。合成数据虽然标签易得，但往往无法真实反映现场实际情况，导致训练网络的泛化能力较差。</li>
+<li>因此，减少合成数据与真实数据之间的差异，以及使两者的分布相似，是提升网络泛化能力的有效方法。如何为小样本数据集建立映射关系，并通过这些数据集提高网络的泛化能力和预测性能，将是未来研究的重要方向。</li>
+</ul>
+<hr>
+<h2>6 Summary and Conclusion</h2>
+<ul>
+<li>S波速度估计在油藏预测中非常重要。本文提出了一种新的深度学习框架——1DCNN-BiLSTM-Attention网络，结合了CNN和RNN的特征提取优势，并引入了注意力机制。该网络在实际油田数据中的预测精度表现优异，能够提供准确的S波速度参数。与传统的LSTM网络、BPNN和经验公式相比，本文方法在预测性能和泛化能力方面表现更好，预测精度更高。然而，1DCNN-BiLSTM-Attention网络作为监督学习算法，其预测精度仍然依赖于高质量的标签数据，因此，未来的研究应考虑如何提高网络的泛化能力和鲁棒性。</li>
+</ul>
+<p><a href="https://www.frontiersin.org/journals/earth-science/articles/10.3389/feart.2024.1376344/full" rel="nofollow">Paper Link</a></p></div>
+<div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://Lszidv.github.io">芜尽</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","Lszidv/Lszidv.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+
+
+</script>
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</html>
