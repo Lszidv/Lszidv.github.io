@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="# ABSTRACT
+- 本文提出了一种基于数据驱动的深度神经网络方法，通过将地表波转换为相速度-频率面板来预测近地表速度剖面，区别于传统的通过反射体波或导波估计速度的方法。">
+<meta property="og:title" content="[Liter Reading]Near-surface velocity estimation using shear-waves and deep-learning with a U-net trained on synthetic data">
+<meta property="og:description" content="# ABSTRACT
+- 本文提出了一种基于数据驱动的深度神经网络方法，通过将地表波转换为相速度-频率面板来预测近地表速度剖面，区别于传统的通过反射体波或导波估计速度的方法。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://Lszidv.github.io/post/%5BLiter%20Reading%5DNear-surface%20velocity%20estimation%20using%20shear-waves%20and%20deep-learning%20with%20a%20U-net%20trained%20on%20synthetic%20data.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
+<title>[Liter Reading]Near-surface velocity estimation using shear-waves and deep-learning with a U-net trained on synthetic data</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">[Liter Reading]Near-surface velocity estimation using shear-waves and deep-learning with a U-net trained on synthetic data</h1>
+<div class="title-right">
+    <a href="https://Lszidv.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/Lszidv/Lszidv.github.io/issues/40" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h1>ABSTRACT</h1>
+<ul>
+<li>本文提出了一种基于数据驱动的深度神经网络方法，通过将地表波转换为相速度-频率面板来预测近地表速度剖面，区别于传统的通过反射体波或导波估计速度的方法。</li>
+<li>研究的第二个目标是分析迁移学习和数据增强等深度学习方法对预测精度的影响。通过数值实验，证明这些方法有助于提高速度估计的精度。</li>
+<li>第三个目标是解决深度学习模型在处理超出分布（OOD）数据时的泛化能力问题，提出了基于先验知识约束输出映射的领域自适应网络。</li>
+</ul>
+<hr>
+<h1>1.Institution</h1>
+<ul>
+<li>地球物理学领域也同样受益于深度学习的应用。深度学习被应用于地震处理的多个方面，主要可以分为四个类别：</li>
+<li>基于机器视觉的地震解释：这是最成熟的应用，包括断层检测、地震相分类和初至波拾取等任务。</li>
+<li>信号处理任务：包括地震去噪、去叠加、地面滚动衰减和地震预处理。</li>
+<li>岩性参数反演：例如岩性反演和地震阻抗反演。</li>
+<li>物理信息神经网络（PINNs）：这些网络结合了标准前馈神经网络和偏微分方程的参数，应用于如波场建模等任务。</li>
+</ul>
+<p>传统与基于深度学习的近地表速度估计</p>
+<ul>
+<li>本文首先回顾了传统的地表波估计近地表速度的方法，接着介绍了基于深度学习的方法，特别是迁移学习、数据增强和领域自适应策略。通过这种新方法，本文在合成数据和真实的陆地地震数据上进行了评估。</li>
+</ul>
+<h2>1.1. Deep learning in seismic velocity estimation</h2>
+<ul>
+<li>
+<p>本节讨论了深度学习在地震速度估计中的应用，特别是在近地表速度估计方面的潜力。传统的地震速度估计方法主要依赖反射地震数据或P波数据，而深度学习提供了一种数据驱动的解决方案，能够通过学习复杂的地震数据模式来估算速度模型。深度学习的优势在于它可以自动化处理和分析大量数据，减少了传统方法中需要大量手动干预的步骤。</p>
+</li>
+<li>
+<p>本节提到，深度学习的一个重要优势是通过选择合适的训练数据，能够将先验知识融入到神经网络的训练过程中，从而提高反演精度并限制网络的预测结果。训练好的神经网络可以在生产处理中高效应用，减少了计算资源的消耗。</p>
+</li>
+<li>
+<p>此外，深度学习方法还能够处理多种类型的速度定义，不仅包括传统的岩石物理学速度定义，还能应用于反射地震数据中的速度反演、信号处理任务（如去噪和去叠加），以及物理信息神经网络（PINN）的应用。</p>
+</li>
+</ul>
+<p>##1.2. Near-surface velocity estimation with surface waves</p>
+<ul>
+<li>
+<p>讨论了基于地表波的近地表速度估计方法，重点使用瑞利波和色散曲线反演来提取Vp和Vs速度信息。传统的地震速度估计方法通常依赖垂直传播的P波和反射地震数据，然而，本文采用水平传播的地表波，更适用于近地表速度的测量。</p>
+</li>
+<li>
+<p>色散曲线反演过程中，传统方法手动选择每个频率的最大值，存在主观性和繁琐性，尤其在大规模地震勘探中。为了自动化这一过程，已有研究尝试采用机器学习方法，但这些方法仍依赖于瑞利波基本模式的假设，且高阶模式可能会与基本模式重叠，导致误差。</p>
+</li>
+<li>
+<p>在反演中，剪切速度和层厚度是常见的模型参数，低频信息能感知地下的深层结构，而高频则主要作用于浅层。色散曲线反演结果显示，少层数的模型能与多层数模型展现相同的基本模式色散曲线。</p>
+</li>
+<li>
+<p>尽管色散曲线反演方法历史悠久，但仍存在一定局限，尤其是在高阶模式交叉重叠的情况下，可能影响基本模式的提取。理想情况下，反演不应依赖手动选择色散曲线，而应直接使用整个频率-相速度数据进行处理。为此，本文探讨了深度神经网络在弥合色散曲线反演与全波形反演（FWI）之间差距的潜力。通过监督学习，深度神经网络能够从完整的相速度谱中学习，自动估算合理的Vp和Vs模型。</p>
+</li>
+</ul>
+<hr>
+<h1>2.Method</h1>
+<ul>
+<li>本节介绍了一种基于深度学习的近地表速度估计方法。与传统方法不同，深度学习方法不再依赖手动估算色散曲线，而是通过数据驱动方式学习色散曲线的代理。方法流程包括将相速度的幅度谱输入增强模块，应用多种变换生成新变体，并结合每个谱点的速度和频率坐标作为网格信息，形成3通道输入。</li>
+<li>变换后的输入通过CNN骨干网络回归得到Vp和Vs曲线。通过多种输入输出组合训练该深度学习管道，并通过领域自适应模块提升网络的泛化能力，使其能够对未见过的数据进行有效预测。</li>
+</ul>
+<h2>2.1 Transfer learning</h2>
+<ul>
+<li>本节讨论了迁移学习在深度学习中的应用，尤其是在较小数据集上的泛化能力较差的情况下如何通过迁移学习来改善性能。迁移学习通过将从更复杂任务中学习到的知识转移到新的任务中，帮助网络更好地初始化，并加速优化过程。在地球物理问题中，本文使用了来自ImageNet任务的预训练神经网络权重和偏置，尽管地震数据与自然图像在空间分布上差异显著，但仍值得探索它们的潜在空间是否存在重叠，以及迁移学习是否能为地震数据分析带来帮助。</li>
+</ul>
+<h2>2.2. Artificial image augmentations</h2>
+<ul>
+<li>本节讨论了人工图像增强技术在深度学习中的应用，尤其是在数据稀缺的情况下，如何通过增强现有图像来增加数据集的规模，从而避免过拟合。所采用的图像增强技术包括：随机裁剪、随机平移、随机膨胀、随机旋转、随机遮蔽</li>
+</ul>
+<h2>2.3 Artificial image augmentations</h2>
+<ul>
+<li>本节讨论了人工图像增强在深度学习中的应用，尤其是当数据集较小或稀缺时，通过增强现有图像的多样性来增加数据量。数据增强技术通过生成不同版本的图像，帮助深度学习模型提高泛化能力，避免过拟合。本文采用了包括随机裁剪、随机平移、随机膨胀、随机旋转和随机遮蔽在内的增强方法，这些方法能有效地改善模型的学习效果，并加速优化过程，同时确保图像的空间信息得到保留。通过这些增强技术，模型可以在多种不同的输入数据上进行训练，从而提高预测的准确性和稳定性。</li>
+</ul>
+<h2>2.4 Random cropping</h2>
+<ul>
+<li>本节讨论了随机裁剪技术，这是通过从原始图像中创建随机子集来增强数据的一种方法。随机裁剪将图像先放大，然后随机裁剪出与原始图像相同大小的区域。此方法帮助深度学习模型更好地泛化，尤其是在目标物体未完全显示或在不同尺度下出现时。在计算机视觉中，这种方法已被证明有助于提高模型的学习能力，特别是在目标物体的位置不固定或尺寸不一的情况下。</li>
+</ul>
+<h2>2.5 Random masking</h2>
+<ul>
+<li>本节介绍了随机遮蔽技术，它通过向图像中随机添加零值或空白区域来掩盖部分信息，帮助模型避免在特定区域的过拟合，并促使模型有效地使用整个特征空间。对于地震数据，随机遮蔽也起到了去噪的作用，因为只有遵循色散曲线的高振幅值才包含关于地下模型的预测信息，而低振幅值则对速度预测的影响较小。这种技术使得模型能够更好地关注于重要的、高振幅的部分，从而提升预测的准确性。</li>
+</ul>
+<p><a href="">Paper Link</a></p></div>
+<div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://Lszidv.github.io">芜尽</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","Lszidv/Lszidv.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+
+
+</script>
+
+
+</html>
