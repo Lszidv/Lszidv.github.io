@@ -1,17 +1,23 @@
 name: build Gmeek
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'config.json'
+
   issues:
-    types: [opened, edited]
-  schedule:
-    - cron: "0 16 * * *"
-    
+    types: [closed]
+
+  workflow_dispatch:
+
+
 jobs:
   build:
     name: Generate blog
-    runs-on: ubuntu-22.04
-    if: ${{ github.event.repository.owner.id == github.event.sender.id || github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    if: ${{ github.event.repository.owner.id == github.event.sender.id || github.event.sender.login =='weinibuliu' || github.event_name == 'schedule' }}
     permissions: write-all
     steps:
       - name: Checkout
@@ -51,10 +57,10 @@ jobs:
           cp -r ./* /opt/Gmeek/
           cd /opt/Gmeek/
           python Gmeek.py ${{ secrets.GITHUB_TOKEN }} ${{ github.repository }} --issue_number '${{ github.event.issue.number }}'
-          cp -a /opt/Gmeek/docs ${{ github.workspace }} 
-          cp -a /opt/Gmeek/backup ${{ github.workspace }} 
-          cp /opt/Gmeek/blogBase.json ${{ github.workspace }} 
-          
+          cp -a /opt/Gmeek/docs ${{ github.workspace }}
+          cp -a /opt/Gmeek/backup ${{ github.workspace }}
+          cp /opt/Gmeek/blogBase.json ${{ github.workspace }}
+
       - name: update html
         run: |
           git config --local user.email "$(jq -r ".email" config.json)"
@@ -63,15 +69,15 @@ jobs:
           git commit -a -m '🎉auto update by Gmeek action' || echo "nothing to commit"
           git push || echo "nothing to push"
           sleep 3
-          
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: 'docs/.'
-          
+
   deploy:
     name: Deploy blog
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     needs: build
     permissions:
       contents: write
