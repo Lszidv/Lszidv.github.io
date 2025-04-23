@@ -10,9 +10,11 @@
         let theme = localStorage.getItem("meek_theme") || "light";
         document.documentElement.setAttribute("data-color-mode", theme);
     </script>
-<meta name="description" content="# Abstract。">
+<meta name="description" content="# Abstract
+- 研究通过使用密集的地震阵列和永久站点数据，构建了详细的微震目录，揭示了三江横向碰撞带（SLCZ）区域内的地震活动与地壳变形之间的密切关系。">
 <meta property="og:title" content="[Literature ReadingSpatially-varied crustal deformation indicating seismicity at faults intersection in the SE margin of the Tibetan Plateau: Evidence of S-wave splitting from microseismic identification">
-<meta property="og:description" content="# Abstract。">
+<meta property="og:description" content="# Abstract
+- 研究通过使用密集的地震阵列和永久站点数据，构建了详细的微震目录，揭示了三江横向碰撞带（SLCZ）区域内的地震活动与地壳变形之间的密切关系。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://Lszidv.github.io/post/%5BLiterature%20ReadingSpatially-varied%20crustal%20deformation%20indicating%20seismicity%20at%20faults%20intersection%20in%20the%20SE%20margin%20of%20the%20Tibetan%20Plateau-%20Evidence%20of%20S-wave%20splitting%20from%20microseismic%20identification.html">
 <meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
@@ -73,7 +75,44 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </div>
 </div>
     <div id="content">
-<div class="markdown-body" id="postBody"><h1>Abstract</h1></div>
+<div class="markdown-body" id="postBody"><h1>Abstract</h1>
+<ul>
+<li>研究通过使用密集的地震阵列和永久站点数据，构建了详细的微震目录，揭示了三江横向碰撞带（SLCZ）区域内的地震活动与地壳变形之间的密切关系。研究表明，S波分裂（SWS）数据可以有效地揭示上地壳各向异性，并且这种各向异性受到了应力场、断层及局部结构的多重影响。</li>
+</ul>
+<hr>
+<h1>1.Introduction</h1>
+<ul>
+<li>区域变形和应力分布的研究：<br>
+通过分析地震各向异性，揭示了SLCZ地区的应力场分布、断层分布和深部结构特征。地震各向异性是理解构造变形和物质流动的重要指标，能够揭示区域内的应力、深部复杂结构和动态机制。</li>
+<li>S波分裂分析（SWS）：<br>
+S波分裂分析是一种有效的技术，用于研究地壳和上地幔的各向异性特征。在SLCZ区域，快速S波的极化方向通常与最大主压应力平行，并且会受到附近断层的影响。此外，慢速S波的时间延迟（TDSS）提供了介质各向异性程度的定量信息。通过SWS参数分析，可以揭示区域应力和断层特性。</li>
+<li>微震识别方法：<br>
+由于传统地震台网中的地震数据数量有限，微震识别方法被应用于提高有效记录的数量，并从中提取高质量的SWS参数。通过这一方法，能够获得更多小震事件的数据，这些数据对于研究上地壳各向异性和区域变形分布至关重要。</li>
+<li>数据来源与研究方法：<br>
+本研究利用了三江阵列（SJ阵列）收集的连续地震记录，并结合微震识别方法增加了有效事件的数量。通过这些数据，提取了更多的SWS参数，进一步研究了SLCZ区域的地壳各向异性以及其与应力、断层和区域构造的关系。</li>
+</ul>
+<hr>
+<h1>2.Data</h1>
+<ul>
+<li>研究利用中国地震局地震预报研究所部署的密集SJ阵列收集的连续地震记录，阵列由26个临时站点组成，站点分布在SYB西部边界两侧，站点间距小于20公里。为了增强阵列的空间覆盖，本研究还结合了该区域的七个固定台。</li>
+</ul>
+<hr>
+<h1>3. Methods</h1>
+<h2>3.1. Detection and location of microseismic events</h2>
+<ul>
+<li>微震事件检测与定位方法：基于机器学习的LOC-FLOW工作流进行微震事件的检测与定位（Zhang等，2022）。该工作流包括多个步骤：P波和S波相位拾取、相位关联、绝对定位和双差法相对定位。</li>
+<li>相位拾取：使用RNN（递归神经网络）相位拾取模型来识别P波和S波的到达时间（Yu等，2022）。该模型通过数据点的置信度水平来进行相位拾取，输出对应的P/S波相位时间和类型。</li>
+<li>相位关联：通过REAL（快速地震关联与定位）自动相位关联方法（Zhang等，2019）将拾取到的P波和S波相位关联到具体的地震事件，建立初步的微震目录。</li>
+<li>绝对定位：使用HYPO-INVERSE方法（Klein，1978；Lienert等，1986）进行单事件的绝对定位，结合局部速度模型提供更准确的定位结果。</li>
+<li>相对定位：使用hypoDD方法（Waldhauser和Ellsworth，2000）进行相对定位，通过减少对速度模型的依赖，精确确定事件间的相对位置，从而提高定位精度。</li>
+</ul>
+<h2>3.2. SWS analysis of microseismic events</h2>
+<ul>
+<li>使用系统分析方法（SAM）提取微震事件的SWS参数。</li>
+<li>选择震级小于ML3.5且符合S波窗口的高质量S波波形进行分析。</li>
+<li>通过旋转粒子运动轨迹到真北并消除时间延迟，成功分离出快速S波和慢速S波。</li>
+<li>获得了参数（PDFS为167°，TDSS为0.09秒）。</li>
+</ul></div>
 <div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
