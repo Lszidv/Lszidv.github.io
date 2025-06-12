@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="# Abstract
+- 提出了一种基于深度神经网络的滤波模型 FilterNet，结合了 CNN 与 RNN 架构；
+- 实现了原始隧道衬砌 GPR 数据的端到端滤波处理，包括去除空气反射波、去噪与自动增益；
+- 性能方面，FilterNet 的 SSIM 达到 0.997，PSNR 高达 19.41，参数量为 UNet 的 48%，GFLOPS 仅为其 1/3；
+- 支持实时处理，在抑制随机噪声方面具有显著优势，是一种高效、轻量、实用的GPR数据处理方案。">
+<meta property="og:title" content="[Literature Reading]FilterNet: A CNN-RNN based filter model used for raw tunnel lining GPR data">
+<meta property="og:description" content="# Abstract
+- 提出了一种基于深度神经网络的滤波模型 FilterNet，结合了 CNN 与 RNN 架构；
+- 实现了原始隧道衬砌 GPR 数据的端到端滤波处理，包括去除空气反射波、去噪与自动增益；
+- 性能方面，FilterNet 的 SSIM 达到 0.997，PSNR 高达 19.41，参数量为 UNet 的 48%，GFLOPS 仅为其 1/3；
+- 支持实时处理，在抑制随机噪声方面具有显著优势，是一种高效、轻量、实用的GPR数据处理方案。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://Lszidv.github.io/post/%5BLiterature%20Reading%5DFilterNet-%20A%20CNN-RNN%20based%20filter%20model%20used%20for%20raw%20tunnel%20lining%20GPR%20data.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
+<title>[Literature Reading]FilterNet: A CNN-RNN based filter model used for raw tunnel lining GPR data</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">[Literature Reading]FilterNet: A CNN-RNN based filter model used for raw tunnel lining GPR data</h1>
+<div class="title-right">
+    <a href="https://Lszidv.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/Lszidv/Lszidv.github.io/issues/45" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h1>Abstract</h1>
+<ul>
+<li>提出了一种基于深度神经网络的滤波模型 FilterNet，结合了 CNN 与 RNN 架构；</li>
+<li>实现了原始隧道衬砌 GPR 数据的端到端滤波处理，包括去除空气反射波、去噪与自动增益；</li>
+<li>性能方面，FilterNet 的 SSIM 达到 0.997，PSNR 高达 19.41，参数量为 UNet 的 48%，GFLOPS 仅为其 1/3；</li>
+<li>支持实时处理，在抑制随机噪声方面具有显著优势，是一种高效、轻量、实用的GPR数据处理方案。</li>
+</ul>
+<hr>
+<h1>1. Introduction</h1>
+<ul>
+<li>地质雷达（GPR）因其高效、无损、高分辨率的特点，在铁路路基等浅层结构检测中应用广泛；</li>
+<li>GPR 数据采集过程易受噪声与电磁干扰影响，影响信噪比与分析效果；</li>
+<li>传统滤波算法（傅里叶、小波、曲波等）与浅层机器学习方法（EMD、VMD、FastICA）虽具一定效果，但难以实现复杂数据的端到端处理；</li>
+<li>深度神经网络（DNN）滤波方法（如 UNet、GPRNet、卷积自编码器）在信噪提升与特征提取方面表现优越，但存在参数量大、处理速度慢等问题；</li>
+<li>为实现更高效的 GPR 数据处理，本文提出一种融合 CNN 与 RNN 的深度滤波模型 FilterNet，具备小参数量、高实时性的优势，适用于实际工程场景中对原始 GPR 数据的快速处理。</li>
+</ul>
+<hr>
+<h1>2. Method</h1>
+<h2>2.1 The architecture of FilterNet</h2>
+<ul>
+<li>FilterNet 结构结合 CNN 与 GRU（RNN 子类），用于 GPR B-Scan 数据端到端滤波,模型设计目标：低参数量、高效率、支持实时性、小样本可训练性；</li>
+<li>FilterNet 架构包含：<br>
+Encoder： 基于多层 1D CNN，输入为长度为 512 的一维通道波形；<br>
+GRU 层： 提取时序相关性，支持处理二维剖面；<br>
+Decoder： 将波形特征向量还原为滤波结果；</li>
+<li>FilterNet1D 为对照模型，移除 RNN 并引入 skip connection，用于处理单通道数据,两种模型的输出均通过 Sigmoid 函数归一化；</li>
+<li>FilterNet 具有更短特征向量与更少参数量，适合实际工程中的实时场景；FilterNet1D 收敛速度更快。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/26a20c43-9bec-42ac-83f5-d519168e8804"><img src="https://github.com/user-attachments/assets/26a20c43-9bec-42ac-83f5-d519168e8804" alt="Image" style="max-width: 100%;"></a></p>
+<h2>2.2. Training data</h2>
+<ul>
+<li>为提升模型的实用性与泛化能力，不使用合成数据，而是采用实际采集的 GPR 隧道衬砌检测数据进行训练与测试。</li>
+<li>数据来源： 采集自宜漳铁路宜娄段共 15 座隧道（如刘家隧道、苏油冲隧道），覆盖湖南省益阳、长沙、湘潭、娄底等区域。线路北起益阳东站，南至娄底东站，地理坐标范围大致为 北纬 27°40′ 至 28°30′，东经 111°50′ 至 112°20′。</li>
+<li>模型目标： FilterNet 实现 端到端处理，直接以原始波形为输入，输出已完成 去除空气反射波、噪声抑制和自动增益处理的滤波结果（见图 2）。</li>
+<li>预处理步骤： 模型输入数据仅进行归一化处理，不采用其他手动预处理操作。</li>
+<li>标签数据构建： 滤波后的标签波形由 GPR 专业后处理软件 Reflexw 生成。该软件广泛用于 GPR 数据处理，支持数据导入、增益调整、滤波与编辑等功能。</li>
+<li>优势： 通过使用原始波形数据与专业标注输出构建训练样本，可大幅简化后处理流程，提高 GPR 数据处理的自动化程度与工程可部署性。</li>
+</ul>
+<h2>2.3 Real-time inference process</h2>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/533d85de-cad6-4133-8cf9-d4f055428f2a"><img src="https://github.com/user-attachments/assets/533d85de-cad6-4133-8cf9-d4f055428f2a" alt="Image" style="max-width: 100%;"></a></p>
+<ul>
+<li>FilterNet1D：用于处理单通道一维波形，结构简洁，只需实时输入当前通道数据即可完成滤波；</li>
+<li>FilterNet：用于处理二维 B-Scan 数据，依赖状态信息传递与序列建模，能捕捉通道之间的上下文信息。</li>
+<li>推理步骤如下：
+<ol>
+<li>归一化输入</li>
+<li>卷积编码器提取特征向量</li>
+<li>GRU 接收前一状态与当前特征，输出当前状态向量</li>
+<li>解码器生成滤波输出波形</li>
+</ol>
+</li>
+<li>状态向量 $mathbf{h}_i$具有记忆性，融合了当前通道与历史通道的信息，实现了对 B-Scan 数据的二维建模。整个流程支持 端到端、实时滤波输出，适用于隧道衬砌检测等现场实时 GPR 处理任务。</li>
+</ul>
+<hr>
+<h1>3. Performance analysis of FilterNet</h1>
+<h2>3.1 Single data analysis</h2>
+
+<ul>
+<li>测试集：长度为 2048 行 的 GPR 波形数据，每行包含 512 点的一维信号；</li>
+<li>原始数据（图 4a） 能量集中于空气反射波，地下回波几乎被掩盖；</li>
+<li>标签数据（图 4b） 仍存在随机噪声，且反射波比模拟数据更强；</li>
+<li>FilterNet 输出（图 4c, 4d）：能有效滤除标签中残留的随机高频噪声；网络输出趋于平均，天然抑制正负对称的高频随机扰动；网络不仅保留反射信号，还显著增强其可辨识性；</li>
+<li>模型差异对比：<br>
+1D 模型：噪声残留主要为横向结构；<br>
+2D 模型：更好建模通道间上下文信息，表现出更强的噪声抑制能力；<br>
+📌 神经网络在保留目标反射波的同时抑制随机噪声，表现出超越传统滤波算法的优势。</li>
+</ul>
+<h2>3.2. The accuracy of FilterNet</h2>
+<ul>
+<li>比较了三个模型的滤波精度：FilterNet1D；FilterNet；UNet（Liu et al., 2024）<br>
+-评估指标包括：峰值信噪比（PSNR, Peak Signal-to-Noise Ratio）；结构相似性指数（SSIM, Structural Similarity Index）</li>
+</ul>
+<p>$$
+\mathrm{PSNR} = 20 \cdot \log_{10} \left( \frac{I_{\max}}{\mathrm{RMSE}(x, d)} \right)
+$$</p>
+<p>$x$ 表示模型输出波形；<br>
+$d$ 表示标签波形；<br>
+$\mathrm{RMSE}(x, d)$ 为均方根误差；<br>
+$I_{\max}$ 为最大值（通常归一化为 1）；</p>
+<ul>
+<li>PSNR 值越高，表示滤波后信噪比越高</li>
+</ul>
+<p>$$
+\mathrm{SSIM}(x, d) = \frac{(2 \mu_x \mu_d + C_1)(2 \sigma_{xd} + C_2)}{(\mu_x^2 + \mu_d^2 + C_1)(\sigma_x^2 + \sigma_d^2 + C_2)}
+$$</p>
+<p>$\mu_x, \mu_d$ 为均值；<br>
+$\sigma_x^2, \sigma_d^2$ 为方差；<br>
+$\sigma_{xd}$ 为协方差；<br>
+$C_1, C_2$ 为常数项（用于稳定计算）；</p>
+<ul>
+<li>SSIM 值越接近 1，说明结构越相似。</li>
+</ul>
+<h2>3.3. Computation Efficiency Test</h2>
+<ul>
+<li>评估了模型的 理论计算复杂度（以 GFLOPS 表示）和 可训练参数数量；</li>
+<li>FilterNet 推理仅需 3.21 GFLOPS，为 UNet 的 1/3，更适合资源受限设备；</li>
+<li>模型参数量方面，FilterNet 仅为 107.1K，而 UNet 高达 222.2K，多出 115.1K 参数；</li>
+<li>FilterNet 每次只需处理一帧数据，相比 UNet 同时处理多帧的机制，显著节省内存；</li>
+<li>由于 RNN 不易并行，FilterNet 在多核 CPU 上处理速度略慢，但在低核数处理器（如 ARM）上仍具优势。</li>
+</ul>
+<h2>3.4. Model Generalization Ability Test</h2>
+<ul>
+<li>FilterNet 作为 $ \text{DNN} $ 方法，依赖训练数据，对相似数据具有高精度，但对异构数据泛化性较弱；</li>
+<li>使用两类数据测试模型泛化能力：<br>
+1.香山隧道 GPR 实测数据（背景噪声更强）；<br>
+2.合成管道反射数据（加入高斯噪声）；</li>
+<li>相比之下，UNet 与 FilterNet 拟合能力更强但泛化能力更弱；</li>
+<li>测试表明，若要适应更多任务，需使用多样化数据进行 迁移学习 训练提升泛化能力</li>
+</ul>
+<hr>
+<h1>4. Disscussion</h1>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/6cf402f7-5f3e-42dc-b802-bf4dca80c7f6"><img src="https://github.com/user-attachments/assets/6cf402f7-5f3e-42dc-b802-bf4dca80c7f6" alt="Image" style="max-width: 100%;"></a></p>
+<ul>
+<li>深度学习模型可直接处理原始 GPR 数据，替代传统的直达波去除、滤波与增益预处理流程；</li>
+<li>FilterNet 可有效抑制深部高频噪声，但：1D 模型对横向噪声抑制较弱；2D 模型能更好学习横向纹理，具备结构性滤波能力；</li>
+<li>为测试泛化能力，引入两种人工噪声：类直达波背景噪声；幅值为 1% 的高斯噪声；<br>
+测试结果见图 8：UNet 在类直达波噪声下完全失效；FilterNet 输出弱，但有信号；FilterNet1D 表现最好，可正常输出并抑制部分干扰；</li>
+<li>对于高斯噪声：所有模型性能下降；UNet 过拟合严重，泛化性最弱；FilterNet 因含 RNN，具时序建模能力，表现次优；FilterNet1D 虽为 CNN，但单通道信息密度高，泛化能力最强。</li>
+</ul>
+<hr>
+<h1>5. Conclusion</h1>
+<ul>
+<li>提出了一种可直接处理原始 GPR 数据的滤波模型 —— FilterNet，包含两种结构：<br>
+FilterNet1D：基于 CNN，处理单通道数据；<br>
+FilterNet：结合 CNN 和 RNN，可建模多通道数据间的时序信息。</li>
+<li>该模型具备以下三项优势：<br>
+1.端到端输出，无需传统的直达波去除、滤波、增益调整等流程，提升自动化效率；<br>
+2.更强的噪声抑制能力与泛化能力，可在不同噪声环境下稳定输出，效果接近人工处理；<br>
+3.实时性强、计算资源占用低，适合现场嵌入式部署或边缘计算平台。<br>
+<a href="https://www.sciencedirect.com/science/article/pii/S277246702500017X#fig1" rel="nofollow">Paper Link</a></li>
+</ul></div>
+<div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://Lszidv.github.io">芜尽</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","Lszidv/Lszidv.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+
+
+</script>
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</html>
