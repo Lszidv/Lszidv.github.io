@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="# Abstract
+
+- 多源地球物理数据显著提升了反演约束力，但也带来了更强的非线性耦合和观测稀疏性问题，导致传统反演方法在精度与计算效率之间难以权衡。">
+<meta property="og:title" content="[Literature Reading]One-Fit-All Transformer for Multimodal Geophysical Inversion: Method and Application">
+<meta property="og:description" content="# Abstract
+
+- 多源地球物理数据显著提升了反演约束力，但也带来了更强的非线性耦合和观测稀疏性问题，导致传统反演方法在精度与计算效率之间难以权衡。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://Lszidv.github.io/post/%5BLiterature%20Reading%5DOne-Fit-All%20Transformer%20for%20Multimodal%20Geophysical%20Inversion-%20Method%20and%20Application.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
+<title>[Literature Reading]One-Fit-All Transformer for Multimodal Geophysical Inversion: Method and Application</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">[Literature Reading]One-Fit-All Transformer for Multimodal Geophysical Inversion: Method and Application</h1>
+<div class="title-right">
+    <a href="https://Lszidv.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/Lszidv/Lszidv.github.io/issues/46" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h1>Abstract</h1>
+<ul>
+<li>多源地球物理数据显著提升了反演约束力，但也带来了更强的非线性耦合和观测稀疏性问题，导致传统反演方法在精度与计算效率之间难以权衡。</li>
+<li>本文提出基于 Transformer 的 G-Query 框架，结合统一向量表示与可调 Query 注意力机制，实现多模态输入的高效融合，支持跨观测系统、跨区域的一体化建模与反演。</li>
+<li>引入半监督学习策略与不确定性评估方法，使模型在利用未标注数据提升表达能力的同时，具备反演结果置信度估计能力，增强预测的可靠性与实用性。</li>
+<li>在面波与接收函数的联合反演任务中，G-Query 成功恢复美国大陆岩石圈结构，表现出优异的精度、速度与通用性，展现其在复杂地球物理应用中的广泛潜力。</li>
+</ul>
+<hr>
+<h1>Introduction</h1>
+<ul>
+<li>现代地球物理研究广泛依赖多模态观测数据（如地震波形、群/相速度、接收函数、SAR、GPS等）来揭示地球内部结构。多源信息虽增强了建模约束，但由于观测稀疏、过程非线性及数据异构性，传统方法在精度、效率与泛化能力方面均面临严重挑战。</li>
+<li>尽管深度学习已在多个地球物理子任务中表现出色，其广泛应用仍受限于：<br>
+数据表示问题：地球物理数据存在格式、维度、尺度多样性，难以统一输入建模；<br>
+域转换困难：常见网络架构（如 CNN/U-Net）在处理输入-输出跨域问题时存在拓展性差、参数开销大等限制；<br>
+架构定制成本高：每种观测类型或目标任务常需单独设计网络结构，不具备通用性。</li>
+<li>为克服上述限制，本文提出了基于 Transformer 的通用反演框架 G(eophysics)-Query，其核心设计见下图（图 1）所示：</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/a5948a18-789e-4075-9e48-27ae30809bf8"><img src="https://github.com/user-attachments/assets/a5948a18-789e-4075-9e48-27ae30809bf8" alt="Image" style="max-width: 100%;"></a></p>
+<ul>
+<li>左侧 (a)：多模态输入,包括地表面波的相速度与群速度图、以及接收函数波形数据，反映多源观测特征。</li>
+<li>中部 (b)：G-Query 网络结构,多模态数据首先通过统一的向量嵌入编码，分别输入信息路径与查询路径。Transformer 架构中的 Attention Block 实现输入与目标之间的有效关联建模。</li>
+<li>输出包括反演结果 $y$ 与预测不确定性 $\sigma$，后者经 soft-plus 激活保证非负；</li>
+<li>半监督训练策略提升了无标签数据下的不确定性建模能力。</li>
+<li>右侧 (c)：多种反演输出目标,模型可输出多个地球物理量，如剪切波速剖面与置信区间、P-S 速度比、Moho 面结构等。</li>
+</ul>
+<hr>
+<h1>2.Method and Data</h1>
+<ul>
+<li>反演问题转化：将地球物理反演问题建模为 Transformer 中的“查询-响应”问题，输入数据与反演目标均表示为统一向量序列。</li>
+<li>注意力机制设计：使用整维度多头注意力（full-dimensional multi-head attention），提升网络表达力；通过查询序列控制输出类型，实现“一网多目标”。</li>
+<li>输出形式：网络输出同时包含预测值 $y$ 与不确定性估计 $\sigma$，并引入 softplus 激活确保 $\sigma \geq 0$。</li>
+<li>结构构建：网络由 $N$ 层编码器与 $M$ 层解码器组成，结合改进型注意力机制搭建主干 Transformer 架构。</li>
+</ul>
+<h2>2.1 多模态数据与反演目标的向量表示</h2>
+<ul>
+<li>核心思路：借鉴 NLP 中的 token 表示方式，将地球物理数据统一编码为由类型 + 值 + 参数组成的向量表示。</li>
+<li>向量构造公式：每个 token 表示一个信息段，其结构为：</li>
+</ul>
+<p>$$
+x = \phi(t) + \sum u_i \cdot \phi(u_i, i) + \sum p_j \cdot \phi(p_j, j)
+$$</p>
+<p>其中 $\phi$ 为嵌入函数，单位共享嵌入向量，索引用于区分维度。</p>
+<ul>
+<li>适应性设计：可处理不同数据类型（如接收函数、多频率速度）；可表示多种参数（如时间点、方位角、高斯因子）；支持未知/参考值和不确定性的编码；</li>
+<li>统一性与可扩展性强：所有信息归一为数值乘以单位嵌入向量，有助于模型处理异构数据。<br>
+2.2 不确定性估计的训练策略</li>
+<li>目标：在无明确不确定性标签的情况下训练模型，实现反演值 $\hat{y}$ 与不确定性 $\sigma$ 的联合预测。</li>
+<li>方法：采用负对数似然损失函数，以最大化预测值落在对应高斯分布内的概率：无需显式标签即可训练不确定性；</li>
+</ul>
+<p>$$
+\mathcal{L} = \sum_{i=1}^{N} w_i \left[ \frac{1}{2} \log \sigma_i^2 + \frac{1}{2} \cdot \frac{(y_i - \hat{y}_i)^2}{\sigma_i^2} \right]
+$$</p>
+<ul>
+<li>鲁棒性增强：对 $(y - \hat{y})$ 使用 Huber 损失函数 进行平滑处理，以抵抗异常值干扰，$\delta = 3$。</li>
+<li>任务适应性：该损失结构适用于回归问题；分类任务可改用交叉熵损失函数。</li>
+</ul>
+<h2>2.3 非规则数据与非均匀输出处理策略</h2>
+<ul>
+<li>目标：模拟真实场景中观测数据与反演目标的不规则性与不确定性，同时保持网络结构的统一性与并行训练能力。</li>
+<li>策略一：统一格式 + 掩码机制<br>
+输入数据：从原始数据中随机抽样若干段数据单元，统一组织为定长数组；<br>
+掩码：随机屏蔽部分输入/输出段，使有效长度可变；<br>
+反演目标也随机掩码，支持多种反演任务与网格配置。</li>
+<li>策略二：模拟观测噪声与不确定性<br>
+对输入加入随机高斯噪声，并将其标准差作为输入的不确定性；部分反演目标用扰动后的值作为输入，同时提供扰动幅度。</li>
+<li>策略三：模拟未知参考信息<br>
+将部分参考值与不确定性设为 −1，表示未知或不可用状态。</li>
+</ul>
+<h2>2.4 应用设置</h2>
+<ul>
+<li>任务选型：采用典型的面波 + 接收函数联合反演作为示例，目标包括 $V_s$、$V_p/V_s$、ST、CT 等；用于展示 G-Query 跨域、多类型信息提取能力。</li>
+<li>数据规范化：输入包括频散曲线（2–160 s）、接收函数（0–12 s）；所有深度与时间类参数单位统一（100 km、40 s）；未知不确定性设为 −1；参考模型来源于已有文献或地质知识。</li>
+<li>模型结构设定：嵌入维度：160；注意力头：10；编码器/解码器层数：8；参数总数：约 2966 万；</li>
+<li>可调整网络规模以适应不同任务与资源需求（如降为 6 层 + 5 头，误差增加约 2%）。</li>
+<li>对比方案：与传统 MCMC 非线性反演方法进行性能比较，评估精度与效率表现。</li>
+</ul>
+<h2>2.5 合成与实测数据集</h2>
+<ul>
+<li>合成数据设计：使用 1D 分层模型 + 正演模拟生成合成数据；分层结构参数包括沉积层（3 参数）、地壳层（7 参数）、Moho–410 km（13 参数）；模型结构 + 面波频散曲线 + 接收函数数据 = 全部训练输入；验证集固定，训练样本实时生成；训练考虑深部结构，测试仅评估 0–150 km 的反演结果。</li>
+<li>实测数据验证：选用美国本土区域的真实观测数据（相速度、群速度、接收函数）；数据来源包括 IRIS 与公开研究成果；面波信息通过 RBF 插值映射至反演网格；接收函数根据 Ps 转换点进行栅格叠加；未知不确定性统一标记为 −1。<br>
+如图：<br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/f45c69e8-8890-4f92-a084-e9ea43828286"><img src="https://github.com/user-attachments/assets/f45c69e8-8890-4f92-a084-e9ea43828286" alt="Image" style="max-width: 100%;"></a><br>
+(a) 展示 1024 组剪切波速结构 $V_s$，红色虚线标示 150 km 测试评估深度界线；<br>
+(b) 相速度频散曲线 $c(T)$，周期 $T$ 采用对数尺度，集中在 10–40 s；<br>
+(c) 群速度频散曲线 $g(T)$，同样采用对数周期轴，变化范围广；<br>
+(d) 接收函数波形，时间范围 0–12 s，初始几秒内呈现显著 Ps 相响应，反映对 Moho 与浅层的约束。</li>
+</ul>
+<h2>2.6 训练设置</h2>
+<ul>
+<li>训练阶段中，模型输入包括从指定周期范围中随机采样的 60 个相速度与群速度频散点，以及深度范围为 0–375 km 的不等距分层采样节点（共 161 个），浅层采样密集、深层稀疏。反演目标（如 $V_p/V_s$、ST、CT）初始化为 0 或接近真实值，以模拟“已知”与“未知”初始模型两类场景。</li>
+<li>为增强模型对界面结构的辨识能力，对靠近沉积-地壳界面与 Moho 面的 $V_s$ 节点、ST、CT 参数赋予 5 倍损失权重。训练中引入 0–40% 的随机掩码，模拟不同观测可用性。</li>
+<li>同时，为模拟野外观测噪声，向三类数据加入随机扰动：相速度：标准差为 2%（相对误差）；群速度：标准差为 4%；接收函数：标准差为 0.02（绝对误差）；</li>
+<li>图 4 展示了加噪样例（a–b）及三类输入的信噪比分布（c–e），其中相速度 SNR 分布集中在 40–50 dB，群速度为 30–40 dB，接收函数为 15–25 dB，表明模拟噪声设计合理并具代表性。</li>
+<li>模型采用 AdamW 优化器，初始学习率 $\eta_0$，warm-up 步数为 3200，之后每 3200 步衰减 5%。训练批量为 64，使用 NVIDIA RTX 4090 GPU 单卡训练约需 2 天，总训练步数为 32 万步，生成样本约 2048 万个，覆盖广泛结构空间并有效拟合非线性反演关系。<br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/ff695dc0-1eea-4244-8b4c-2d99b5bee0c2"><img src="https://github.com/user-attachments/assets/ff695dc0-1eea-4244-8b4c-2d99b5bee0c2" alt="Image" style="max-width: 100%;"></a>
+</li>
+</ul>
+<hr>
+<h1>3.Results</h1>
+<h2>3.1 预测性能评估（合成数据）</h2>
+<ul>
+<li>效率对比：G-Query 在 1,024 组样本上推理耗时约 3 秒；MCMC（32 线程）需 32 小时，计算成本极高；G-Query 一次训练、多次高效推理，适合大规模部署。</li>
+<li>反演设置：面波频散：60 个周期，2–160 s；接收函数：0–12 s，采样率 10 Hz；无先验信息条件下完成联合反演。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/02f19139-94c3-4a74-be3b-9910374b8798"><img src="https://github.com/user-attachments/assets/02f19139-94c3-4a74-be3b-9910374b8798" alt="Image" style="max-width: 100%;"></a><br>
+图 5 对比分析：</p>
+<ul>
+<li>G-Query 与 MCMC 在频散与接收函数数据的拟合精度相当；</li>
+<li>G-Query 在 Moho 面附近波速预测更平滑，误差带更小；</li>
+<li>从统计上看，G-Query 提供 更稳定、更准确的反演结果。</li>
+</ul>
+<h2>3.2 反演不确定性估计能力评估</h2>
+<ul>
+<li>G-Query 所预测的 $\hat{\sigma}$：与实际误差 $d_y$ 高度相关；可有效揭示界面处的不确定性；在分布统计上优于传统输入扰动法。</li>
+<li>使用归一化误差检验 $\hat{\sigma}$ 的可信度；</li>
+<li>G-Query 的归一化误差稳定接近标准正态分布；<br>
+-MCMC 的估计偏窄，存在系统性误判；</li>
+<li>G-Query 拥有 内建的不确定性建模优势。</li>
+</ul>
+<h2>3.3 通用性与鲁棒性验证</h2>
+<ul>
+<li>架构灵活性：G-Query 支持输入/目标向量格式调整，适应不同任务场景；无需重新设计网络或重复训练，具备高度迁移能力。</li>
+<li>关键验证结果：略</li>
+</ul>
+<h2>3.4 表示向量分析</h2>
+<ul>
+<li>G-Query 通过统一嵌入机制，将多模态观测数据与反演目标表示为相同维度的向量，便于模型在共享空间中进行融合建模与信息交互。<br>
+图 11 展示了不同模态向量之间的相关性分布。结果表明，相速度与群速度在相近周期段具有更强相似性，接收函数的早期部分与短周期频散更为相关。这一趋势在编码后更加明显，与灵敏度核分布高度一致，说明 G-Query 能从物理机制中学习有效的特征表示。<br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/f4fb58b0-cf88-4808-9a0f-a1b8c4548cf0"><img src="https://github.com/user-attachments/assets/f4fb58b0-cf88-4808-9a0f-a1b8c4548cf0" alt="Image" style="max-width: 100%;"></a></li>
+<li>通过 PCA 可视化（图 11c–d），我们发现编码后的向量分布更加复杂但结构清晰：频散类模态相互聚类，而接收函数保持差异性；ST 与 CT 等厚度类目标保持空间接近，反映其物理属性的一致性。</li>
+<li>综上，G-Query 的表示机制不仅有效区分不同模态数据，还构建了具有物理一致性和结构性的共享表示空间，为多源信息融合与可解释建模提供了支撑。</li>
+</ul>
+<h2>3.5 注意力分布与信息关注分析</h2>
+<ul>
+<li>编码器注意力特征：浅层编码器关注分散，深层聚焦集中，相/群速度主要关联于相近周期信息，部分周期关注于接收函数大幅度波形（如 Moho 界面转换波），接收函数则主要自关注或关注强响应波形，早期对应短周期，后期对应长周期。</li>
+<li>解码器注意力分布：反演参数如 $V_s$ 的注意力集中在前六层，反映出主要预测过程，后两层用于微调；深层 $V_s$ 由长周期频散主导，CT/ST/$κ$ 分别关注不同周期段面波，与其物理涵义相符。</li>
+<li>模态间协同：注意力与表示向量相似性、高度与灵敏度核一致，说明 G-Query 能根据物理结构有效协调多源模态。</li>
+<li>解释性增强：注意力分析揭示了模型关注机制，有助于理解预测驱动逻辑与物理一致性。</li>
+</ul>
+<h2>3.6 实测数据反演结果验证</h2>
+<ul>
+<li>高效性显著提升：G-Query 可在 6 秒内完成 1836 个网格点的反演，远快于需 36 小时的 MCMC，且仅需基于合成数据训练一次。</li>
+<li>强鲁棒性与迁移能力：即使面对实测数据中存在不规则频散曲线与数据缺失，G-Query 仍可稳定反演地下结构。</li>
+<li>反演结构与地质一致：如 CT 自中部向外减薄、ST 与 $\kappa$ 高度相关、西部地壳最薄且低速异常最强，均与 USGS 区划、MCMC 与已有研究一致。</li>
+<li>具有跨区域推广性：模型训练时引入了多样化大陆结构样本，已成功迁移应用于华北构造带，验证了其广泛适用性。</li>
+</ul>
+<hr>
+<h1>4.Discussion and Conclusion</h1>
+<ul>
+<li>G-Query 成功实现多模态地球物理数据（如面波与接收函数）的联合反演，展现出无需专门设计即可适配不同反演任务的灵活性。</li>
+<li>相比传统 MCMC 方法，G-Query 显著减少计算成本，并有效处理观测误差与先验信息，提高反演精度。</li>
+<li>通过向量统一表示与注意力机制，可揭示神经网络内部机制，识别关键数据点，辅助反演结果的可信性分析。</li>
+<li>框架适用于台站分布不规则、采样频率不同等复杂输入问题，具备迁移到震源定位、去噪、全波形反演等多任务场景的潜力。</li>
+<li>利用地球物理数据一致性：建议充分利用“同一区域不同数据反映相同结构”的一致性特征，构建更鲁棒的多模态反演模型。<br>
+<a href="https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2024JH000432" rel="nofollow">Paper Link</a></li>
+</ul></div>
+<div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://Lszidv.github.io">芜尽</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","Lszidv/Lszidv.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+
+
+</script>
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</html>
