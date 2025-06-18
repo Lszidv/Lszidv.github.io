@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="# 引言
+
+- **研究背景**：地震波传播特性可用于推断地球深部结构，尤其是各向异性特征；
+- **方法基础**：SKS波分裂是当前量化上地幔各向异性的主要方法；
+- **技术挑战**：SKS震相的识别需依赖人工，面对大规模地震台网数据存在瓶颈；
+- **传统方法限制**：STA/LTA、AIC类方法在低信噪比情况下准确率差；
+- **新兴趋势**：深度学习可自动提取高维特征，广泛应用于震相识别；
+- **研究现状**：大部分研究聚焦区域地震的P波/S波识别，远震SKS识别研究较少；
+- **本文贡献**：构建CNN模型自动识别SKS震相，结合splitwavepy提取各向异性参数，应用于河北地区上地幔结构分析。">
+<meta property="og:title" content="[Literature Reading]基于SKS深度学习识别的河北省上地幔各向异性">
+<meta property="og:description" content="# 引言
+
+- **研究背景**：地震波传播特性可用于推断地球深部结构，尤其是各向异性特征；
+- **方法基础**：SKS波分裂是当前量化上地幔各向异性的主要方法；
+- **技术挑战**：SKS震相的识别需依赖人工，面对大规模地震台网数据存在瓶颈；
+- **传统方法限制**：STA/LTA、AIC类方法在低信噪比情况下准确率差；
+- **新兴趋势**：深度学习可自动提取高维特征，广泛应用于震相识别；
+- **研究现状**：大部分研究聚焦区域地震的P波/S波识别，远震SKS识别研究较少；
+- **本文贡献**：构建CNN模型自动识别SKS震相，结合splitwavepy提取各向异性参数，应用于河北地区上地幔结构分析。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://Lszidv.github.io/post/%5BLiterature%20Reading%5D-ji-yu-SKS-shen-du-xue-xi-shi-bie-de-he-bei-sheng-shang-di-man-ge-xiang-yi-xing.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
+<title>[Literature Reading]基于SKS深度学习识别的河北省上地幔各向异性</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">[Literature Reading]基于SKS深度学习识别的河北省上地幔各向异性</h1>
+<div class="title-right">
+    <a href="https://Lszidv.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/Lszidv/Lszidv.github.io/issues/47" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h1>引言</h1>
+<ul>
+<li><strong>研究背景</strong>：地震波传播特性可用于推断地球深部结构，尤其是各向异性特征；</li>
+<li><strong>方法基础</strong>：SKS波分裂是当前量化上地幔各向异性的主要方法；</li>
+<li><strong>技术挑战</strong>：SKS震相的识别需依赖人工，面对大规模地震台网数据存在瓶颈；</li>
+<li><strong>传统方法限制</strong>：STA/LTA、AIC类方法在低信噪比情况下准确率差；</li>
+<li><strong>新兴趋势</strong>：深度学习可自动提取高维特征，广泛应用于震相识别；</li>
+<li><strong>研究现状</strong>：大部分研究聚焦区域地震的P波/S波识别，远震SKS识别研究较少；</li>
+<li><strong>本文贡献</strong>：构建CNN模型自动识别SKS震相，结合splitwavepy提取各向异性参数，应用于河北地区上地幔结构分析。</li>
+</ul>
+<hr>
+<h1>1.SKS震相人工智能识别</h1>
+<h2>1.1 数据来源与数据处理</h2>
+<ul>
+<li><strong>数据来源</strong>
+<ul>
+<li>HNS台：2010–2021年，共1116个事件；</li>
+<li>CLI台：2015–2021年，共287个事件；</li>
+<li>事件筛选标准：震级≥4.5，震中距 85°–120°。</li>
+</ul>
+</li>
+<li><strong>样本构造</strong>
+<ul>
+<li>正样本（标签 1）：人工标注存在清晰SKS震相；</li>
+<li>负样本（标签 0）：无明显SKS震相，信噪比低或未记录；</li>
+<li>HNS数据集：525正 + 591负；</li>
+<li>CLI数据集：135正 + 152负。</li>
+</ul>
+</li>
+<li><strong>数据处理流程</strong>
+<ul>
+<li>选取理论SKS到时 ±30 s；</li>
+<li>采样率：100 Hz；</li>
+<li>带通滤波：0.05–1 Hz；</li>
+<li>保留：水平分量（N、E）；</li>
+<li>标准化处理。</li>
+</ul>
+</li>
+<li><strong>数据使用策略</strong>
+<ul>
+<li>HNS用于模型训练、验证、测试；</li>
+<li>CLI用于迁移学习测试泛化性能。</li>
+</ul>
+</li>
+</ul>
+<h2>1.2 SKS-net模型构建</h2>
+<ul>
+<li>
+<p><strong>网络结构（SKS-net）</strong></p>
+<ul>
+<li>6 个卷积层 + 6 个池化层 + 1 个展平层 + 1 个 dropout + 1 个全连接 Softmax 层；</li>
+<li>每层通道数：4 → 16 → 32 → 64 → 128 → 128；</li>
+<li>卷积核大小为 $3×1$，激活函数为 ReLU；</li>
+<li>输入为 $6000×1×2$（两个水平分量）；</li>
+<li>使用 BatchNorm 加速训练；</li>
+<li>输出为两个概率值，表示是否包含 SKS 相。</li>
+</ul>
+</li>
+<li>
+<p><strong>训练设置</strong></p>
+<ul>
+<li>K=10 折交叉验证选取最优模型；</li>
+<li>使用 Adam 优化器，动态调整学习率；</li>
+<li>损失函数为交叉熵；</li>
+<li>训练集 : 测试集 = 7 : 3，训练集中再分出 10% 为验证集。</li>
+</ul>
+</li>
+<li>
+<p><strong>模型训练流程</strong></p>
+<ol>
+<li>数据准备：截取震相，滤波，标准化；</li>
+<li>模型训练：交叉熵优化，更新权重；</li>
+<li>模型测试：预测是否含有 SKS 相。</li>
+</ol>
+</li>
+<li>
+<p><strong>启发（针对近场S波识别）</strong></p>
+<ul>
+<li>可复用 CNN 架构，改为预测“可分裂 / 不可分裂”；</li>
+<li>使用近场特定频带（如 0.5–5 Hz）；</li>
+<li>加入分裂测量后处理模块；</li>
+<li>小样本场景建议采用 K 折交叉验证评估；</li>
+<li>可构建 cascade 结构：分类 + 参数提取。</li>
+</ul>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/d209969f-0691-406c-a7cf-29bc2a31a6a8"><img src="https://github.com/user-attachments/assets/d209969f-0691-406c-a7cf-29bc2a31a6a8" alt="Image" style="max-width: 100%;"></a></p>
+<h2>1.3 SKS-net模型识别性能评估</h2>
+<ul>
+<li>
+<p><strong>评估指标</strong></p>
+<ul>
+<li>准确率 (Accuracy)：预测正确样本比例；</li>
+<li>精准率 (Precision)：预测为正样本中实际为正的比例；</li>
+<li>回召率 (Recall)：实际正样本中被正确识别的比例；</li>
+<li>F1 分数：Precision 和 Recall 的调和平均，适用于样本不均衡问题。</li>
+</ul>
+</li>
+<li>
+<p><strong>训练表现</strong></p>
+<ul>
+<li>准确率快速上升并趋于平稳；</li>
+<li>验证集准确率达 85%，无明显过拟合；</li>
+<li>损失函数在约 25 epoch 后趋于收敛。</li>
+</ul>
+</li>
+<li>
+<p><strong>最终性能（表1）</strong></p>
+<ul>
+<li>准确率：88.3%</li>
+<li>精准率：82.5%</li>
+<li>回召率：92.3%</li>
+<li>F1 分数：87.1%</li>
+</ul>
+</li>
+<li>
+<p><strong>SNR 敏感性分析</strong></p>
+<ul>
+<li>SNR &gt; 10 dB 时预测为正样本的概率显著上升；</li>
+<li>低 SNR 是误判（FN）主要原因。</li>
+</ul>
+</li>
+<li>
+<p><strong>误差分析</strong></p>
+<ul>
+<li>FN 案例多因 SKS 振幅弱、周期变大或其他信号干扰；</li>
+<li>FP 案例多为误将扰动当作有效震相；</li>
+<li>暗示样本集尚未覆盖所有波形复杂情况。</li>
+</ul>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/91e060fd-ace2-41cd-83ec-56140760c13d"><img src="https://github.com/user-attachments/assets/91e060fd-ace2-41cd-83ec-56140760c13d" alt="Image" style="max-width: 100%;"></a></p>
+<h2>1.4 跨台站迁移学习</h2>
+<ul>
+<li>
+<p><strong>泛化能力测试</strong></p>
+<ul>
+<li>原模型训练于 HNS 台，测试于 CLI 台；</li>
+<li>测试结果：准确率 75.6%，F1 分数 72.4%，低于 HNS 测试结果；</li>
+<li>说明：不同台站数据分布存在差异，直接迁移效果有限。</li>
+</ul>
+</li>
+<li>
+<p><strong>迁移策略设计</strong></p>
+<ul>
+<li>冻结前 6 个卷积 + 池化层（即“卷积基”）；</li>
+<li>用 CLI 数据重新训练后端分类器（flatten + dropout + FC）；</li>
+<li>采用特征提取迁移学习法构建“SKS-net 预训练模型”。</li>
+</ul>
+</li>
+<li>
+<p><strong>性能提升（表2）</strong></p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>模型</th>
+<th>准确率</th>
+<th>精准率</th>
+<th>回召率</th>
+<th>F1 分数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>原模型</td>
+<td>75.6%</td>
+<td>83.6%</td>
+<td>63.8%</td>
+<td>72.4%</td>
+</tr>
+<tr>
+<td>迁移模型</td>
+<td>85.0%</td>
+<td>91.2%</td>
+<td>77.5%</td>
+<td>83.8%</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+</li>
+<li>
+<p><strong>关键观察</strong></p>
+<ul>
+<li>迁移后 F1 分数提升超 10%，表明特征迁移成功；</li>
+<li>高精准率（91.2%）意味着误报更少，适合自动震相拾取任务。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h1>2.河北地区SKS波分裂计算</h1>
+<h2>2.1 构建河北地区SKS数据集</h2>
+<ul>
+<li>
+<p><strong>数据来源与筛选</strong></p>
+<ul>
+<li>台站：河北省固定台站，共71个；</li>
+<li>事件来源：2017–2021年全球 $M≥5.0$ 地震，共6162个；</li>
+<li>筛选条件：震中距 $85° ≤ Δ ≤ 120°$，共匹配 1274 个事件；</li>
+<li>波形总数：90454 条，均存在理论 SKS 相。</li>
+</ul>
+</li>
+<li>
+<p><strong>模型预测与初筛</strong></p>
+<ul>
+<li>使用 SKS-net 预训练模型对全部波形进行预测；</li>
+<li>取 $P(\text{正样本}) &amp;gt; 0.5$ 判定为含 SKS 相；</li>
+<li>共得到 3962 条候选波形（图6展示部分）；</li>
+</ul>
+</li>
+<li>
+<p><strong>高质量样本筛选</strong></p>
+<ul>
+<li>筛选条件：
+<ol>
+<li>震中距满足 $85° ≤ Δ ≤ 120°$；</li>
+<li>信噪比 SNR &gt; 5；</li>
+</ol>
+</li>
+<li>最终得到1173条高质量波形，来自50个台站；</li>
+<li>用于后续 SKS 波分裂参数的测量分析。</li>
+</ul>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/1cc38c60-d2a8-4d56-9764-eebc8051e4c6"><img src="https://github.com/user-attachments/assets/1cc38c60-d2a8-4d56-9764-eebc8051e4c6" alt="Image" style="max-width: 100%;"></a></p>
+<ul>
+<li>每幅子图中均展示了发震时间、震级、震中距、深度和震中位置，黑色、灰色曲线分别为东西、南北分量.</li>
+</ul>
+<h2>2.2 SKS波分裂计算方法</h2>
+<ul>
+<li>
+<p><strong>方法概述</strong></p>
+<ul>
+<li>单事件采用最小切向能量法 (SC法)，输出最优快波极化方向 $\varphi$ 和延迟时间 $\delta t$；</li>
+<li>多事件叠加采用 Wolfe &amp; Silver 方法，加权累积切向能量后求全局最优解。</li>
+</ul>
+</li>
+<li>
+<p><strong>网格搜索设置</strong></p>
+<ul>
+<li>极化角：$\varphi \in [-90^\circ, 90^\circ]$，步长 $1^\circ$；</li>
+<li>延迟时间：$\delta t \in [0, 4]$ 秒，步长 $0.05$ 秒；</li>
+<li>误差估计：95% 置信区间。</li>
+</ul>
+</li>
+<li>
+<p><strong>图7说明</strong></p>
+<ul>
+<li>(a)~(d)：单事件波形分裂前后表现；</li>
+<li>(e)：SC法能量等值线图，蓝十字为最优解；</li>
+<li>(f)：52个事件叠加分析，红星为最终分裂解。</li>
+</ul>
+</li>
+<li>
+<p><strong>关键结果</strong></p>
+<ul>
+<li>单事件：$\varphi = -54.0^\circ \pm 4.0^\circ$, $\delta t = 1.65 \pm 0.10$；</li>
+<li>叠加解：$\varphi = 118.0^\circ \pm 1.6^\circ$, $\delta t = 1.55 \pm 0.08$；</li>
+<li>提供了区域性各向异性的重要约束。</li>
+</ul>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/ae96a2c6-2515-47c3-b544-08ba2391f031"><img src="https://github.com/user-attachments/assets/ae96a2c6-2515-47c3-b544-08ba2391f031" alt="Image" style="max-width: 100%;"></a></p>
+<ul>
+<li>(a) 原始波形转化到R、T分量上的波形；(b) 校正前质点的运动轨迹；(c) 校正后R、T分量上的波形；(d) 校正后质点的运动轨迹；(e) 切向能量等值线图，蓝色十字位置对应最佳分裂参数；(f) CSS台站52个地震事件波形的叠加分析结果，红色五角星位置为所有事件叠加之后最小切向能量对应的快波偏振方向和快慢波延迟时间</li>
+</ul>
+<h2>2.3 河北地区SKS波分裂结果</h2>
+<ul>
+<li>
+<p><strong>与前人研究对比</strong></p>
+<ul>
+<li>本研究与常利军等(2008)研究中共用 22 个台站；</li>
+<li>绘制了河北地区上地幔各向异性结果图（图8）；</li>
+<li>线段方向为快波极化角 $\varphi$，长度为快慢波延迟时间 $\delta t$。</li>
+</ul>
+</li>
+<li>
+<p><strong>结果特征</strong></p>
+<ul>
+<li>
+$\varphi$ 多集中在 $84^\circ \sim 138^\circ$，指向 NWW-SEE；</li>
+<li>
+$\delta t$ 分布在 $0.5 \sim 1.8$ s，平均值约为 1 s；</li>
+<li>表明河北地区上地幔具有稳定、明显的各向异性结构。</li>
+</ul>
+</li>
+<li>
+<p><strong>与前人结果一致性</strong></p>
+<ul>
+<li>
+$\varphi$ 偏差小于 $20^\circ$ 的台站占比 72%；</li>
+<li>
+$\delta t$ 差值小于 0.5 s 的台站占比 86%；</li>
+<li>平均值：本研究 $\varphi = 106.9^\circ$，常氏结果 $\varphi = 112.2^\circ$；</li>
+<li>说明本文的 SKS-net 模型震相识别结果可靠，适用于地球物理参数反演。</li>
+</ul>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/5b85e430-e921-47b5-b3b0-baa68897171c"><img src="https://github.com/user-attachments/assets/5b85e430-e921-47b5-b3b0-baa68897171c" alt="Image" style="max-width: 100%;"></a></p>
+<h2>3.1 河北地区上地幔各向异性特征</h2>
+<ul>
+<li>
+<p><strong>成因机制</strong></p>
+<ul>
+<li>上地幔各向异性由橄榄石晶格优势排列（LPO）引起，反映深部地幔流动特征；</li>
+<li>SKS分裂提供快波极化方向 $\varphi$ 与延迟时间 $\delta t$ 作为量化指标。</li>
+</ul>
+</li>
+<li>
+<p><strong>本区特征</strong></p>
+<ul>
+<li>
+$\varphi$ 指向 NWW-SEE，约为 N288°E，偏差大多在25°以内；</li>
+<li>
+$\delta t \in [0.5, 1.8]$ s，平均约 1 s；</li>
+<li>表明河北地区上地幔存在稳定、显著的各向异性流场。</li>
+</ul>
+</li>
+<li>
+<p><strong>与地壳关系</strong></p>
+<ul>
+<li>地壳厚度 30–40 km，仅产生 $\delta t \approx 0.1$ s；</li>
+<li>SKS波实际 $\delta t$ &gt; 0.5 s → 主体来自软流圈；</li>
+<li>各向异性层估算厚度约为 75–270 km，平均 150 km，远超岩石圈（80 km）。</li>
+</ul>
+</li>
+<li>
+<p><strong>模型分析</strong></p>
+<ul>
+<li>两种壳幔模型：
+<ul>
+<li>SAF：软流圈与岩石圈分离，流动主导形变；</li>
+<li>VCD：壳幔一体共同形变；</li>
+</ul>
+</li>
+<li>本文$\varphi$与APM一致 → 支持 SAF 模型。</li>
+</ul>
+</li>
+<li>
+<p><strong>异常分析</strong></p>
+<ul>
+<li>偏差 &gt;25° 的台站仅5个，均为事件样本数较少台站；</li>
+<li>提示多事件叠加可显著提高分裂参数稳定性。</li>
+</ul>
+</li>
+</ul>
+<h2>3.2 方法的局限性</h2>
+<ul>
+<li>数据样本小，建议全国范围扩展；</li>
+<li>区域覆盖不足，应纳入更多构造区；</li>
+<li>未结合面波各向异性，限制深度解释。</li>
+</ul>
+<hr>
+<h1>4 结论</h1>
+<ul>
+<li>深度模型成功实现SKS震相自动识别；</li>
+<li>CLI测试集迁移成功，泛化能力良好；</li>
+<li>河北全区识别出3962个SKS波形，计算出1173条分裂参数；</li>
+<li>
+$\varphi$ 与 APM 对齐，延迟合理；</li>
+<li>验证自动流程在地球物理推断中的可靠性；</li>
+<li>为未来全国、全球上地幔实时各向异性研究提供新方案。</li>
+</ul>
+<p><a href="http://www.geophy.cn/article/doi/10.6038/cjg2024S0141" rel="nofollow">Paper Link</a></p></div>
+<div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://Lszidv.github.io">芜尽</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","Lszidv/Lszidv.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+
+
+</script>
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</html>
