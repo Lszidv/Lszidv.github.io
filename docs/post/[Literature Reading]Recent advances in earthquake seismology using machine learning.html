@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="# Abstract
+- 本文回顾了机器学习在地震学中的应用，尤其是在地震目录构建、地震活动性分析、地面运动预测和地壳变形分析等领域的进展。">
+<meta property="og:title" content="[Literature Reading]Recent advances in earthquake seismology using machine learning">
+<meta property="og:description" content="# Abstract
+- 本文回顾了机器学习在地震学中的应用，尤其是在地震目录构建、地震活动性分析、地面运动预测和地壳变形分析等领域的进展。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://Lszidv.github.io/post/%5BLiterature%20Reading%5DRecent%20advances%20in%20earthquake%20seismology%20using%20machine%20learning.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
+<title>[Literature Reading]Recent advances in earthquake seismology using machine learning</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">[Literature Reading]Recent advances in earthquake seismology using machine learning</h1>
+<div class="title-right">
+    <a href="https://Lszidv.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/Lszidv/Lszidv.github.io/issues/48" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h1>Abstract</h1>
+<ul>
+<li>本文回顾了机器学习在地震学中的应用，尤其是在地震目录构建、地震活动性分析、地面运动预测和地壳变形分析等领域的进展。</li>
+<li><strong>地震目录构建</strong>涉及事件检测、分类、到时拾取等核心过程；</li>
+<li><strong>地震风险评估和活动性分析</strong>是理解地震发生规律和评估潜在风险的重要环节；</li>
+<li><strong>地面运动预测</strong>被细分为四类，根据输出类型和输入数据的不同进行分类；</li>
+<li><strong>数据不平衡</strong>则是另一个挑战，解决方法涉及特定的技术和策略；</li>
+<li><strong>地壳变形分析</strong>聚焦于利用测地数据进行聚类分析和信号检测，帮助识别地震和非地震现象。</li>
+</ul>
+<hr>
+<h1>引言</h1>
+<ul>
+<li><strong>机器学习技术</strong>，尤其是深度学习，在地震学等科学领域取得了显著进展。</li>
+<li>本文<strong>重点回顾了机器学习</strong>在地震目录构建、地震活动性分析、地面运动预测和地壳变形分析中的应用。</li>
+<li><strong>文章的重点</strong>是探索机器学习在独立领域的应用，而非对整个领域进行全面回顾。</li>
+<li><strong>地震目录编制</strong> 领域是推动机器学习在地震学应用的关键之一，涉及地震波形检测、震中定位和目录编制技术。<br>
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/d7279573-bee3-4515-918c-b70cf32eb237"><img src="https://github.com/user-attachments/assets/d7279573-bee3-4515-918c-b70cf32eb237" alt="Image" style="max-width: 100%;"></a></li>
+</ul>
+<hr>
+<h1>改进地震目录</h1>
+<ul>
+<li><strong>地震目录编制</strong> 领域中，改善事件检测能力能够显著增加可分析的事件数量，并提升地震活动性分析的时空分辨率。这一进步有助于我们更深入地了解地震的生成过程，特别是小型地震在这一过程中扮演的角色。</li>
+<li><strong>模板匹配技术</strong> 和 <strong>深度学习</strong> 是提升地震目录完整性的重要手段，尤其是在处理低信噪比的小型地震事件时，能够显著降低完整性大小并提高事件检测的效率。尽管计算成本较高，GPU并行计算使得这些技术能够应用于更大规模的数据集。</li>
+<li><strong>机器学习技术</strong> 在高质量地震目录开发中的应用自2018年以来迅速发展，特别是深度学习（DL）在事件检测和到时拾取中的应用，为地震目录的构建提供了更高的自动化和准确性，远超传统方法。</li>
+<li><strong>迁移学习和微调</strong> 技术的应用使得机器学习能够应对数据稀缺的挑战，尤其是当目标地震的规模或观测频带与训练数据存在显著差异时，仍能有效应用。这种技术也大大降低了大规模训练数据准备的需求。</li>
+<li>许多基于机器学习的工具包已发布并广泛应用于从事件检测、到时拾取、相位关联到震中定位的完整目录编制流程，推动了地震目录编制的自动化和精确度的提升。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/4986dfe7-e8a6-4de2-905c-cc09ed828a3d"><img src="https://github.com/user-attachments/assets/4986dfe7-e8a6-4de2-905c-cc09ed828a3d" alt="Image" style="max-width: 100%;"></a></p>
+<ul>
+<li><strong>地震目录编制流程</strong> 通常包括事件检测、到时拾取、相位关联和震中定位等步骤，机器学习技术已在这些步骤中得到应用，显著提高了性能。</li>
+<li><strong>去噪和质量控制</strong> 阶段的加入可以进一步提升目录编制的质量，优化检测结果。</li>
+<li><strong>机器学习技术</strong> 显著优于传统方法，尤其在事件检测和到时拾取等任务中表现突出，许多经过训练的机器学习模型已公开，并适用于这些任务。</li>
+</ul>
+<hr>
+<h1>事件检测/到时拾取</h1>
+<ul>
+<li>
+<p><strong>流程简化：跳过事件检测阶段</strong></p>
+<ul>
+<li>直接在连续波形上进行到时拾取，简化流程但需控制误检率与相位关联效率；</li>
+<li>工程案例：Park 等人（2020）和 Heck 等人（2022）已采用该方法于连续数据集进行高精度拾取，显著提高计算效率与整体处理速度。</li>
+</ul>
+</li>
+<li>
+<p><strong>监督深度学习相位拾取器</strong></p>
+<ul>
+<li>使用神经网络模型进行到时读取，准确度已接近人工分析员，尤其在 S 波拾取上优于传统方法；</li>
+<li>示例：PhaseNet 模型读取北加州百万级地震记录，P/S 波拾取精度接近或优于人类分析员</li>
+</ul>
+</li>
+<li>
+<p><strong>多样化深度学习模型架构</strong></p>
+<ul>
+<li>集成 RNN、Attention、Transformer、Edge Conv 等模块不断提升性能；</li>
+<li>案例：Earthquake Transformer 一体化处理事件检测与拾取，效率与准确性均优于传统与早期 DL 方法 。</li>
+</ul>
+</li>
+<li>
+<p><strong>灵活输入/输出形式</strong></p>
+<ul>
+<li>支持单站、多站输入，输出可为标量或概率时间序列，可适应不同事件时长；</li>
+<li>如：Ocean-Bottom Seismometer（OBS）专用 PickBlue 模型使用了多通道与迁移学习，P/S 波平均拾取误差如下：MAD=0.05 s 和 0.12 s。</li>
+</ul>
+</li>
+<li>
+<p><strong>多任务学习模型</strong></p>
+<ul>
+<li>将事件检测与相位拾取整合于单一模型，增强一致性与效率；</li>
+<li>示例：EQTransformer 同时输出事件概率与 P/S 波到时，支持端到端训练。</li>
+</ul>
+</li>
+<li>
+<p><strong>数据增强缓解大地震样本稀缺</strong></p>
+<ul>
+<li>利用 GAN、波形相似性训练合成数据提升模型泛化；</li>
+<li>示例：SeismoGen（Wang et al. 2021）用 GAN 合成了多标签地震波形用于 Oklahoma 数据增强，显著提升检测准确性 。</li>
+</ul>
+</li>
+<li>
+<p><strong>生成对抗网络（GAN）辅助特征提取</strong></p>
+<ul>
+<li>GAN 不仅生成训练样本，还用于特征提取与去噪；</li>
+<li>应用：Li 等（2020b）通过 GAN 合成训练数据用于地震事件检测，并在特征提取中提升效果</li>
+</ul>
+</li>
+</ul>
+<h2>震相关联</h2>
+<ul>
+<li><strong>误报剔除与残差优化</strong>：通过迭代剔除大残差候选，可提升震中定位精度。</li>
+<li><strong>网格搜索关联 + 理论到时匹配</strong>：传统而稳定，REAL 工具包高效运用此方法构建高质量地震目录 。</li>
+<li><strong>神经网络替代网格搜索</strong>：Yu &amp; Wang（2022）使用 NN 高速关联，提高处理效率。</li>
+<li><strong>RNN、图神经网络（GENIE）、贝叶斯高斯混合模型（GaMMA）、PINNs</strong>：多种先进模型用于增强关联准确性与物理一致性。</li>
+<li><strong>波形对二分类 &amp; 深度度量学习</strong>：以波形特征直接判断是否属于同一事件，减少对到时模型依赖。</li>
+</ul>
+<h2>地震定位</h2>
+<ul>
+<li><strong>到时反演方法</strong>（Geiger 1912 用传统或 ML 算法如随机森林/FCNN），适用于 EEW 快速定位。</li>
+<li><strong>波形叠加定位</strong>（端到端 DL），跳过拾取过程，适合探测小震但计算成本高。</li>
+<li><strong>图像回归 / 强化学习定位</strong>：使用相干/迁移图（diffraction stack 图）或深度强化学习实现定位创新。</li>
+<li><strong>单站定位算法</strong>：应用 SVM、DL（ConvNetQuake 等），实现无需多站波形即可定位。</li>
+<li><strong>多站全波形 DL 模型与图神经网络</strong>：融合多站数据最大化信息利用，提升准确性。</li>
+<li><strong>贝叶斯方法与合成数据训练</strong>（GAN 等）助力数据稀缺情况下定位；<strong>PINNs</strong> 增强物理一致性与未知事件泛化能力。</li>
+</ul>
+<h2>质量控制</h2>
+<ul>
+<li><strong>传统阈值质量控制</strong>（如到时残差限值）容易导致误报与漏报，难以兼顾精度与覆盖度。</li>
+<li><strong>机器学习非线性分类</strong>：通过模型自动筛选震中结果，提升质量控制效率与准确性。</li>
+<li><strong>集成学习（Tamaribuchi et al. 2021, 2023）</strong>：结合日本气象厅自动目录，实现大规模自动化系统对震中误报的剔除。</li>
+<li><strong>CNN 模型质量筛选</strong>：利用 Ross et al. (2018) 的 CNN 对自动拾取的相位进行过滤，减少误报。</li>
+<li><strong>ML 应用于其他检测流程</strong>：如从能量检测结果（Beaucé et al. 2019）和匹配滤波候选（Herrmann et al. 2019）中剔除错误事件。</li>
+</ul>
+<hr>
+<h1>相似波形搜索</h1>
+<ul>
+<li><strong>相似波形搜索</strong>（如模板匹配与自相关）能发现被噪声掩盖的小震，但计算复杂度高。</li>
+<li><strong>ML与无监督方法</strong>，如 Skoumal 的重复式信号检测与 Ganter 的 ML 模板生成，可减少预先模板需求和计算成本。</li>
+<li><strong>LSH + FAST 方法</strong>基于频谱指纹与近似邻域搜索，实现快速波形检索，比自相关快 100 倍，已用于多站长时序数据</li>
+<li><strong>大规模部署</strong>：优化后的 FAST 支持 11 站、6–11 年数据集处理，成功发现新地震事件（如 Diablo Canyon 与新西兰）</li>
+<li><strong>深度哈希技术</strong>：Naoi&amp;Hirano将波形转为64位二进制码，用于16通道高采样 AE 数据，显著提高效率</li>
+</ul>
+<h2>震源机制分析</h2>
+<ul>
+<li><strong>二分类读取 P 波初动极性</strong>：深度学习如 DiTingMotion、RPNet 等可实现高精度自动判断，适用于大规模机制构建 :contentReference[oaicite:23]{index=23}。</li>
+<li><strong>单站/多站输入设计灵活</strong>，DL 方法适配不同数据采集场景（Uchide、Cheng、Tanaka 等）。</li>
+<li><strong>无监督极性识别</strong>：DL 聚类实现从波形中自动识别初动方向，无需标签数据。</li>
+<li><strong>极性补全增强机制库</strong>：ML 补全低信噪站点极性显著增加机制数量与定位精度（Skoumal 等）。</li>
+<li><strong>快速机制估算与物理约束模型</strong>：EEW 应用中尝试实时机制估算；Physics‑Guided NN 和 PINNs 通过嵌入物理规律提升未知事件泛化能力。</li>
+</ul>
+<h2>古地震记录分析</h2>
+<ul>
+<li><strong>数字记录 vs 模拟记录</strong>：目前只有自地震仪全面数字化以来的近四分之一时期拥有数字波形，其余需依赖模拟数据（如烟熏纸、Develocorder 胶片）。</li>
+<li><strong>CNN 自动数字化烟熏纸记录</strong>：Furumura 等（2023）使用 CNN 模型成功将烟熏纸上记录的强震波形进行数字化，验证与人工数据高度一致。</li>
+<li><strong>DevelNet 处理 Develocorder 胶片</strong>：Wang 等（2019b、2022d）开发 DevelNet 系统，从两年连续胶片中提取事件信息（检测、到时、震级、震中），并成功重建历史地震目录，事件数量为原目录的两倍。</li>
+<li><strong>DL 识别低频地震事件</strong>：Kaneko 等（2021、2023）使用深度学习模型在模拟记录中检出历史低频地震，拓展了地震种类研究。</li>
+</ul>
+<h2>当前成就与未来展望</h2>
+<ul>
+<li><strong>深度学习显著提升目录开发精度</strong>：自动处理性能晋升至接近人工水平，覆盖从检测、拾取到极性读取等任务。</li>
+<li><strong>多站点一致性与架构优化是未来重点</strong>：下一步目标是改进模型架构实现更强多站一致性与综合鲁棒性。</li>
+<li><strong>相位关联、定位与质量控制仍需研究投入</strong>：当前仍处于 ML 应用初步阶段，需进一步实证与工程化探索。</li>
+<li><strong>端到端自动化是趋势方向</strong>：如 LOC‑FLOW、PhaseNet+ 等一体化框架提供流程整合、精度提升与效率优化。</li>
+<li><strong>再训练与共享基础设施关键</strong>：推荐使用 SeisBench 等框架标准，公开数据集和再训练模型以加速研究发展。</li>
+</ul>
+<hr>
+<h1>地震风险评估与地震活动性分析的应用</h1>
+<h2>实验室地震破裂预测</h2>
+<ul>
+<li><strong>随机森林预测实验滑动</strong>：Rouet-Leduc 等（2017）用 AE 窗口特征成功预测破裂时间（R²≈0.9），提前量大于整个周期 。</li>
+<li><strong>竞赛推动算法发展</strong>：Kaggle 比赛激发多个新模型（如深度学习、自监督聚类、注意力机制） 。</li>
+<li><strong>关键预测特征发现</strong>：如 AE 波形振幅方差、事件持续时间，可预测滑动模式及破裂时间 。</li>
+<li><strong>目录级预测方法</strong>：Lubbers（2018）指出即使仅使用 AE 目录信息，若目录完整仍可有效预测。</li>
+<li><strong>物理约束与 PINN 方法</strong>：Borate（2023）等通过 PINNs 在样本不足时稳定预测 。</li>
+<li><strong>多实验场景扩展</strong>：推挤实验：预测滑动是否发生与时机（Corbi、Mastella 等）；微滑制度成像与位移评估（Trugman、Ma、Chaipornkaew 等）。</li>
+</ul>
+<h2>诱发地震风险评估</h2>
+<ul>
+<li><strong>微震目录与机制编目自动化</strong>：ML 显著提升微震和机制目录质量，为诱发地震研究提供高质量输入数据。</li>
+<li><strong>关键因素解释分析</strong>：逻辑回归与树模型有效识别控制诱发机制，如孔隙压力率和注入深度。</li>
+<li><strong>地震率与预警模型</strong>：随机森林、增强回归树、神经网络（RNN、CNN、Transformer）可实时预测地震率与潜在大事件前兆，可用于风险控制。</li>
+<li><strong>变压力区有效率较高</strong>：Oklahoma 包注水案例中识别孔隙压力率为关键，并成功预测长期趋势。</li>
+<li><strong>地热场领先预警案例</strong>：Geysers 和 Hengill 地热场的 RNN 与 Transformer 模型已具实用性，可部分预测 M~4 事件。</li>
+</ul>
+<h2>地震活动性分析中的其他应用</h2>
+<ul>
+<li><strong>无监督聚类技术</strong>（DBSCAN、HDBSCAN、OPTICS、GMM、SOM）广泛用于识别地震簇、断层结构、余震序列和构造颤动。</li>
+<li><strong>背景活动剥离（ declustering）</strong>：Aden‑Antoniów 等（2022）使用随机森林将背景与触发地震区分，性能好于基于 spatiotemporal 阈值的传统方法 。</li>
+<li><strong>背景率建模改进</strong>：Trampert 等采用梯度树分布成分模型；Muir &amp; Ross 用深高斯过程替代 ETAS 中简化背景率 。</li>
+<li><strong>非线性后震空间模型</strong>：如 RECAST 模型为替代 ETAS 的时空点过程模型。</li>
+<li><strong>结构性 asperity 识别</strong>：监督学习识别板块边界 asperity，为震活性解释提供新工具。</li>
+</ul>
+<hr>
+<h1>地面运动预测中的应用</h1>
+<h2>从特征预测地面运动强度</h2>
+<ul>
+<li>模型替代与提升：ML 增强型 GMPE</li>
+<li><strong>ML 替代/增强 GMPE</strong>：从早期的神经网络、支持向量回归、高斯过程，到现代的随机森林、XGBoost 等树模型，预测 PGA/PGV/反应谱等强度指标的精度已超越传统经验回归模型（如 Khosravikia &amp; Clayton 2021）。</li>
+</ul>
+<h3>新特征加入</h3>
+<ul>
+<li><strong>结合空间与站点信息</strong>：纳入震中经纬度、后方位角（back azimuth）、HVSR 以及站点 ID（one-hot 编码）等变量，有效降低预测误差（Log σ），增强站点放大模拟能力（Oana 2022；Esteghamati 2022；Okazaki 2021）。</li>
+<li><strong>空间化预测</strong>：Lilienkamp 2022 采用地图式数据预测区域地震动；Rekoske 2023 基于降阶 POD 重现 PGA 空间分布。</li>
+<li><strong>贝叶斯神经网络 (BNN)</strong>：Sreenath &amp; Raghukanth 2023 利用 BNN 提供置信区间，使预测结果更有可信度。</li>
+<li><strong>引入 XAI 技术</strong>：Mohammadi 2023 应用 SHAP（Shapley additive explanations）来评估 XGBoost 模型中各特征的贡献度，提升模型透明性。</li>
+</ul>
+<h2>根据特征预测地面运动时间序列</h2>
+<h3>生成式 ML 模型推动时间序列预测</h3>
+<ul>
+<li><strong>Florez et al. (2022)</strong>：首次提出 CGAN 生成真实感三分量地震记录（conditioning on M, R, Vs30）；其结果与真实地震记录在时间–频率上高度一致。</li>
+<li><strong>Esfahani et al. (2023)</strong>：使用 TF-cGAN 结合时频谱和相位检索，生成非平稳地震波形 。</li>
+<li><strong>Matsumoto et al. &amp; 扩散模型</strong>：生成概率地震时间序列，保留丰富频谱特征，未来采用扩散模型是趋势方向 。</li>
+</ul>
+<h3>物理推动的算法提升</h3>
+<ul>
+<li><strong>PINNs 方法</strong>：在频域/时域正向波传播中嵌入 PDE，效果优于传统 чис值模拟，但对高频和复杂介质面临挑战 。</li>
+<li><strong>Neural Operators 如 FNO、GNO</strong>：实现对声波/弹性波传播的高精度代理，速度提升近两位数，并验证稳定性与泛化性能。</li>
+</ul>
+<h2>从时间序列预测地面影响强度</h2>
+<ul>
+<li><strong>EEW 强度快速估计</strong>：只需 5–10 s 初期波形，CNN、GNN、RF 等模型即可在数秒内完成目标站点 PGA 等强度预测（Jozinović et al. 2020；Bloemheuvel et al. 2022；SC‑GNN 2023）。</li>
+<li><strong>多站点输入架构提升精度</strong>：TISER‑GCN 模型结合空间信息与迁移学习，MSE 优于单站 CNN 模型 约 16%。</li>
+<li><strong>自监督 + GNN 架构优化</strong>：SC‑GNN 利用对比学习构建地震嵌入，短输入窗（5 s）即可稳定预测，适应性强、更适合 EEW 实战 。</li>
+<li><strong>多样化模型探索</strong>：RF、SVM、LSTM 等也被广泛实验，对比显示 GNN 架构在利用空间关联性</li>
+</ul>
+<h2>从时间序列预测地面运动序列</h2>
+<ul>
+<li><strong>高效时空预测模型</strong>：LSTM、CNN‑Voronoi、时空 RNN 和 GPR 等方法通过当前波形实现目标站点未来/当前地面运动预测，提高 EEW 与智能灾害应急响应能力。</li>
+<li><strong>物理—数据融合策略</strong>：通过 ML 映射 PBS 模拟信息，生成现实感强、覆盖全频带的波形，辅助工程设计与分析。</li>
+<li><strong>波形质量提升作用凸显</strong>：去噪处理是构建高质量输入的基础，决定预测系统的底层表现。</li>
+</ul>
+<h2>与地面运动预测相关的研究</h2>
+<ul>
+<li><strong>数据驱动站点响应模型</strong>：DL 模型已较好替代 1D 理论模型，实现站点放大函数的更高精准预测。</li>
+<li><strong>单站估计放大响应</strong>：SeismAmp 等算法可识别地震记录中的站点响应组件，有助于现场即时校正。</li>
+<li><strong>记录质量自动评估</strong>：DL 模型评估记录频带质量，提高后续模型训练数据集质量。</li>
+<li><strong>模拟样本扩充助力危险性评估</strong>：Imai 等利用 POD 和 copula 技术生成多种情景摇晃图，为危险性分析增量数据。</li>
+<li><strong>多灾种技术迁移发展</strong>：相同 ML 框架已在地震动与海啸预测中推广应用，支持多领域综合预警体系。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/123ce07d-4080-4620-aef2-6f0aa5efaf51"><img src="https://github.com/user-attachments/assets/123ce07d-4080-4620-aef2-6f0aa5efaf51" alt="Image" style="max-width: 100%;"></a></p>
+<h2>平衡地震运动数据不平衡问题的方法</h2>
+<ul>
+<li><strong>利用合成数据补充稀缺区域</strong>：通过 PBS 或生成模型补足高震级/强震样本，增强 ML 模型泛化。</li>
+<li><strong>物理模型融合 ML 方法</strong>：Hybrid ML‑GMPE 和物理先验网络提高模型对强地震事件的敏感度和稳定性。</li>
+<li><strong>添加数学先验关系</strong>：如单调性约束，有助模型更好遵循地球物理规律，减少偏差。</li>
+<li><strong>跨区域模型迁移</strong>：用数据丰富区域的预训练模型适配数据稀少区域，有效缓解偏差问题。</li>
+</ul>
+<h2>地面运动预测的现状与未来展望</h2>
+<h3>当前进展</h3>
+<ul>
+<li><strong>精度优于传统模型</strong>：ML 模型普遍表现超过经典 GMPE，但实用应用仍有限。</li>
+<li><strong>强震、近震数据不足</strong>：高强地面运动观测稀缺，严重影响训练稳健性。</li>
+<li><strong>网络与数据库强化</strong>：NGA‑West2、NZSM 数据集深化应用并补全数据偏向。</li>
+</ul>
+<hr>
+<h1>在大地测量数据上的应用</h1>
+<h2>聚类</h2>
+<ul>
+<li>
+<p><strong>聚类种类</strong></p>
+<ul>
+<li><em>硬聚类（Hard Clustering）</em>：层次聚类、K-means、Euler-vector → 站点归属唯一；</li>
+<li><em>软聚类（Soft Clustering）</em>：GMM、模糊 C-means → 每站表达隶属概率，揭示边界不确定性。</li>
+</ul>
+</li>
+<li>
+<p><strong>应用案例</strong></p>
+<ul>
+<li>Simpson 等（2012）：旧金山湾区速率聚类；</li>
+<li>Savage &amp; Simpson（2013）：加州/大地区Euler-vector聚类；</li>
+<li>Savage &amp; Wells（2015）：通过北美西北板块结构验证聚类；后续拓展至台、土耳其、新西兰等。</li>
+</ul>
+</li>
+<li>
+<p><strong>噪声评估机制</strong></p>
+<ul>
+<li>Takahashi 等（2019）：引入信息熵+蒙特卡洛方法评价分区稳定性。</li>
+</ul>
+</li>
+<li>
+<p><strong>扩展数据变量</strong></p>
+<ul>
+<li>Yáñez-Cuadra 等（2023）：使用应变率/旋转率改进聚类效果。</li>
+</ul>
+</li>
+<li>
+<p><strong>工具开发</strong></p>
+<ul>
+<li>Granat 等（2021）：创建开源代码，支持快速部署 GNSS 聚类与可视分析。</li>
+</ul>
+</li>
+</ul>
+<h2>模型与预测地壳变形：AI 应用</h2>
+<ul>
+<li>
+<p><strong>粘弹性模拟加速</strong></p>
+<ul>
+<li><strong>DeVries et al. (2017)</strong>：神经网络学习理论粘弹性结果，加速可达 50,000 倍 。</li>
+</ul>
+</li>
+<li>
+<p><strong>PINN 静态变形建模</strong></p>
+<ul>
+<li><strong>Okazaki et al. (2022)</strong>：使用极坐标结合 PINN 模拟地震造成的静变形，模拟断层位移不连续边界。</li>
+<li><strong>Fukushima et al. (2023)</strong>：利用 PINN 模拟慢滑事件的滑速演化，并以此反演摩擦参数 。</li>
+</ul>
+</li>
+<li>
+<p><strong>时序预测</strong></p>
+<ul>
+<li><strong>Fukushima et al. (2023)</strong>：将 PINN 应用于俯冲界面滑动速率短期预测 。</li>
+</ul>
+</li>
+<li>
+<p><strong>震后形变预测</strong></p>
+<ul>
+<li><strong>Yamaga &amp; Mitsui (2019)</strong>：RNN 处理 GNSS 时间序列，预测震后变形效果优于传统模型，残差可揭示主导机制。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h1>结论</h1>
+<h2>研究成果</h2>
+<ul>
+<li><strong>广泛应用</strong>：ML 在地震目录构建、活动分析、地面运动预测与大地测量数据分析上取得重要进展。</li>
+<li><strong>数据不平衡问题突出</strong>：强震与高强度地震数据稀缺，需通过<strong>数据增强、领域知识融合、迁移学习</strong>等方法补偿。</li>
+<li><strong>黑盒问题正被攻克</strong>：利用 <strong>PINNs、神经算子、BNN 与 XAI</strong> 等技术提升模型可解释性与物理一致性。</li>
+</ul>
+<h2>未来展望</h2>
+<ol>
+<li>深度整合 <strong>领域物理知识</strong> 与 ML 模型，提高泛化能力；</li>
+<li>在更多任务中推广 <strong>生成式增强、迁移学习、监督与半监督学习</strong>；</li>
+<li>推进 <strong>可解释、可重复的 ML 基准框架</strong>，增强工程应用信任；</li>
+<li>拓展 ML 应用于 <strong>全周期地震过程模拟与预测</strong>，深化地震物理机制理解。</li>
+</ol>
+<p><a href="">Paper Link</a></p></div>
+<div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://Lszidv.github.io">芜尽</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","Lszidv/Lszidv.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+
+
+</script>
+
+
+</html>
