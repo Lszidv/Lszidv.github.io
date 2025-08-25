@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="# Abstract
+- 本研究通过模拟2019年加利福尼亚Ridgecrest地震序列，评估了八种地震定位方法。">
+<meta property="og:title" content="[PW]Accuracy and Precision of Earthquake Location Programs: Insights from a Synthetic Controlled Experiment">
+<meta property="og:description" content="# Abstract
+- 本研究通过模拟2019年加利福尼亚Ridgecrest地震序列，评估了八种地震定位方法。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://Lszidv.github.io/post/%5BPW%5DAccuracy%20and%20Precision%20of%20Earthquake%20Location%20Programs-%20Insights%20from%20a%20Synthetic%20Controlled%20Experiment.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
+<title>[PW]Accuracy and Precision of Earthquake Location Programs: Insights from a Synthetic Controlled Experiment</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">[PW]Accuracy and Precision of Earthquake Location Programs: Insights from a Synthetic Controlled Experiment</h1>
+<div class="title-right">
+    <a href="https://Lszidv.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/Lszidv/Lszidv.github.io/issues/53" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h1>Abstract</h1>
+<ul>
+<li>本研究通过模拟2019年加利福尼亚Ridgecrest地震序列，评估了八种地震定位方法。通过构建旅行时间数据集并采用3D速度模型，辅以von Karman扰动和地形效应，模拟了地震监测中的常见问题，如拾取误差、相位可用性和异常值。基于差分时间的定位方法在准确性和精度上优于单事件定位方法。补偿1D速度结构偏差对于提高定位精度至关重要。同时，大多数程序在误差量化上存在低估现象。</li>
+<li>本研究验证了差分时间方法在地震定位中的优势，并强调了补偿速度结构偏差和准确量化不确定性的重要性。</li>
+</ul>
+<hr>
+<h1>引言</h1>
+<ul>
+<li>准确的地震定位对于地震学应用至关重要，例如地震危害评估、破裂过程探索和地下结构揭示。地震定位问题利用P波和S波的到达时间来估计震源位置和震源时间。然而，地震定位存在诸多挑战，包括非线性反问题、简化的地球结构表示和有限的速度模型</li>
+<li>最早的线性化定位算法已发展超过一个世纪，而随后的发展引入了联合震源定位方法，能够同时定位多个地震事件。非线性算法的出现进一步提升了地震定位的精度。</li>
+<li>尽管定位方法有所改进，3D速度模型的低分辨率和活动断层附近的速度结构复杂性仍对地震定位造成较大误差。此外，地震台站的分布和波形处理误差也是地震定位的主要问题。</li>
+<li>近年来，计算能力的提升促进了地震定位方法的发展。网格搜索和随机直接搜索等方法成为了线性化方法的替代方案，这些方法在多个定位程序中得到了应用，如HypoSVI、NonLinLoc等。</li>
+</ul>
+<h3>差分时间方法</h3>
+<ul>
+<li>基于差分时间的定位方法通过配对相邻地震事件来抑制路径效应，从而提高定位精度。为应对未建模的地质结构和潜在的仪器误差，研究中引入了自适应加权、静态台站项和源特定台站项（SSST）。</li>
+<li>为了评估不同算法的性能，研究开发了一个包含已知事件位置的基准数据集，并通过合成实验进行测试，评估了八种常用的地震定位程序在震源估计和不确定性量化方面的表现。</li>
+</ul>
+<h3>精度和准确性误差</h3>
+<ul>
+<li>准确性误差量化了程序输出与真实位置之间的差异，而精度误差则衡量相邻震源之间的距离差异。精度误差有助于评估震源之间相对结构（如断层面几何形状）的保持情况。</li>
+<li>研究使用了Chamfer距离来评估地震定位程序恢复地震事件结构的能力。该方法计算了两个点云之间的形状不相似性，并用于量化程序在地震定位中的结构恢复能力。</li>
+<li>基于差分时间的地震定位程序在准确性和精度方面明显优于单事件定位程序。通过台站修正或配对取消未建模结构的影响，这些程序能够更好地确定震源位置。</li>
+</ul>
+<hr>
+<h1>地震定位程序概述</h1>
+<ul>
+<li>本部分回顾了用于估计震源位置和不确定性的算法，这些算法分别应用于单事件定位程序（Hypoinverse、HypoSVI、NonLinLoc、NonLinLoc_SSST、VELEST）和基于差分时间的定位程序（GrowClust、HypoDD、XCORLOC）。</li>
+</ul>
+<h3>单事件定位程序</h3>
+<ul>
+<li>这些程序通过线性化方程和迭代方法来计算震源位置，HYPOINVERSE和VELEST是最为常见的单事件定位程序。HYPOINVERSE使用自适应阻尼方法最小化旅行时间残差，而VELEST则同时确定震源位置和1D速度结构。</li>
+</ul>
+<h3>非线性定位程序</h3>
+<ul>
+<li>与线性方法不同，NonLinLoc通过概率模型和全局搜索方法估算震源位置，并结合SSST方法进行更精确的定位。HypoSVI则通过贝叶斯推理和变分推断方法来处理不确定性问题，并使用机器学习加速计算。</li>
+</ul>
+<h2>协方差和不确定性</h2>
+<ul>
+<li>VELEST和NonLinLoc程序使用不同的方式计算协方差矩阵，评估定位误差和不确定性，HypoSVI通过采样位置的95百分位数来量化不确定性。研究表明，非线性问题的协方差估算仅在进行线性近似时有效。</li>
+</ul>
+<hr>
+<h1>基于差分时间的定位程序</h1>
+<ul>
+<li>本研究中，我们评估的另外三种地震定位方法通过利用相邻事件对之间的差分旅行时间来减少路径效应，从而提高精度。这些方法包括HypoDD、GrowClust和XCORLOC。</li>
+</ul>
+<h3>HypoDD</h3>
+<p>HypoDD通过最小化差分旅行时间的L2范数来优化定位结果，使用SVD或最小二乘法（LSQR）算法。该程序通过事件间距离和观测次数进行事件分组。</p>
+<h3>GrowClust</h3>
+<ul>
+<li>GrowClust通过最小化L1范数并使用旅行时间表搜索来处理大数据集中的病态矩阵问题。最近的更新包括支持3D速度模型和并行计算，以增强其处理能力。</li>
+</ul>
+<h3>XCORLOC</h3>
+<ul>
+<li>XCORLOC通过最小化混合误差（L1和L2范数的组合）来优化定位结果，并且使用旅行时间表进行搜索。它还包括静态台站修正和SSST的反演，但需要额外的震中距离信息。</li>
+</ul>
+<h3>误差估计</h3>
+<ul>
+<li>HypoDD通过协方差矩阵估计误差，GrowClust和XCORLOC则通过自助法（bootstrapping）来量化不确定性。这些方法都在不同程度上提高了地震定位的精度和可靠性。</li>
+</ul>
+<hr>
+<h1>程序评估</h1>
+<ul>
+<li>在本节中，我们概述了用于评估每个地震定位程序性能的工作流程，具体包括三部分：构建合成旅行时间数据集、运行八个定位程序、以及将输出结果与真实位置（GT）进行比较。</li>
+</ul>
+<h3>数据集和程序配置</h3>
+<ul>
+<li>我们详细描述了合成数据集的构建过程，并概述了每个程序的配置。尽管各程序的参数有所不同，我们尽力遵循各自手册中的推荐，并报告了所有调整。</li>
+</ul>
+<hr>
+<h1>前向问题设置</h1>
+<ul>
+<li>为了模拟现实的地震监测场景，我们使用SCEDC提供的Ridgecrest地区的台站位置，并从2019年Ridgecrest地震QTM目录中随机抽取1000个事件构建了震源数据集。</li>
+</ul>
+<h3>速度模型构建</h3>
+<ul>
+<li>我们从南加州地震中心（SCEC）社区速度模型（CVMS5）中获得了基础模型，覆盖了Ridgecrest地区的空间范围。基础模型只考虑了大尺度变化，因此通过von Karman扰动模型引入了小尺度的地质异质性。</li>
+</ul>
+<h3>海拔效应</h3>
+<ul>
+<li>为了模拟海拔效应，我们根据P波速度将每个网格分类为花岗岩或沉积岩，并调整速度以反映海拔变化。</li>
+</ul>
+<h3>合成数据集和误差处理</h3>
+<ul>
+<li>使用PyKonal包计算旅行时间数据集，并对P波和S波的到达时间引入读取误差。此外，还加入了P波和S波的异常值，以模拟实际地震监测中可能出现的误差。</li>
+</ul>
+<hr>
+<h1>运行定位程序</h1>
+<ul>
+<li>本节描述了运行地震定位程序的设置。对于单事件定位程序，我们使用相同的旅行时间数据集和修订后的1D速度模型作为输入；而对于基于差分时间的定位程序，仅使用差分时间数据集，并采用相同的1D速度模型。这保证了各程序的输入数据一致性，便于对比评估。</li>
+</ul>
+<h3>定位程序设置</h3>
+<ul>
+<li>
+<p><strong>HYPOINVERSE</strong>：该程序通过最小化均方根（rms）误差和距离加权策略，每次迭代更新，假设读取和计时误差为0.04秒。HYPOINVERSE在地震网络监测中广泛使用，尤其适用于处理小型数据集。</p>
+</li>
+<li>
+<p><strong>VELEST</strong>：VELEST在同时模式下运行，先估计震源位置和台站项，完成30次迭代后，切换到单事件模式，仅计算不确定性统计，并固定震源位置。</p>
+</li>
+<li>
+<p><strong>NonLinLoc</strong>：使用OctTree采样方法最大化等差分时间似然函数，基于所有读数对的原始时间估算方差加权进行优化。该方法有效地处理复杂的非线性问题，并且对多个事件进行联合定位。</p>
+</li>
+<li>
+<p><strong>NonLinLoc_SSST</strong>：在NonLinLoc的基础上，增加了SSST修正，通过生成修正网格进一步提高震源定位的精度。</p>
+</li>
+<li>
+<p><strong>HypoSVI</strong>：采用机器学习模型EikoNet训练速度剖面，通过SSST迭代优化震源位置，保持推荐的参数配置进行误差估算。</p>
+</li>
+<li>
+<p><strong>HypoDD</strong>：通过将所有事件聚类为一个单一的聚类来处理，使用LSQR方法进行误差计算。为了更精确地估算误差，HypoDD将LSQR结果分组并进入SVD模式计算。</p>
+</li>
+<li>
+<p><strong>GrowClust</strong>：通过最小化L1范数和使用旅行时间表搜索，解决大数据集中的计算问题。GrowClust通过波形相似性将事件聚类，并进行100次自助法迭代进行不确定性分析。</p>
+</li>
+<li>
+<p><strong>XCORLOC</strong>：执行10次SSST迭代、5次波形互相关定位，并进行100次自助法迭代进行不确定性分析，进一步提升震源定位的精度和可靠性。</p>
+</li>
+</ul>
+<h2>不确定性分析</h2>
+<ul>
+<li>
+<p><strong>GrowClust</strong> 和 <strong>XCORLOC</strong> 都采用了 <strong>自助法（bootstrapping）</strong> 来进行不确定性分析。在每次自助法迭代中，程序从现有的数据中随机选择样本，生成新的数据集并进行多次定位计算，从而评估每个事件定位结果的变化范围和不确定性。GrowClust和XCORLOC各自进行了100次自助法迭代，以确保估算的不确定性具有代表性。</p>
+</li>
+<li>
+<p><strong>HypoDD</strong> 通过<strong>SVD模式</strong>计算误差，在LSQR模式下，由于阻尼效应，误差估计通常会低估，因此SVD模式能有效避免这种低估现象。</p>
+</li>
+<li>
+<p><strong>NonLinLoc</strong> 和 <strong>NonLinLoc_SSST</strong> 通过 <strong>标准化样本</strong> 计算协方差矩阵，并基于样本位置分布使用高斯估计器来提取不确定性。这些程序能够有效地量化非线性问题中的不确定性，并为不同事件之间的位置变化提供准确的估计。</p>
+</li>
+<li>
+<p><strong>HypoSVI</strong> 通过分析<strong>95百分位数</strong>来评估位置的不确定性，这种方法基于对采样位置的分析，可以量化震源位置的变化范围，提供详细的误差估算。</p>
+</li>
+<li>
+<p>总结来说，不确定性分析是评估地震定位程序性能的关键部分。通过不同的统计方法和采样策略，程序能够量化地震定位中的误差和不确定性，从而提供更可靠的震源位置估算。每个程序在不确定性分析方面采用了不同的策略，这使得每种方法能够适应不同的地震监测需求。</p>
+</li>
+</ul>
+<hr>
+<h1>后处理与评估指标</h1>
+<ul>
+<li>在后处理过程中，我们通过测量每个程序输出与真实数据集（GT）之间的水平和垂直距离，计算平均距离，以确定水平和垂直的平均准确性误差。此外，我们还计算事件间距离误差，并通过这些误差计算水平和垂直方向上的平均精度误差。</li>
+</ul>
+<h2>Chamfer距离</h2>
+<ul>
+<li>我们评估Chamfer距离，以量化预测位置与真实位置（GT）之间的差异，全面地以点云形式表示地震事件的位置差异。</li>
+</ul>
+<h2>不确定性输出分析</h2>
+<ul>
+<li>针对不同程序的不确定性输出，我们首先将其转换为95%置信区间。根据协方差矩阵或自助法计算的不确定性，我们进一步应用卡方分布等因素来调整误差估算。对NonLinLoc和NonLinLoc_SST的误差分布进行了Δχ2分布假设。</li>
+</ul>
+<h2>误差评估指标</h2>
+<ul>
+<li><strong>震源位置包含率</strong>：衡量真实位置落在估计位置加95%置信椭圆内的比例，评估位置估算的准确性。</li>
+<li><strong>事件对包含率</strong>：评估事件对位置的相对精度，计算事件对的实际间距是否在估算的误差区间内。</li>
+</ul>
+<hr>
+<h1>结果分析</h1>
+<h3>单事件定位程序</h3>
+<ul>
+<li><strong>总体趋势</strong>：所有程序都能捕捉到正交断层系统的整体趋势，但在细节处理上有所不同。Hypoinverse和NonLinLoc的结果较为分散，而NonLinLoc_SSST、HypoSVI和VELEST的结果更集中，尤其在处理主断层东南端的线性排列时。图4中的地图视图展示了这一差异。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/7ba2217b-559c-4c8b-bfc8-a2e558a0dd04"><img width="905" height="860" alt="Image" src="https://github.com/user-attachments/assets/7ba2217b-559c-4c8b-bfc8-a2e558a0dd04" style="max-width: 100%; height: auto; max-height: 860px;"></a></p>
+<ul>
+<li><strong>精度</strong>：VELEST和NonLinLoc_SSST在深度准确性上表现一致。尽管HypoSVI的绝大多数事件误差较小，但仍有少数事件的误差较大。深度剖面图（图5）显示了不同程序在深度估算上的差异，特别是在8公里距离和10公里深度的异常事件处理上。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/a000e493-4694-4de0-b1ac-e4db303c27c0"><img width="879" height="565" alt="Image" src="https://github.com/user-attachments/assets/a000e493-4694-4de0-b1ac-e4db303c27c0" style="max-width: 100%; height: auto; max-height: 565px;"></a></p>
+<h3>差分时间定位程序</h3>
+<ul>
+<li>
+<p><strong>准确性与精度</strong>：基于差分时间的定位程序显示了更强的与真实位置的相干性，结果与真实数据（GT）高度一致，水平误差小于1公里。尽管GrowClust存在较大的误差，尤其在深度剖面中，HypoDD和XCORLOC成功恢复了异常事件。图6展示了这三种程序的定位结果，并突出了它们与真实数据的匹配度。</p>
+</li>
+<li>
+<p><strong>误差分析</strong>：GrowClust的误差较大，特别是在处理小聚类时表现较差，而HypoDD和XCORLOC在所有事件内的处理更为稳定。GrowClust的定位误差可能与聚类中的事件数量不足有关。</p>
+</li>
+</ul>
+<h3>不确定性分析</h3>
+<ul>
+<li><strong>不确定性量化</strong>：差分时间定位程序的输出误差明显低于单事件定位程序，表明其能够更有效地抑制路径效应并校正1D速度结构的偏差。</li>
+</ul>
+<hr>
+<h1>讨论</h1>
+<h3>系统性偏移</h3>
+<ul>
+<li>研究中观察到，震源位置存在系统性深度偏移，尤其是由于1D速度模型的简化，导致震源深度定位的误差较大。使用3D速度模型能够有效减少这种偏移，提高定位准确性。图7展示了这一分析，特别是准确位置区域的速度截面与1D速度剖面的对比。</li>
+</ul>
+<h3>误差来源分析</h3>
+<ul>
+<li>通过比较定位程序返回的残差与拾取误差和1D近似偏差，研究揭示了简化速度模型在定位误差中的主导作用。HYPOINVERSE的残差中位数为130毫秒，表明多种因素共同影响了定位结果。</li>
+</ul>
+<h3>定位方法的优劣</h3>
+<ul>
+<li>单事件定位方法通常难以处理路径效应或低信噪比引起的异常值，而基于差分时间的定位程序在恢复异常事件方面表现优越。适当的聚类大小对于保证差分时间定位程序的可靠性至关重要。</li>
+</ul>
+<h3>差分时间定位的应用</h3>
+<ul>
+<li>差分时间测量方法不仅可以通过波形互相关计算得出，还可以通过常规的到达时间数据获取。此方法的广泛适用性已经通过近实时监测中的差分定位目录系统得以验证，特别是在北加州地震网络的DDRT系统中。</li>
+</ul>
+<h3>系统性偏移和3D速度模型</h3>
+<ul>
+<li>系统性偏移在地震震源定位中普遍存在，主要来源于台站几何布置、高速层的存在以及1D速度结构假设的简化。通过将3D速度模型与1D速度模型进行对比，研究表明1D模型在恢复精确震源位置方面存在局限性，而3D模型能够有效减少偏差并提高准确性。</li>
+</ul>
+<h3>定位误差和不确定性</h3>
+<ul>
+<li>不同程序在定位误差和不确定性量化方面表现不同。多数程序倾向于低估不确定性，尤其是1D速度模型的简化对误差的贡献显著。通过结合台站修正和统计优化方法，可以提高定位准确性。</li>
+</ul>
+<h3>误差分析和改进</h3>
+<ul>
+<li>单事件定位程序在处理路径效应和低信噪比引起的异常值时存在不足，而差分时间定位程序通过使用波形互相关和台站修正策略，能够有效改进定位精度。为保证差分时间程序的可靠性，合适的事件聚类大小至关重要。</li>
+</ul>
+<h3>地质复杂性和波形建模</h3>
+<ul>
+<li>尽管本研究使用了合理的地质模型，但未能完全捕捉地球结构的复杂性，诸如速度不连续、低速层和断层破坏带等特征未能考虑。未来的研究可通过引入各向异性和非平稳速度结构异质性，结合波形建模，进一步提高地震定位的准确性和现实性。</li>
+</ul>
+<hr>
+<h1>结论</h1>
+<h3>定位方法评估</h3>
+<ul>
+<li>本研究系统地评估了八种地震定位程序在震源位置估算和不确定性量化方面的表现。通过基于2019年Ridgecrest地震序列的受控合成实验，我们展示了基于差分时间的定位方法在准确性和精度上优于单事件定位方法。</li>
+</ul>
+<h3>台站修正与不确定性分析</h3>
+<ul>
+<li>通过将VELEST得出的台站修正信息输入到HYPOINVERSE中，定位准确性得到了显著提升。我们还发现，大多数程序倾向于低估不确定性，强调了改进不确定性分析的必要性。使用简化的1D速度模型进行定位时，深度估算存在系统性偏差。</li>
+</ul>
+<h3>测试框架与应用前景</h3>
+<ul>
+<li>我们提供了测试数据集和使用说明，鼓励其他研究人员使用这些数据评估其他地震定位程序。未来研究可以使用本研究开发的测试框架，定量评估不同监测条件下不同定位算法的性能。</li>
+</ul>
+<h3>地震定位技术的进一步发展</h3>
+<ul>
+<li>该合成测试框架不仅可以应用于其他地区，还可以扩展到区域和远震尺度，为地震定位技术的探索和改进提供坚实的基础。</li>
+</ul>
+<p><a href="https://doi.org/10.1785/0220240354" rel="nofollow">Paper Link</a></p></div>
+<div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://Lszidv.github.io">芜尽</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","Lszidv/Lszidv.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+
+
+</script>
+
+
+</html>
