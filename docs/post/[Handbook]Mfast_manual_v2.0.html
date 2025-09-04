@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="# 滤波
+- **带通滤波器的应用**：带通滤波器是剪切波分裂测量中不可或缺的工具，它能有效提高信噪比（SNR），从而确保高质量的测量结果。">
+<meta property="og:title" content="[Handbook]Mfast_manual_v2.0">
+<meta property="og:description" content="# 滤波
+- **带通滤波器的应用**：带通滤波器是剪切波分裂测量中不可或缺的工具，它能有效提高信噪比（SNR），从而确保高质量的测量结果。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://Lszidv.github.io/post/%5BHandbook%5DMfast_manual_v2.0.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
+<title>[Handbook]Mfast_manual_v2.0</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">[Handbook]Mfast_manual_v2.0</h1>
+<div class="title-right">
+    <a href="https://Lszidv.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/Lszidv/Lszidv.github.io/issues/55" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h1>滤波</h1>
+<ul>
+<li>
+<p><strong>带通滤波器的应用</strong>：带通滤波器是剪切波分裂测量中不可或缺的工具，它能有效提高信噪比（SNR），从而确保高质量的测量结果。狭带滤波器会引起周期跳跃，需避免使用。</p>
+</li>
+<li>
+<p><strong>滤波器选择方法</strong>：为每个地震事件根据信噪比和滤波器带宽标准自动选择最优滤波器。预定义的14个带通滤波器集提供了合理的起始参数。</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/2003fc57-683b-48b9-af34-9c68abc23cf8"><img width="636" height="553" alt="Image" src="https://github.com/user-attachments/assets/2003fc57-683b-48b9-af34-9c68abc23cf8" style="max-width: 100%; height: auto; max-height: 553px;"></a></p>
+<ul>
+<li>
+<p><strong>方法的适用性扩展</strong>：此方法不仅适用于局部剪切波数据，还可应用于远震数据，研究地幔各向异性，并通过修改代码实现自动SKS测量。</p>
+</li>
+<li>
+<p><strong>针对短周期数据的滤波器调整</strong>：使用短周期数据时，需要调整长周期滤波器，因为它们在短周期时被有效截断，导致响应不足。某些滤波器在短周期数据上可能表现出相似的响应，因此必须重新设计滤波器。</p>
+</li>
+<li>
+<p><strong>滤波器选择的灵活性</strong>：针对不同数据集，可能需要使用不同的滤波器组，表1中的滤波器是大多数微震研究的合理起始值，但特定数据集可能要求其他滤波器。</p>
+</li>
+</ul>
+<hr>
+<h1>信噪比</h1>
+<ul>
+<li><strong>信噪比（SNR）计算</strong>：计算SNR时，噪声窗口设置在S波到达之前，信号窗口设置在S波到达后，确保能够捕捉到P波尾波产生的信号噪声。</li>
+<li><strong>计算方法</strong>：SNR通过东西向和南北向分量的rms幅度比值的平均值来计算。信噪比小于阈值（3）的数据不用于解释。</li>
+<li><strong>滤波器选择</strong>：根据滤波器带宽与信噪比的乘积选择最适合的滤波器来进行波形分析。优先选择那些频率上最稳定的测量结果。</li>
+<li><strong>早期版本的局限性</strong>：早期代码仅使用SNR，容易出现周期跳跃问题，而后来的版本则通过引入SNR-带宽乘积来减少这一问题。</li>
+</ul>
+<hr>
+<h1>BASIC Technique</h1>
+<ul>
+<li>
+<p><strong>剪切波分裂参数的测量</strong>：通过反向分裂算子计算快波极化（$\phi$）和延迟时间（$dt$），反向算子是通过网格搜索得到的，目标是最大化粒子运动的线性度，减少波形分裂。</p>
+</li>
+<li>
+<p><strong>网格搜索和置信度</strong>：通过F检验计算不同算子的$\lambda_2$等高线图，评估结果的置信区域。更新后的代码提高了误差条，增加了测量的可靠性。</p>
+</li>
+<li>
+<p><strong>参数空间搜索</strong>：在1º和时间单位的参数空间内搜索快波方向和延迟时间，$t_{lagmax}$的选择依据研究问题的规模而定。</p>
+</li>
+<li>
+<p><strong>测量窗口的依赖性</strong>：网格搜索的结果可能会依赖于测量窗口，通常需要多次测量以确认参数的稳定性。自动化的SPLIT方法使用聚类分析来找出最稳定的解。</p>
+</li>
+<li>
+<p><strong>主频率的计算</strong>：主频率基于信号窗口计算，频率范围为0.3Hz到8Hz，以确保窗口长度适当。</p>
+</li>
+<li>
+<p><strong>时间步长选择（$\Delta T_{\text{beg}}$ 和 $\Delta T_{\text{end}}$）</strong>：</p>
+<ul>
+<li>
+$\Delta T_{\text{beg}}$（窗口开始时间步长）应根据主频率（$f_d$）来调整，较小的值为0.2秒，但如果S-P时间过短，则会减少到0.1秒或 $(S-P)/2$除以 $N_{\text{beg}}$的较小值。</li>
+<li>
+$\Delta T_{\text{end}}$（窗口结束时间步长）较大，起始为0.08秒，通过增加或减少来确保窗口结束时间范围（$N_{\text{end}}$）在15到2之间。这个值是根据 $w3$和 $w4$计算得到的。</li>
+</ul>
+</li>
+<li>
+<p><strong>时间选择（$T_{\text{beg0}}$ 和 $T_{\text{beg1}}$）</strong>：</p>
+<ul>
+<li>
+$T_{\text{beg0}}$表示窗口开始的最早时间，接近S波到达时间，通常设定在图3的线（2）位置，具体为 $toff_{\text{beg}}$。</li>
+<li>
+$T_{\text{beg1}}$表示窗口开始的最晚时间，远离S波到达时间，通常设定在图3的线（1）位置，具体为 $zass_{\text{mfm}}$。</li>
+</ul>
+</li>
+<li>
+<p><strong>窗口设置调整</strong>：</p>
+<ul>
+<li>
+$T_{\text{beg0}}$初始设为0.3秒，靠近S波到达时间，但如果S-P时间过小，则会减少到0.1秒或 $(S-P)/2$除以  $ (N_{\text{beg}}+1)$的较小值。</li>
+<li>
+$T_{\text{beg1}}$的计算方式为：S波时间减去 $toff_{\text{beg}} + N_{\text{beg}} * \Delta T_{\text{beg}}$。</li>
+</ul>
+</li>
+<li>
+<p><strong>时间窗口选择</strong>：分析窗口的开始时间 $T_{\text{beg}}$和结束时间$T_{\text{end}}$通过参数 $T_{\text{beg0}}$和 $T_{\text{beg1}}$，以及 $T_{\text{end0}}$和 $T_{\text{end1}}$进行调整，步长为 $\Delta T_{\text{beg}}$和 $\Delta T_{\text{end}}$。</p>
+</li>
+<li>
+<p><strong>窗口长度控制</strong>：最小窗口为一个周期，最大窗口为2.5个周期。根据测量窗口的长度调整步长，确保窗口结束时间在合理范围内（15到25）。</p>
+</li>
+<li>
+<p><strong>聚类分析</strong>：通过聚类分析来确定最稳定的测量结果，选择方差最小的簇和测量结果作为最终结果。</p>
+</li>
+<li>
+<p><strong>窗口的调整</strong>：对于近震事件，特别是S和P波到达时间间隔小于2.2秒时，缩短窗口开始时间，避免P波干扰。</p>
+</li>
+</ul>
+<hr>
+<h1>质量标准</h1>
+<ul>
+<li><strong>周期跳跃问题</strong>：周期跳跃是由于波形错配导致的快慢波互换问题，尤其在窄带滤波器中显著，可能影响火山区域的测量。</li>
+<li><strong>自动化处理</strong>：引入自动化技术，通过聚类分析分级事件，排除多解问题，自动选择最佳簇。</li>
+<li><strong>簇分级</strong>：通过计算方差和比较快波方向、延迟时间差异来对簇进行分级，确保选择最稳定的测量结果。</li>
+<li><strong>空测量处理</strong>：空测量发生在没有各向异性或极化方向对齐时，通过几何标准判定，若极化差异超过70º则认为是空测量。</li>
+</ul>
+<hr>
+<h1>平均值</h1>
+<ul>
+<li><strong>测量平均值计算</strong>：使用高斯统计方法计算延迟时间的平均值，使用Von Mises分布来处理极化方向的平均值。</li>
+<li><strong>极化方向的处理</strong>：通过将单位向量相加来计算平均极化方向，并处理180°歧义，确保极化方向的一致性。</li>
+<li><strong>误差计算</strong>：误差通过标准误差进行计算，但需要注意，很多分布是双峰的，不能完全用正态分布来描述，因此在使用平均值和标准误差时需要小心。</li>
+</ul>
+<hr>
+<h1>多滤波器</h1>
+<ul>
+<li>
+<strong>多个滤波器的使用</strong>：早期研究使用多个滤波器对同一事件-站点对进行处理，并在平均值计算中使用这些滤波器。此方法通过增加一致结果的权重来增强测量结果的可靠性。</li>
+<li>
+<strong>避免相关性过高</strong>：不同滤波器的结果可能存在相关性，因此不应使用高斯统计进行处理。</li>
+<li>
+<strong>比较和剔除标准</strong>：对于通过分级标准的多个滤波器结果，若结果差异过大（如时间差异大于 $t_{\text{lagmax}}/8$或角度差异大于$\pi/8$），则剔除该测量；若结果相似，则选择误差条最小的结果。</li>
+</ul>
+<hr>
+<ul>
+<li>
+<p><strong>时间窗口的设定</strong>：</p>
+<ul>
+<li>起始和结束时间选择基于S波到达时间，并通过设定合适的时间范围和步长进行调整。</li>
+<li>最小窗口为一个周期，最大窗口为2.5个周期，确保能够捕捉到完整的信号。</li>
+<li>对于近震事件，S-P间隔小于2.2秒时，时间窗口的开始时间需要进行特殊调整，以避免P波干扰。</li>
+</ul>
+</li>
+<li>
+<p><strong>快波偏振方向的确定</strong>：</p>
+<ul>
+<li>通过单位向量加法计算快波偏振方向，并通过角度加倍和减半来解决180°歧义。</li>
+<li>使用向量长度$R$来度量偏振方向的一致性，$R=1$表示完全一致，$R$越接近1，偏振方向的稳定性越高。</li>
+<li>使用Von Mises分布进行极化方向的统计分析，确保测量结果的合理性。</li>
+<li>进行非随机性测试，以确保测量结果的可靠性和统计意义。</li>
+</ul>
+</li>
+</ul></div>
+<div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://Lszidv.github.io">芜尽</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","Lszidv/Lszidv.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+
+
+</script>
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</html>
