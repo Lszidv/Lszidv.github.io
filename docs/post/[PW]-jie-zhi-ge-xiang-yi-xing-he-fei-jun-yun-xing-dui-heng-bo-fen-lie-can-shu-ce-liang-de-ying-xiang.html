@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="# 摘要
+- 各向异性和非均匀性引起的偏差：实际地震记录上，震相的观测走时与理论走时、观测偏振与理论偏振、以及震相的观测序列与理论序列之间存在显著的偏离。">
+<meta property="og:title" content="[PW]介质各向异性和非均匀性对横波分裂参数测量的影响">
+<meta property="og:description" content="# 摘要
+- 各向异性和非均匀性引起的偏差：实际地震记录上，震相的观测走时与理论走时、观测偏振与理论偏振、以及震相的观测序列与理论序列之间存在显著的偏离。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://Lszidv.github.io/post/%5BPW%5D-jie-zhi-ge-xiang-yi-xing-he-fei-jun-yun-xing-dui-heng-bo-fen-lie-can-shu-ce-liang-de-ying-xiang.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
+<title>[PW]介质各向异性和非均匀性对横波分裂参数测量的影响</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+.copy-feedback {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 50px;
+    color: var(--color-fg-on-emphasis);
+    background-color: var(--color-fg-muted);
+    border-radius: 3px;
+    padding: 5px 8px;
+    font-size: 12px;
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">[PW]介质各向异性和非均匀性对横波分裂参数测量的影响</h1>
+<div class="title-right">
+    <a href="https://Lszidv.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/Lszidv/Lszidv.github.io/issues/57" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h1>摘要</h1>
+<ul>
+<li>
+<p>各向异性和非均匀性引起的偏差：实际地震记录上，震相的观测走时与理论走时、观测偏振与理论偏振、以及震相的观测序列与理论序列之间存在显著的偏离。这些偏差是地震横波研究中的一个重要挑战。</p>
+</li>
+<li>
+<p>偏振非正交和路径非正交：文章指出，传统的正交分离方法无法有效解决地震波震相矢量偏振非正交和路径非正交的问题，这也是导致横波分裂参数显著离散的根本原因。</p>
+</li>
+<li>
+<p>震相漏识别和误识别：通过仿真模拟，分析了现有震相识别和波形分析方法可能带来的震相漏识别或误识别的现象。</p>
+</li>
+<li>
+<p>波形分离方法：作者提出了一种新的思路，通过矢量分析技术对三分量地震记录中的震相波形进行分离，推导了基于地震波空间偏振矢量方向的波形分离运算公式。此外，文章还介绍了如何通过三分量地震记录的傅里叶频谱投影方法，近似测量震相矢量的空间方向。</p>
+</li>
+</ul>
+<hr>
+<h1>引言</h1>
+<ul>
+<li>自20世纪80年代以来，地震各向异性研究在全球范围内取得了显著进展。Crampin等人确立了地震横波分裂现象与地球介质各向异性之间的内在关系，并将其视为地震各向异性的标志。地震学家的大量观测研究揭示了各向异性广泛存在于地壳、地幔、核幔边界及地核等各个分层。</li>
+</ul>
+<h2>主要研究成果</h2>
+<pre class="notranslate"><code class="notranslate">1. 横波分裂参数：地震横波分裂参数包括快横波偏振方向和快-慢横波到时差。快横波偏振方向与地球内部应力场方向相关，通常与观测点下部区域的压应力主轴方向平行。
+2. 快-慢横波到时差：反映了地球介质在应力场作用下弹性特征的变化，是地球内部应力、介质特征和应力响应的直接显示。
+3. 观测结果：尽管横波偏振的观测已得到认可，但快-慢横波到时差的观测结果缺乏客观性和稳定性，且与理论预期的结果不符.
+</code></pre>
+<h2>持续的挑战</h2>
+<ul>
+<li>尽管存在理论支持，横波到时差的测量结果显示离散，严重制约了通过横波分裂进一步了解地震各向异性及地球内部运动的研究。为了解决这些问题，必须重新审视介质各向异性对地震横波的影响，并进一步研究其在三分量观测记录上的表现。</li>
+</ul>
+<hr>
+<h1>非理想地球介质中地震横波的基本特征</h1>
+<ol>
+<li>
+<p><strong>各向异性介质与均匀各向同性介质的比较</strong><br>
+各向异性介质更接近真实地球介质，物理上各向异性表现为介质微观结构和弹性特征受地球内部运动或温压影响形成的现象。在地壳和地幔中，各向异性表现为脆性岩石中孔隙和裂隙的张开与闭合，以及岩石晶格的定向排列。</p>
+</li>
+<li>
+<p><strong>地震横波对各向异性介质的敏感性</strong><br>
+地震横波进入各向异性介质后，会发生分裂并且偏振方向显著改变，形成非正交，影响现有地震波震相分析的正交前提。</p>
+</li>
+<li>
+<p><strong>介质速度分层的影响</strong><br>
+地球内部介质的速度分层或其他非均匀结构会改变纵横波的传播路径和震相序列，进而干扰横波分裂参数的测量。</p>
+</li>
+<li>
+<p><strong>各向异性介质中地震波传播特征</strong></p>
+<ul>
+<li><strong>双折射现象</strong>：横波分裂为快横波qS1和慢横波qS2，纵横波速度随传播方向和介质对称面的关系而变化。</li>
+<li><strong>偏振特征变化</strong>：在各向异性介质中，纵波的偏振方向不再与传播方向平行，横波偏振受介质各向异性对称面约束。</li>
+<li><strong>三类体波耦合</strong>：各向异性介质中三类体波相互耦合，增添了地震波场的复杂性。</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>这些变化不仅导致地震波的观测走时与理论走时的偏离，还引起了观测偏振与理论偏振的偏离，从而影响了横波分裂参数的准确测量。</li>
+</ul>
+<h2>各向异性介质条件下横波偏振非正交关系</h2>
+<ol>
+<li>
+<p><strong>震相矢量的偏振特征</strong></p>
+<ul>
+<li>地震波震相具有特定的空间偏振方向，每个震相矢量代表一个特定的偏振方向。与均匀各向同性介质中震相矢量相互正交不同，在各向异性介质中，震相矢量表现为非正交。</li>
+</ul>
+</li>
+<li>
+<p><strong>固有非正交与视非正交</strong></p>
+<ul>
+<li><strong>固有非正交</strong>：与介质的各向异性程度相关，并随地震波入射角而变化。较大的横波固有非正交可能接近20°。</li>
+<li><strong>视非正交</strong>：与地震波入射平面和观测坐标平面的空间关系有关，这种非正交在三分量观测记录中同样不能忽视。</li>
+</ul>
+</li>
+<li>
+<p><strong>快-慢横波偏振的正交性</strong></p>
+<ul>
+<li>快-慢横波的偏振正交在各向异性介质中是非常偶然的，只有当地震波射线路径正好与各向异性对称面平行或正交时，才可能发生。由于这种巧合在天然地震观测中极为罕见，因此通常快-慢横波偏振是非正交的。</li>
+</ul>
+</li>
+<li>
+<p><strong>横波与纵波的偏振差异</strong></p>
+<ul>
+<li>在各向异性介质中，横波的偏振显著偏离各向同性介质的条件，纵波的偏振也受介质各向异性和入射方向的影响，虽然纵波偏离各向同性的程度小于横波。</li>
+</ul>
+</li>
+</ol>
+<h2>分层及一般非均匀介质中纵横波路径非正交关系</h2>
+<ol>
+<li>
+<p><strong>路径非正交现象</strong></p>
+<ul>
+<li>除了各向异性介质中的偏振非正交，地震波路径非正交现象广泛存在于所有类型的地震观测中，特别是由于分层或非均匀介质引起的路径差异。</li>
+</ul>
+</li>
+<li>
+<p><strong>路径非正交的影响</strong></p>
+<ul>
+<li>地震波在分层界面上的反射、折射、衍射等作用导致不同路径、不同偏振方向的震相矢量以非正交方式叠加，形成复杂的三分量地震记录。路径非正交广泛出现在全球地震走时曲线和可控源勘探数据中。</li>
+</ul>
+</li>
+<li>
+<p><strong>非正交关系对测量的影响</strong></p>
+<ul>
+<li>介质各向异性和非均匀性导致的偏振非正交和路径非正交问题是横波分裂参数测量的主要障碍。所有地震波震相矢量参数（除初至震相外）都受到非正交关系的影响。</li>
+</ul>
+</li>
+<li>
+<p><strong>横波分裂参数的测量困难</strong></p>
+<ul>
+<li>横波观测数据显示，纵波尾波对横波快波到时和偏振方向测量的干扰难以消除，同时快-慢横波的时间窗重叠也影响了慢横波到时的可靠辨识。</li>
+</ul>
+</li>
+<li>
+<p><strong>真实地球介质的复杂性</strong></p>
+<ul>
+<li>真实地球介质中的地震波特征比理想化的各向异性和非均匀性更复杂，实际三分量地震观测记录同时包含了偏振非正交和路径非正交的共同影响。</li>
+</ul>
+</li>
+<li>
+<p><strong>非正交问题的不可忽视</strong></p>
+<ul>
+<li>在地震各向异性研究和横波分裂参数测量中，非正交问题的存在是无法回避的，忽视这些问题会导致无法提取到准确的震相和介质信息。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h1>现有地震波震相识别和参数测量存在的问题</h1>
+<ol>
+<li>
+<p><strong>介质各向异性与非均匀性带来的影响</strong><br>
+地球介质的各向异性和非均匀性引起的地震波速度、偏振非正交和路径差异会改变地震波的到时、偏振和震相序列，影响三分量地震记录上的震相识别和参数测量。</p>
+</li>
+<li>
+<p><strong>正交波场分离的多解性</strong><br>
+大多数现有方法仍基于均匀各向同性介质假设，忽略了地震波震相的非正交关系。正交分离技术将震相矢量投影到三个分量上，丢失了震相的振幅、相位和波形等动力学信息，无法准确恢复丢失的地震矢量信息。</p>
+</li>
+<li>
+<p><strong>非正交关系对震相参数测量的影响</strong><br>
+震相矢量之间的非正交关系导致正交分离技术无法准确测量各个震相的到时、振幅、相位和波形，特别是横波分裂及其他震相信息的丢失，造成不可预测的多解性和不确定性。</p>
+</li>
+<li>
+<p><strong>目前的测量方法面临障碍</strong><br>
+目前的横波分裂参数测量方法遇到了不可逾越的障碍，现有技术无法解决震相矢量非正交问题，限制了地震波参数的精确测量。</p>
+</li>
+</ol>
+<h2>观测记录上地震矢量波波形的不确定性</h2>
+<ol>
+<li>
+<p><strong>介质各向异性与非均匀性带来的波形不确定性</strong><br>
+介质的各向异性和非均匀性引起的地震波偏振、速度和到时的改变，导致观测记录上的地震波形出现显著的不确定性。图2展示了偏振和走时变化对波形的影响。</p>
+</li>
+<li>
+<p><strong>偏振与走时变化对波形的影响</strong></p>
+<ul>
+<li><strong>偏振变化</strong>：偏振入射角的改变显著影响波形和周期的变化，震相波形之间的差异变得更加明显。图2(a2)与(b2)展示了偏振变化对波形的影响。</li>
+<li><strong>走时变化</strong>：延长震相到时会导致观测波形差异，图2(a3)和(b3)展示了走时延长对波形的影响，波形对走时的变化非常敏感。</li>
+</ul>
+</li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/03dda642-4678-4b9c-836f-cb5d52f80d6a"><img width="830" height="711" alt="Image" src="https://github.com/user-attachments/assets/03dda642-4678-4b9c-836f-cb5d52f80d6a" style="max-width: 100%; height: auto; max-height: 711px;"></a></p>
+<ol start="3">
+<li>
+<p><strong>震相矢量非正交问题</strong><br>
+地震波震相矢量之间的非正交关系是地震波形测量中的主要问题。正交分离技术无法准确测量震相的到时、振幅、相位和波形，震相矢量的投影只能反映震相的部分特征，导致不可预测的多解性和不确定性。</p>
+</li>
+<li>
+<p><strong>介质的各向异性与非均匀性对震相识别的影响</strong><br>
+介质的各向异性与非均匀性增加了震相识别和测量的复杂性，特别是对横波分裂和后续震相的参数测量影响显著。这些变化无法通过简单的坐标变换消除，进一步复杂化了震相的准确识别与参数测量。</p>
+</li>
+</ol>
+<h2>传统方法可能带来的震相误识别或漏识别</h2>
+<ol>
+<li>
+<p><strong>传统震相识别方法的挑战</strong><br>
+偏振方向和到时的变化严重影响了地震波震相的波形，使得传统震相识别方法（基于振幅突变或周期突变）无法准确识别震相，尤其是后续震相的漏识别或误识别。</p>
+</li>
+<li>
+<p><strong>震相的到时和识别问题</strong><br>
+图2展示了不同震相在时间上的到达情况，尽管在0.41秒之后观察到振幅和周期的变化，但在0.41秒之前，无法清晰地通过传统方法识别是否存在其他震相。</p>
+</li>
+<li>
+<p><strong>波形变化的不一致性</strong><br>
+在同一组三分量记录中，不同分量的振幅或周期突变的数量和时间点存在差异，缺乏一致的标准和判据来精确识别震相。</p>
+</li>
+<li>
+<p><strong>波形“突变”特征的局限性</strong><br>
+在介质各向异性和非均匀性背景下，单纯依赖波形中的“突变”特征来提高横波和其他震相参数的测量精度是不客观的，因为未充分利用震相矢量信息。</p>
+</li>
+<li>
+<p><strong>矢量信息的缺失</strong><br>
+地震波震相最重要的矢量信息未被充分利用，这是导致误识别和漏识别的根本原因。</p>
+</li>
+</ol>
+<hr>
+<h1>3 改进横波分裂参数测量可靠性的途径</h1>
+<h2>1. 震相矢量的表示</h2>
+<ul>
+<li>在三维空间中，地震波的震相矢量通过偏振方向的单位矢量 ( e_i(\theta, \phi) ) 和随时间变化的波形 ( a_i(t) ) 来表示。</li>
+</ul>
+<h2>2. 波形的定义</h2>
+<ul>
+<li>波形 ( a_i(t) ) 表示振幅随时间的变化，通常由地震源的时间过程决定。</li>
+</ul>
+<h2>3. 路径和介质特性差异的影响</h2>
+<ul>
+<li>传播路径的差异和介质特性差异会导致相同震源下不同路径震相的波形不同，体现了介质对地震波的衰减和影响。</li>
+</ul>
+<h2>4. 多个震相矢量的合成</h2>
+<ul>
+<li>当三个非共震震相矢量在不同时间到达时，通过合成矢量 ( \mathbf{G}(t) ) 可以反映其合成效果。</li>
+</ul>
+<h2>5. 震相矢量的几何特性</h2>
+<ul>
+<li>震相矢量之间的关系可以通过矢量几何的交叉积和点积来描述，进一步构建波形表达式。</li>
+</ul>
+<h2>非正交坐标系的影响</h2>
+<h2>1. 非正交坐标系中的影响</h2>
+<ul>
+<li>在非正交坐标系中，震相矢量之间的混合积与时间相关，决定了各个震相矢量的波形。正交情况下，震相矢量的波形是合成矢量在特定方向的投影；而非正交时，波形在与其他矢量相关的方向上产生投影。</li>
+</ul>
+<h2>2. 震相矢量的投影和波形</h2>
+<ul>
+<li>震相矢量 ( a_1 ) 的波形 ( a_1(t-t_1) ) 是合成矢量 ( \mathbf{G}(t) ) 在 ( \mathbf{e}_1 ) 方向上的投影。</li>
+<li>非正交情况下，矢量 ( a_1 ) 与 ( \mathbf{e}_1 ) 方向通常不一致，导致其在该方向上的投影振幅小于实际振幅。</li>
+</ul>
+<h2>3. 分母的作用</h2>
+<ul>
+<li>分母 ( (\mathbf{e}_1 \mathbf{e}_2 \mathbf{e}_3) ) 的作用是将投影振幅放大，从而恢复震相矢量的实际振幅。</li>
+</ul>
+<h2>震相矢量分离与波形恢复</h2>
+<ol>
+<li>
+<p><strong>震相矢量的方向与数量确定</strong></p>
+<ul>
+<li>三分量观测记录中，确定震相矢量的个数和空间方向是分离非正交震相矢量的前提。通过数学判据可以可靠地从三分量记录中确定震相个数，即使振幅差异较大。</li>
+</ul>
+</li>
+<li>
+<p><strong>震相矢量空间方向的确定方法</strong></p>
+<ul>
+<li>通过时域波形分析（基于式(6)~(8)）和傅里叶变换（基于式(1)）可以直观高效地确定震相矢量的空间方向，傅里叶变换尤其在频域分析中更为便捷。</li>
+</ul>
+</li>
+<li>
+<p><strong>傅里叶变换的应用</strong></p>
+<ul>
+<li>使用傅里叶变换，合成矢量 ( \mathbf{G}(t) ) 的振幅谱展示了震相波形的频率特征，帮助估算震相矢量的空间方向。与时域波形相比，频域方法具有更高的效率和直观性。</li>
+</ul>
+</li>
+</ol>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/2465887f-11fc-4e9a-b0b2-1a3440f35d75"><img width="566" height="526" alt="Image" src="https://github.com/user-attachments/assets/2465887f-11fc-4e9a-b0b2-1a3440f35d75" style="max-width: 100%; height: auto; max-height: 526px;"></a></p>
+<hr>
+<h1>4 讨论</h1>
+<ol>
+<li>
+<p><strong>地震各向异性介质研究的理论与实践的关系</strong></p>
+<ul>
+<li>尽管地震各向异性介质的理论研究已经很广泛，但依然需要依赖观测数据的检验和验证。</li>
+</ul>
+</li>
+<li>
+<p><strong>横波分裂参数测量的不稳定性</strong></p>
+<ul>
+<li>横波分裂参数的测量结果不稳定，特别是横波快-慢波到时差测量的较大离散，限制了从现有观测数据中提取更多可靠信息的能力，并影响未来地震各向异性研究的推进。</li>
+</ul>
+</li>
+<li>
+<p><strong>非正交震相矢量的影响</strong></p>
+<ul>
+<li>从三分量观测记录上可靠测量横波参数及其他震相参数的最大难题是震相矢量广泛存在的非正交关系。非正交关系来源于介质的各向异性和非均匀性，体现了地震波传播路径和地球介质的多种物理特性。</li>
+</ul>
+</li>
+<li>
+<p><strong>目前的测量限制</strong></p>
+<ul>
+<li>数学家目前没有提供矢量分离的现成方法，也没有有效的解析途径来处理三分量观测数据中可能包含多个震相矢量的情况，这导致横波快波偏振、快-慢波到时差等测量受到极大限制。</li>
+</ul>
+</li>
+<li>
+<p><strong>提出解决途径</strong></p>
+<ul>
+<li>需要建立针对三分量观测数据的地震波震相矢量特征的独立矢量分析方法。</li>
+</ul>
+</li>
+<li>
+<p><strong>进一步发展矢量分析技术的必要性</strong></p>
+<ul>
+<li>只有重视介质的复杂性，充分了解地震波的基本特征，并持续发展矢量分析技术，才能推动横波观测解释取得实质性进展。</li>
+</ul>
+</li>
+</ol></div>
+<div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://Lszidv.github.io">芜尽</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z', 'copy': 'M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z', 'check': 'M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","Lszidv/Lszidv.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const createClipboardHTML = (codeContent, additionalClasses = '') => `
+        <pre class="notranslate"><code class="notranslate">${codeContent}</code></pre>
+        <div class="clipboard-container position-absolute right-0 top-0 ${additionalClasses}">
+            <clipboard-copy class="ClipboardButton btn m-2 p-0" role="button" style="display: inherit;">
+                <svg height="16" width="16" class="octicon octicon-copy m-2"><path d="${IconList["copy"]}"></path></svg>
+                <svg height="16" width="16" class="octicon octicon-check color-fg-success m-2 d-none"><path d="${IconList["check"]}"></path></svg>
+            </clipboard-copy>
+            <div class="copy-feedback">Copied!</div>
+        </div>
+    `;
+
+    const handleCodeElements = (selector = '') => {
+        document.querySelectorAll(selector).forEach(codeElement => {
+            const codeContent = codeElement.innerHTML;
+            const newStructure = document.createElement('div');
+            newStructure.className = 'snippet-clipboard-content position-relative overflow-auto';
+            newStructure.innerHTML = createClipboardHTML(codeContent);
+
+            const parentElement = codeElement.parentElement;
+            if (selector.includes('highlight')) {
+                parentElement.insertBefore(newStructure, codeElement.nextSibling);
+                parentElement.removeChild(codeElement);
+            } else {
+                parentElement.parentElement.replaceChild(newStructure, parentElement);
+            }
+        });
+    };
+
+    handleCodeElements('pre.notranslate > code.notranslate');
+    handleCodeElements('div.highlight > pre.notranslate');
+
+    let currentFeedback = null;
+    document.querySelectorAll('clipboard-copy').forEach(copyButton => {
+        copyButton.addEventListener('click', () => {
+            const codeContent = copyButton.closest('.snippet-clipboard-content').innerText;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = codeContent;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            const copyIcon = copyButton.querySelector('.octicon-copy');
+            const checkIcon = copyButton.querySelector('.octicon-check');
+            const copyFeedback = copyButton.nextElementSibling;
+
+            if (currentFeedback && currentFeedback !== copyFeedback) {currentFeedback.style.display = 'none';}
+            currentFeedback = copyFeedback;
+
+            copyIcon.classList.add('d-none');
+            checkIcon.classList.remove('d-none');
+            copyFeedback.style.display = 'block';
+            copyButton.style.borderColor = 'var(--color-success-fg)';
+
+            setTimeout(() => {
+                copyIcon.classList.remove('d-none');
+                checkIcon.classList.add('d-none');
+                copyFeedback.style.display = 'none';
+                copyButton.style.borderColor = '';
+            }, 2000);
+        });
+    });
+});
+
+</script>
+
+
+</html>
