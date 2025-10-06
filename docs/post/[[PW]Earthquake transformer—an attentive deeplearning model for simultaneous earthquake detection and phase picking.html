@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="# 摘要
+- 任务背景：在高噪声与微震监测条件下，地震检测与震相拾取难度大。">
+<meta property="og:title" content="[[PW]Earthquake transformer—an attentive deeplearning model for simultaneous earthquake detection and phase picking">
+<meta property="og:description" content="# 摘要
+- 任务背景：在高噪声与微震监测条件下，地震检测与震相拾取难度大。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://Lszidv.github.io/post/%5B%5BPW%5DEarthquake%20transformer%E2%80%94an%20attentive%20deeplearning%20model%20for%20simultaneous%20earthquake%20detection%20and%20phase%20picking.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
+<title>[[PW]Earthquake transformer—an attentive deeplearning model for simultaneous earthquake detection and phase picking</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">[[PW]Earthquake transformer—an attentive deeplearning model for simultaneous earthquake detection and phase picking</h1>
+<div class="title-right">
+    <a href="https://Lszidv.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/Lszidv/Lszidv.github.io/issues/58" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h1>摘要</h1>
+<ul>
+<li>任务背景：在高噪声与微震监测条件下，地震检测与震相拾取难度大。</li>
+<li>方法框架：提出可跨区域泛化的联合模型，同时执行“检测+拾取”，采用分层注意力融合“震相细节 + 全波形上下文”。</li>
+<li>主要贡献：
+<ul>
+<li>多任务学习提升各子任务表现（检测更稳、拾取更准）。</li>
+<li>在 2000 年鸟取地震连续 5 周数据上，仅用 &lt;1/3 台站，事件检出与定位数提升约 2 倍。</li>
+<li>P/S 到时精度接近人工，但效率与灵敏度更高，可识别更多、更小事件。</li>
+</ul>
+</li>
+<li>预期影响：改进地震目录完整性、支撑快速定位与时空演化分析，利于余震序列与触发机制研究。</li>
+</ul>
+<hr>
+<h1>研究动机与方法概述</h1>
+<ul>
+<li>任务现状：检测与拾取是 DL-地震学的核心热点；DL 相比传统方法具优势（稳健、自动化、泛化）。</li>
+<li>难点差异：
+<ul>
+<li>检测目标：降低 <strong>$P(\text{FN})$</strong> 与 <strong>$P(\text{FP})$</strong>，依赖全局多相上下文。</li>
+<li>拾取目标：提升到时精度 <strong>$|\Delta t|$</strong>，定位对 <strong>$0.01,\text{s}$</strong> 级误差极敏感。</li>
+</ul>
+</li>
+<li>关键假设：上下文（全波形）可提升表征质量，且不同时间片段对任务的贡献不均衡。</li>
+<li>
+<h2>. 检测 vs 拾取：信息粒度与上下文</h2>
+</li>
+<li>
+<strong>共同点</strong>：都可视为<strong>时序特征变化识别</strong>问题。</li>
+<li>
+<strong>差异点</strong>：
+<ul>
+<li>检测偏向<strong>全局</strong>：利用<strong>整段波形</strong>、多震相（含散射波）与<strong>长时间上下文</strong>；</li>
+<li>拾取偏向<strong>局部</strong>：聚焦<strong>震相到时附近的狭窗</strong>以实现高精度回归。</li>
+</ul>
+</li>
+<li>
+<strong>实践工作流（类人先验）</strong>：
+<ol>
+<li>先全局观察<strong>多台站整段波形</strong>，依据<strong>震相时序先后</strong>（如 P 先于 S、体波先于色散面波）判定“是否为地震”；</li>
+<li>再对<strong>具体震相局部窗口</strong>进行<strong>精细到时</strong>。<br>
+→ 暗示“全局判别—局部精测”的<strong>层级信息</strong>是关键。</li>
+</ol>
+</li>
+<li>方法要点：引入双层注意力（Global + Local），显式建模“全局判别—局部精测”的人类工作流，提出 <strong>EQTransformer</strong> 实现单台近震的联合“检测+P/S拾取”。</li>
+<li>评测设计：与多种 DL/传统方法对比，在日本 5 周连续数据上外部验证；通过“检测→定位”展示模型对区域泛化与震源刻画的改进。</li>
+</ul>
+<hr>
+<h1>Results</h1>
+<h2>结构总览</h2>
+<ul>
+<li>多任务框架：共享<strong>超深编码器</strong> + 三个<strong>独立解码器</strong>（检测 / P 相 / S 相）。</li>
+<li>组件组合：一维卷积、双向/单向 <strong>LSTM</strong>、<strong>Transformer/自注意</strong>、<strong>NIN</strong>、<strong>残差连接</strong>、前馈层。</li>
+<li>输出形式：逐时刻三条概率序列（地震存在、P 相、S 相）。</li>
+</ul>
+<h2>编码器（全局表征）</h2>
+<ul>
+<li>前端<strong>下采样</strong>（卷积 + MaxPool）以压缩序列长度 <strong>$T$</strong>，降低自注意内存与计算负担（典型 <strong>$O(T^2)$</strong>）。</li>
+<li>主干由<strong>残差 CNN + LSTM</strong>堆叠，兼顾局部纹理与长时依赖。</li>
+<li>末端<strong>全局注意力</strong>聚焦可能含有地震的时段，形成上下文加权表征。</li>
+</ul>
+<h2>解码器（任务专属）</h2>
+<ul>
+<li><strong>检测分支</strong>：高层特征 → 地震存在概率向量（全局触发曲线）。</li>
+<li><strong>P/S 分支</strong>：入口置 <strong>LSTM+局部注意</strong>，在候选区间内对各震相微观特征精确聚焦；输出各自的逐时刻概率轨迹，服务到时拾取。</li>
+</ul>
+<h2>训练可优化性与效率</h2>
+<ul>
+<li>
+<strong>残差</strong>与<strong>NIN</strong>支撑 56 层深度而<strong>仅 ~ $372\mathrm{K}$ 可训练参数</strong>，实现高表示力与轻量化并存。</li>
+<li>结构与超参由大量<strong>原型网络试验</strong>经验确定，兼顾三任务的精度、召回与到时误差。</li>
+</ul>
+<h2>设计动机与领域先验</h2>
+<ul>
+<li>模拟人类流程：<strong>全局判别 → 局部精测</strong>；以<strong>全局注意</strong>确定“在哪儿是地震”，再用<strong>局部注意</strong>精确到 <strong>P/S</strong>。</li>
+<li>针对自注意的序列长度瓶颈，前置<strong>下采样</strong>平衡上下文范围与计算资源。</li>
+<li>P/S <strong>分支解耦</strong>，允许对两类相位的时频与包络差异进行专门优化。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/4780bb80-2247-4879-ab6a-82b118513a47"><img width="841" height="1013" alt="Image" src="https://github.com/user-attachments/assets/4780bb80-2247-4879-ab6a-82b118513a47" style="max-width: 100%; height: auto; max-height: 1013px;"></a></p>
+---
+# 数据与训练
+<h2>1. 数据与预处理</h2>
+<ul>
+<li>数据源：<strong>STEAD</strong>（全球、标注齐全；不含日本记录）。</li>
+<li>规模与范围：地震 <strong>1,000,000</strong>，噪声 <strong>300,000</strong>，震中距 <strong>≤ 300 km</strong>，事件 <strong>≈ 450,000</strong>（多为 <strong>$M&amp;lt;2.5$</strong>；台站距震中 <strong>≤ 100 km</strong>）。</li>
+<li>划分：训练 <strong>85%</strong>／验证 <strong>5%</strong>／测试 <strong>10%</strong>（随机）。</li>
+<li>预处理：长度 <strong>60 s</strong>（<strong>6000</strong> 点，<strong>$f_s=100,\mathrm{Hz}$</strong>），因果带通 <strong>1–45 Hz</strong>。</li>
+</ul>
+<h2>2. 标签策略</h2>
+<ul>
+<li><strong>检测（binary）</strong>：</li>
+</ul>
+<p>$$
+y(t) =
+\begin{cases}
+1, &amp; t \in [t_P,, t_S + 1.4,(t_S - t_P)] \\
+0, &amp; \text{otherwise}
+\end{cases}
+$$</p>
+<ul>
+<li>
+<strong>拾取（P/S 概率曲线）</strong>：矩形/高斯/三角三选；最终采用<strong>三角形</strong>（更低 loss、更高 <strong>F</strong>）：
+<ul>
+<li>在 <strong>$t_P$</strong> 或 <strong>$t_S$</strong> 处峰值 <strong>1</strong>；到时<strong>前后各 20 样本</strong>线性衰减至 <strong>0</strong>（<strong>$20/f_s=0.2,\mathrm{s}$</strong>）。</li>
+</ul>
+</li>
+</ul>
+<h2>3. 训练配置</h2>
+<ul>
+<li>初始化：<strong>Xavier 正态</strong>；偏置 <strong>0</strong>。</li>
+<li>优化器：<strong>Adam</strong>，<strong>学习率可变</strong>日程。</li>
+<li>资源与时长：<strong>4×V100</strong>，<strong>≈89 h</strong>（TensorFlow）。</li>
+<li>早停：验证损失 <strong>12</strong> 个 epoch 无改进即停止。</li>
+<li>Dropout：<strong>0.1</strong>（<strong>训练/测试</strong>皆启用，用于不确定性估计）。</li>
+</ul>
+<h2>4. 数据增强与并行管线</h2>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>增强</th>
+<th>目的</th>
+<th>概率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>次震叠加（空白段）</td>
+<td>重叠事件鲁棒性</td>
+<td>0.3</td>
+</tr>
+<tr>
+<td>高斯噪声注入</td>
+<td>噪声鲁棒性</td>
+<td>0.5</td>
+</tr>
+<tr>
+<td>事件随机平移（数组旋转）</td>
+<td>时移不变性</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>噪声段插零间隙</td>
+<td>缺失/跳变鲁棒性</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>丢弃 1–2 通道</td>
+<td>传感器异常鲁棒性</td>
+<td>0.3</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<ul>
+<li><strong>半增强批</strong>：每个 batch 中 <strong>50%</strong> 为增强版，维持分布平衡。</li>
+<li><strong>并行预处理</strong>：增强 + <strong>按标准差归一化</strong>在 <strong>24 CPU</strong> 上实时执行，GPU 训练无 I/O 阻塞。</li>
+</ul>
+<h2>5. 关键内联量</h2>
+<ul>
+<li>
+<strong>$t_P,t_S$</strong>：P/S 到时</li>
+<li>
+<strong>$f_s=100,\mathrm{Hz}$</strong>：采样率</li>
+<li>
+<strong>$M&amp;lt;2.5$</strong>：小震主导</li>
+<li>
+<strong>$1.4,(t_S-t_P)$</strong>：检测窗后延</li>
+<li>
+<strong>$0.2,\mathrm{s}$</strong>：三角标签两侧线性衰减时长</li>
+</ul>
+<hr>
+<h1>注意力机制可视化与解释</h1>
+<h2>关键观点</h2>
+<ul>
+<li>分层注意力提供“<strong>全局判别 → 局部精测</strong>”的信息流：
+<ul>
+<li>全局注意：从整段波形中定位 <strong>地震相关</strong>片段；</li>
+<li>局部注意：在事件片段内，聚焦 <strong>P/S 到时</strong>附近的窄窗特征。</li>
+</ul>
+</li>
+<li>检测分支更浅且标签覆盖时长更长 → <strong>损失更大、梯度更强</strong>，训练早期先学会“有无地震”的判别。</li>
+<li>编码器末端的 <strong>Transformer（I）</strong> 充当信息路由，将“事件相关”上下文传递至解码器，抑制噪声干扰。</li>
+</ul>
+<h2>实务意义</h2>
+<ul>
+<li>注意力热力图能指示各任务的<strong>关键时间片段</strong>，辅助误检诊断与模型改进（如窗口策略、噪声建模）。</li>
+<li>层级注意符合人工工作流（先全局判断、后局部拾取），<strong>提升可解释性与泛化性</strong>。</li>
+</ul>
+<h2>术语内联</h2>
+<ul>
+<li>
+<strong>$c_t=\sum_j \alpha_{t,j}h_j$</strong>（上下文向量）</li>
+<li>
+<strong>$\alpha_{t,j}$</strong>（对齐分数，softmax 归一）</li>
+<li>
+<strong>$P(\mathrm{eq}\mid \mathbf{x})$</strong>、<strong>$P(P\mid \mathbf{x})$</strong>、<strong>$P(S\mid \mathbf{x})$</strong>（条件概率式解释）</li>
+</ul>
+<hr>
+<h1>结果与方法对比</h1>
+<h2>一、测试设置与可视化</h2>
+<ul>
+<li>统一评测：<strong>113 K</strong> 条 <strong>1 min/3C</strong> 波形（无额外滤波），对比<strong>深度/传统</strong>多法。</li>
+<li>定性表现：<strong>全局检测 + 高精度拾取</strong>并存；可避免将强尾波/面波<strong>过分裂</strong>为多事件；对<strong>高噪小震</strong>鲁棒（图 4b–d）。</li>
+<li><strong>不确定性</strong>有助于识别高概率但不可靠的样本（如 <strong>MC dropout</strong>）。</li>
+</ul>
+<h2>二、连续数据的工程流程</h2>
+<ul>
+<li>仅需：<strong>补缝、去趋势、带通、重采样至 100 Hz</strong>；切为 <strong>1 min</strong> 重叠窗；馈入时<strong>归一化</strong>。</li>
+<li>训练增强对泛化<strong>关键</strong>：尽管训练数据多为“首 1/4 出现 P、每条仅 1 事件”，模型仍能处理<strong>多事件</strong>与<strong>窗缘事件</strong>（需 ≥ <strong>0.2 s</strong> 的 <strong>P/S</strong> 可见段），并抑制补缝突变导致的<strong>误报</strong>（文中图号处疑似笔误）。</li>
+</ul>
+<h2>三、检测性能</h2>
+<ul>
+<li>阈值 <strong>0.5</strong>：<strong>FP=1，FN=0</strong>（在 <strong>113 K</strong> 样本上）。</li>
+<li>F1 对比：<strong>EQTransformer</strong> 全面领先；<strong>CRED</strong>（同样 CNN+RNN、同源 STEAD）仍不及；<strong>注意力 + 更深网络</strong>带来增益。</li>
+<li>现象：<strong>STA/LTA</strong> 在该测试上 <strong>F1</strong> 高于 <strong>DetNet/Yews</strong>，显示经典法在统一测试集上仍具竞争力；整体排序：<strong>EQTransformer &gt; STA/LTA &gt;（DetNet, Yews）</strong>。</li>
+</ul>
+<h2>四、拾取性能</h2>
+<ul>
+<li>对比对象：<strong>PhaseNet、GPD、PpkNet、Yews、PickNet</strong>（深度）与 <strong>Kurtosis、Filter-Picker、AIC</strong>（传统）。</li>
+<li>评价七项指标：<strong>$sigma(\Delta t)$</strong>、<strong>$mu(\Delta t)$</strong>、<strong>Precision</strong>、<strong>Recall</strong>、<strong>F1</strong>、<strong>MAE</strong>、<strong>MAPE</strong>。</li>
+<li>
+<strong>TP 定义</strong>：<strong>$|\hat t - t| &amp;lt; 0.5,\mathrm{s}$</strong>。</li>
+<li>结果：<strong>P/S</strong> 的 <strong>F1</strong> 均提升，<strong>P 相</strong>增益更显著；<strong>S 相</strong>较难、标注误差更大。</li>
+<li>误差分布：部分深度拾取器出现<strong>非正态簇集</strong>，可能与<strong>滑窗策略</strong>和<strong>宽标签</strong>有关（如 GPD/PpkNet/Yews），仍需消融确认。</li>
+</ul>
+<hr>
+<h1>区域外应用与结果</h1>
+<h2>1. 测试设置</h2>
+<ul>
+<li>区域：日本西部鸟取 <strong>Mw 6.6 (2000)</strong> 余震区（<strong>2000-10-06 ~ 2000-11-17</strong>）。</li>
+<li>台站：<strong>18</strong> 个 HiNet（JMA 研究原用 <strong>57</strong> 个）。</li>
+<li>推断阈值：检测 <strong>0.5</strong>，P 拾取 <strong>0.3</strong>，S 拾取 <strong>0.3</strong>；窗重叠 <strong>30%</strong>，批量 <strong>500</strong>。</li>
+<li>关联与定位：按检测时间进行事件关联；<strong>HypoInverse</strong> 定位，<strong>HypoDD</strong> 重定位（用<strong>走时差 + 互相关</strong>）。</li>
+</ul>
+<h2>2. 目录与完整性</h2>
+<ul>
+<li>事件数：<strong>21,092</strong>（&gt; Fukuyama 等 <strong>8,521</strong> 的两倍），且仅用其<strong>台站子集</strong>。</li>
+<li>覆盖：几乎包含 JMA 已报全部事件；约 <strong>15%</strong> 关联事件未入最终目录（与<strong>关联策略简化</strong>相关）。</li>
+<li>完整性震级：
+<ul>
+<li>
+<strong>$M_c(\mathrm{JMA})\approx 1.82$</strong>，<strong>$M_c(\mathrm{EQTrans})\approx 1.50$</strong>（最大曲率法）；</li>
+<li>深度学习可探测<strong>更小微震（~20×）</strong>，但降低总体 <strong>$M_c$</strong> 仍依赖<strong>更密集台网</strong>与<strong>更好覆盖</strong>。</li>
+</ul>
+</li>
+<li>频度-震级（G–R）框架（提示）：</li>
+</ul>
+<p>$$
+log_{10}N(M)=a-bM,\quad M_c \text{ 为拐点/最大曲率处}
+$$</p>
+<h2>3. 拾取一致性</h2>
+<ul>
+<li>手动 vs 自动：在共有台站上对 <strong>~42k</strong> 拾取对进行对齐评估。</li>
+<li>误差统计：
+<ul>
+<li>
+<strong>$sigma(\Delta t)\approx 0.08,\mathrm{s}$</strong>；<strong>$mathrm{MAE}\approx 0.06,\mathrm{s}$</strong>（<strong>6</strong> 样本 @ <strong>100 Hz</strong>）；</li>
+<li>
+<strong>均值误差 ~0.01 s（1 样本）</strong>，系统偏差极小；</li>
+<li>
+<strong>S 相</strong>略优于 <strong>P 相</strong>（区域与标注因素所致）。</li>
+</ul>
+</li>
+</ul>
+<h2>4. 实务要点</h2>
+<ul>
+<li><strong>检测门控 + 相位阈值</strong>策略：提高召回同时抑制误报。</li>
+<li><strong>低台站数</strong>条件下仍显著扩充目录，说明对<strong>小震高噪</strong>场景鲁棒。</li>
+<li><strong>关联改进</strong>方向：引入<strong>多台站一致性/时空聚类/连通域</strong>约束可降低“未入目录”的 15%。</li>
+</ul>
+<h2>5. 关键内联</h2>
+<ul>
+<li>
+<strong>$M_c$</strong>（完整性震级）、<strong>$b$</strong> 值（G–R 斜率）、<strong>$\Delta t$</strong>（到时差）</li>
+<li>
+<strong>$f_s=100,\mathrm{Hz}$</strong>、<strong>$1,\mathrm{sample}=0.01,\mathrm{s}$</strong>
+</li>
+</ul>
+<hr>
+<h1>讨论</h1>
+<h2>1. 性能增益来源</h2>
+<ul>
+<li>结构：更深网络 + <strong>层级注意</strong>（全局/局部）提升可分性与到时聚焦。</li>
+<li>训练：<strong>数据增强</strong>与合理初始化/优化策略显著改善泛化。</li>
+<li>数据：<strong>高质量标注</strong>与适当规模更关键，单纯扩量效益有限。</li>
+</ul>
+<h2>2. 不确定性与误报控制</h2>
+<ul>
+<li>
+<strong>认知不确定性（Epistemic）</strong> 与误差不必然线性相关，但可用于<strong>误报筛查</strong>（高 <strong>$P$</strong> 伴随高方差→谨慎）。</li>
+<li>
+<strong>随机不确定性（Aleatory）</strong> 更契合置信区间，但在分类/到时联合任务中估计困难。</li>
+<li>
+<strong>文化噪声</strong>易致短窗误判；结合<strong>长窗检测的高波动</strong>可抑制 <strong>FP</strong>。</li>
+<li>建议：扩充并<strong>精标</strong>人为/大气噪声；或在训练中显式引入<strong>谱特征</strong>。</li>
+</ul>
+<h2>3. 影响拾取稳定性的观测条件</h2>
+<ul>
+<li><strong>远距/小震/低 SNR</strong> → P 相概率降低、不确定性升高；<strong>1 Hz 高通</strong>不利于首达识别。</li>
+<li>上述趋势对 <strong>S 相</strong>不如 P 相显著（与区域特性与标签噪声相关）。</li>
+</ul>
+<h2>4. 泛化与数据规模</h2>
+<ul>
+<li>区域限定训练亦可<strong>跨区泛化</strong>（如 PhaseNet）；多数情形<strong>可直接部署</strong>。</li>
+<li>小规模但高质量/合适结构的模型（如 PpkNet）可优于大规模但不匹配的训练。</li>
+</ul>
+<h2>5. 标注与训练流程的重要性</h2>
+<ul>
+<li><strong>软标签形状/窗策略/损失设计</strong>决定峰值对齐与误差分布形态。</li>
+<li>某些模型 P 相误差“簇集”可能源于<strong>到时聚类偏置</strong>（训练分布问题）。</li>
+</ul>
+<h2>6. 与传统方法对比</h2>
+<ul>
+<li>在<strong>高噪</strong>条件下，深度方法整体优于传统方法，<strong>S 相</strong>优势更明显。</li>
+<li>实务建议：利用<strong>不确定性阈</strong> + <strong>长/短窗互证</strong> + <strong>谱特征</strong>，进一步降低 <strong>$P(\mathrm{FP})$</strong> 与 <strong>$P(\mathrm{FN})$</strong>。</li>
+</ul>
+<h2>1. 公平对比的挑战与倡议</h2>
+<ul>
+<li>模型差异体现在<strong>标注、结构、超参、训练流程与数据质量</strong>等多方面；统一评测困难。</li>
+<li>倡导<strong>统一基准</strong>与<strong>独立测试集</strong>，推动可复现实验与严格对比。</li>
+</ul>
+<h2>2. 传统拾取器 vs 深度方法</h2>
+<ul>
+<li>传统法：到时<strong>精度尚可</strong>，但<strong>召回低</strong>、对 <strong>S 相</strong>较弱，误差<strong>偏右（滞后）</strong>。</li>
+<li>速度对比（同一 i7/16 GB 机器）：Kurtosis <strong>62 h12 m</strong>、FilterPicker <strong>3 h25 m</strong>、AIC <strong>31 h18 m</strong>；<strong>EQTransformer 2 h28 m</strong>。</li>
+<li>结论：深度模型在**吞吐与综合指标（F1）**上更具优势。</li>
+</ul>
+<h2>3. 日本应用的泛化与效率</h2>
+<ul>
+<li>到时精度≈人工，<strong>检出事件数 &gt;2×</strong>；新增事件揭示<strong>大山东坡</strong>下稀疏地震性。</li>
+<li>仅用**&lt;1/3 台站**、较大台间距与<strong>简单关联</strong>即可达成；采用更强关联（如 <strong>Glass3</strong>）可进一步扩容。</li>
+<li>工程效率：单核 CPU、单台站<strong>1 个月</strong>数据 <strong>≈23 min</strong>（不含不确定性估计）。</li>
+</ul>
+<h2>4. 方法学与贡献</h2>
+<ul>
+<li><strong>层级注意 + 多任务</strong>：全局判别与局部精测的有机结合（深编码器 + 三解码器）。</li>
+<li><strong>56 层</strong>深网络、<strong>贝叶斯不确定性</strong>输出、<strong>全球 1.2 M</strong> 近震训练——支撑强泛化与高灵敏度。</li>
+</ul>
+<h2>5. 实务建议</h2>
+<ul>
+<li>对比评测务必<strong>统一预处理与阈值策略</strong>，并披露<strong>训练数据质量与标注细节</strong>。</li>
+<li>在业务化部署中结合<strong>高效关联算法</strong>与<strong>不确定性门控</strong>，进一步压低 <strong>误报/漏报</strong> 并提升目录完整性。</li>
+</ul>
+<hr>
+<h1>方法：相关工作</h1>
+<h2>1. 代表性工作脉络</h2>
+<ul>
+<li><strong>CNN/FC 早期框架</strong>：Perol³⁰（检测+聚类，区域内）、Ross¹⁰（P/S/噪声短窗检测）、Ross⁹（P 拾取）。</li>
+<li><strong>分割与端到端拾取</strong>：Zhu &amp; Beroza⁸（U-Net 端到端 P/S）。</li>
+<li><strong>时频与序列混合</strong>：Mousavi⁷（ResCNN + BiLSTM，时频域，跨区/高噪泛化佳）。</li>
+<li><strong>两阶段拾取</strong>：Pardo⁶（先分割后回归）。</li>
+<li><strong>区域数据实践</strong>：Zhou⁵、Zhu⁴（汶川余震）；Dokht³（加拿大西部）；Wang²（日本，改 VGG-16，依赖理论到时短窗）。</li>
+</ul>
+<h2>2. 共性与差异</h2>
+<ul>
+<li>
+<strong>模型差异</strong>：CNN/FC、U-Net、Res+RNN、BiGRU、VGG 变体、递归共享/专网分工。</li>
+<li>
+<strong>数据差异</strong>：规模（<strong>$10^3\sim10^6$</strong>）、震级/距震/类型/噪声/地域各异；预处理与增强策略不统一。</li>
+<li>
+<strong>评测差异</strong>：使用 <strong>Accuracy/Precision/Recall/F1/AP/Hit/MAE/拾取误差</strong> 等不一，难以横向对比。</li>
+</ul>
+<h2>3. 痛点与建议</h2>
+<ul>
+<li>痛点：缺少<strong>高质量统一基准</strong>导致<strong>不可比</strong>与<strong>难以复用</strong>。</li>
+<li>建议：以 <strong>STEAD</strong> 作为<strong>候选标准基准</strong>，统一预处理与指标，促进<strong>公平评测</strong>与<strong>社区共识</strong>。</li>
+</ul>
+<h2>4. 评测指标提示</h2>
+<ul>
+<li>
+<strong>Precision/Recall/F1</strong>（检测）<br>
+$$\mathrm{F1}=2\cdot\frac{\mathrm{Precision}\cdot\mathrm{Recall}}{\mathrm{Precision}+\mathrm{Recall}}$$
+</li>
+<li>
+<strong>MAE</strong>（拾取）<br>
+$$\mathrm{MAE}=\frac{1}{N}\sum_{i=1}^{N}\left|\hat t_i-t_i\right|$$
+</li>
+</ul>
+<hr>
+<h1>方法：网络设计</h1>
+<h2>结构与动机</h2>
+<ul>
+<li>信号特性：地震波形兼具<strong>局部震相细节</strong>与<strong>全局能量包络/多相耦合</strong>。</li>
+<li>设计目标：端到端模型中显式保留<strong>局部—全局依赖的交互</strong>，以提升检测与拾取的协同效果。</li>
+</ul>
+<h2>架构范式</h2>
+<ul>
+<li>采用 <strong>CNN + RNN + Attention</strong> 的<strong>多任务</strong>网络：
+<ul>
+<li>编码器：在<strong>时域</strong>抽取高层特征与<strong>时序上下文</strong>；</li>
+<li>三个解码器：输出 <strong>$p_{\mathrm{eq}}(t)$</strong>（地震存在）、<strong>$p_P(t)$</strong>、<strong>$p_S(t)$</strong> 三条概率轨迹。</li>
+</ul>
+</li>
+<li>注意力机制：根据任务相关性<strong>加权高亮/抑制</strong>不同时间片，实现“全局判别—局部精测”的信息流。</li>
+</ul>
+<h2>计算考量</h2>
+<ul>
+<li>长时序 <strong>RNN</strong> 成本高，需在循环层前<strong>下采样</strong>以控制复杂度并稳定训练。</li>
+<li><strong>CNN×RNN</strong> 组合已被实证为地震序列建模的有效方案，在此基础上引入注意力以进一步提升判别性。</li>
+</ul>
+<h2>关键内联</h2>
+<ul>
+<li>
+<strong>$p_{\mathrm{eq}}(t)$</strong>、<strong>$p_P(t)$</strong>、<strong>$p_S(t)$</strong>：逐时刻概率序列</li>
+<li>
+<strong>$\alpha_t$</strong>：注意力权重（时间片贡献）</li>
+</ul>
+<hr>
+<h1>方法：超深编码器</h1>
+<h2>设计动机</h2>
+<ul>
+<li>更深网络 → 提升<strong>表达力/泛化/抗噪</strong>，对低 <strong>SNR</strong> 地震有效。</li>
+<li>在<strong>注意力</strong>框架中，强表征的<strong>深编码器</strong>是性能关键。</li>
+</ul>
+<h2>结构要点</h2>
+<ul>
+<li>前端<strong>下采样（Conv + MaxPool）</strong>：缩短 <strong>$T$</strong>，降低注意力内存/算力。</li>
+<li>主干：<strong>残差卷积块</strong> + <strong>双向 LSTM 块</strong>，并嵌入 <strong>NIN</strong> 增强非线性而<strong>不显著增参</strong>。</li>
+<li>顺序：先 <strong>CNN</strong> 抽局部与时移不变性，再 <strong>BiLSTM</strong> 建模长依赖，后<strong>自注意</strong>做全局聚焦。</li>
+</ul>
+<h2>关键机理</h2>
+<ul>
+<li>卷积：利用局部结构与<strong>时间平移不变性</strong> → 泛化更佳。</li>
+<li>残差：避免深度退化，稳定训练。</li>
+<li><strong>LSTM → Self-Attention</strong>：前置 LSTM 注入<strong>位置信息</strong>，助力注意力对齐。</li>
+</ul>
+<h2>复杂度提示</h2>
+<p>$$
+\text{Self-Attention Memory} \sim O(T^2)
+$$</p>
+<h2>内联符号</h2>
+<ul>
+<li>
+<strong>$T$</strong>：序列长度</li>
+<li>
+<strong>$h_t$</strong>/<strong>$c_t$</strong>：LSTM 隐状态/记忆单元</li>
+<li>
+<strong>NIN</strong>：逐点映射提高非线性，控制参数规模</li>
+</ul>
+<hr>
+<h1>注意力机制</h1>
+<h2>1. 记号与核心公式</h2>
+<ul>
+<li>序列隐藏态：<strong>$H={h_t}\in\mathbb{R}^{n\times d_h}$</strong>，上下文向量：<strong>$c_t\in\mathbb{R}^{d_h}$</strong>
+</li>
+<li>加性自注意（打分→归一→聚合）：</li>
+</ul>
+<p>$$
+e_{t,t'}=\sigma!\Big(W_2^{\top}\big[\tanh(W_1^{\top}h_t+W_1^{\top}h_{t'}+b_1)\big]+b_2\Big)
+$$</p>
+<p>$$
+\alpha_{t,t'}=\frac{\exp(e_{t,t'})}{\sum_{t'}\exp(e_{t,t'})},\qquad
+c_t=\sum_{t'=1}^{n}\alpha_{t,t'},h_{t'}
+$$</p>
+<ul>
+<li>前馈层：</li>
+</ul>
+<p>$$
+FF(x)=\max(0,,xW_1+b_1),W_2+b_2
+$$</p>
+<ul>
+<li>复杂度提示：<strong>$O(n^2 d_h)$</strong>（自注意）</li>
+</ul>
+<h2>2. 架构落地</h2>
+<ul>
+<li><strong>残差注意力块</strong>（Transformer 风格），但以<strong>单头加性注意</strong>替代多头点积注意；保留 <strong>LayerNorm/残差 + FFN</strong> 以增稳。</li>
+<li><strong>层级注意</strong>（瓶颈处实施，控算量）：
+<ul>
+<li>全局注意（编码器末端）→ 识别<strong>地震段</strong>，路径短 + 检测损失强，先学会“有无地震”；</li>
+<li>局部注意（各相位解码器起始）→ 在候选段内<strong>锐化 P/S 聚焦</strong>（只看小子集）。</li>
+</ul>
+</li>
+<li><strong>位置信息</strong>：每个层级的首个注意力块前加入 <strong>1×LSTM(16)</strong>，提供顺序/相对位置信号。</li>
+</ul>
+<h2>3. 直观理解（内联）</h2>
+<ul>
+<li>
+<strong>$h_t$</strong>：局部状态；<strong>$c_t$</strong>：含全局上下文的加权状态；<strong>$\alpha_{t,t'}$</strong>：时间对齐“注意概率”。</li>
+<li>
+<strong>全局判别 → 局部精测</strong>：先用全局注意找“哪里像地震”，再用局部注意在该段内锁定 <strong>$P/S$</strong> 到时。</li>
+</ul>
+<hr>
+<h1>不确定性估计</h1>
+<h2>核心概念</h2>
+<ul>
+<li>预测<strong>概率</strong> ≠ 模型<strong>置信</strong>：高 <strong>$ \text{softmax} $</strong> 并不保证低不确定性。</li>
+<li>目标：为地震<strong>检测/拾取</strong>提供<strong>概率化输出 + 不确定性度量</strong>，便于质控与误报抑制。</li>
+</ul>
+<h2>方法要点：MC Dropout（近似贝叶斯）</h2>
+<ul>
+<li>思想：在<strong>推理期</strong>也启用 <strong>dropout</strong>，相当于对权重施加伯努利随机掩码，进行<strong>后验蒙特卡洛采样</strong>。</li>
+<li>多次随机前向得到一组预测 <strong>$ { \hat{\mathbf{p}}^{(m)}(y\mid x) }_{m=1}^{M} $</strong>，据此估计均值与方差：</li>
+</ul>
+<p>$$
+\bar{\mathbf{p}}(y\mid x)\approx \frac{1}{M}\sum_{m=1}^{M}\hat{\mathbf{p}}^{(m)}(y\mid x)
+$$</p>
+<p>$$
+\mathrm{Var}[\mathbf{p}(y\mid x)]\approx \frac{1}{M}\sum_{m=1}^{M}\left(\hat{\mathbf{p}}^{(m)}(y\mid x)-\bar{\mathbf{p}}(y\mid x)\right)^{2}
+$$</p>
+<ul>
+<li>实施细节：<strong>全层</strong>置入 dropout，<strong>训练/预测</strong>均启用；预测阶段通过重复采样获得<strong>均值预测</strong>与<strong>不确定性</strong>。</li>
+</ul>
+<h2>实务价值</h2>
+<ul>
+<li>利用<strong>均值 + 方差</strong>进行门控：<strong>高概率但高方差</strong> → 可疑样本，优先人工复核或提高阈值。</li>
+<li>适用于 <strong>P/S 拾取</strong>与<strong>事件检测</strong>的<strong>自动质控</strong>与<strong>假阳性抑制</strong>。</li>
+</ul>
+<h2>关键内联</h2>
+<ul>
+<li>
+<strong>$ \bar{\mathbf{p}}(y\mid x) $</strong>：MC 均值预测</li>
+<li>
+<strong>$ \mathrm{Var}[\mathbf{p}(y\mid x)] $</strong>：MC 不确定性</li>
+<li>
+<strong>$ M $</strong>：蒙特卡洛样本数（前向次数）</li>
+</ul>
+<p><a href="https://www.nature.com/articles/s41467-020-17591-w" rel="nofollow">Paper Link</a></p></div>
+<div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://Lszidv.github.io">芜尽</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","Lszidv/Lszidv.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+
+
+</script>
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</html>
