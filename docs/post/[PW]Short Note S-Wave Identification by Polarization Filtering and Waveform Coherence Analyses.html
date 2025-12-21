@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="## Abstract 
+- 研究动机：微地震高分辨率成像需要大量且一致的相位到时数据，S 相对地下物理参数（Vs、Vp/Vs、各向异性等）尤为关键。">
+<meta property="og:title" content="[PW]Short Note S-Wave Identification by Polarization Filtering and Waveform Coherence Analyses">
+<meta property="og:description" content="## Abstract 
+- 研究动机：微地震高分辨率成像需要大量且一致的相位到时数据，S 相对地下物理参数（Vs、Vp/Vs、各向异性等）尤为关键。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://Lszidv.github.io/post/%5BPW%5DShort%20Note%20S-Wave%20Identification%20by%20Polarization%20Filtering%20and%20Waveform%20Coherence%20Analyses.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
+<title>[PW]Short Note S-Wave Identification by Polarization Filtering and Waveform Coherence Analyses</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">[PW]Short Note S-Wave Identification by Polarization Filtering and Waveform Coherence Analyses</h1>
+<div class="title-right">
+    <a href="https://Lszidv.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/Lszidv/Lszidv.github.io/issues/60" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>Abstract</h2>
+<ul>
+<li>研究动机：微地震高分辨率成像需要大量且一致的相位到时数据，S 相对地下物理参数（Vs、Vp/Vs、各向异性等）尤为关键。</li>
+<li>核心难点：近震 S 相拾取常受 P coda 重叠、转换相干扰、以及各向异性引起的 S 波分裂影响，导致识别不稳定/不唯一。</li>
+<li>方法贡献：提出台网级处理流程，联合单台三分量偏振分析 + 跨台站横向波形相干性分析，构建“以 S 为第一到达”的地震剖面以强化可视化识别。</li>
+<li>应用与产出：该剖面可辅助单事件与大规模数据的半自动分析；并结合自动叠加速度分析从剖面估计 S 波速度。</li>
+<li>验证数据：合成地震图验证适用性；真实数据来自意大利南部 ISNet 台网的局地地震三分量速度计记录，用于评估有效性。</li>
+</ul>
+<hr>
+<h2>Introduction</h2>
+<ul>
+<li>背景：高密度监测台网增多，使微地震也能获得大量高质量三分量记录；正确识别波型对介质结构与震源信息提取至关重要。</li>
+<li>关键意义：P、S 速度模型（尤其 Vs 与 Vp/Vs）是刻画岩石圈组成与物理状态的核心参数，因此需要可靠的 P/S 到时。</li>
+<li>难点来源：近震 S 相识别受 P coda 叠加、转换相、以及各向异性引起的 S 波分裂影响，可能导致严重误拾取甚至无法拾取。</li>
+<li>传统思路：被动源研究常对每台站独立使用多分量/偏振滤波与特征函数抑制 P、突出 S，并结合自动检测拾取与质量/不确定性估计。</li>
+<li>台网/阵列与勘探启示：利用多台站可估计横向相干性与慢度；勘探地震通过 move-out + stacking 在道集中增强目标相位、压制噪声与非目标相位。</li>
+<li>本文贡献：提出台网级新流程，将单台偏振分析与道集横向相干性结合，构建“以 S 为第一到达”的剖面；并用叠加速度分析从剖面估计研究区平均 Vs；在合成与意大利南部局地地震数据上验证有效性。</li>
+</ul>
+<hr>
+<h2>Methods</h2>
+<ul>
+<li>目标：针对三分量记录提出流程，实现 S 波到时的可靠识别。</li>
+<li>总流程：P 拾取与初定位→按入射角 φ 与反方位角 β 将 ZNE 旋转到 LQT→移动窗偏振分析计算 D(t)、P(t)、H(t)→构造 S 波特征函数并可加权→为后续道集/剖面与速度分析做准备。</li>
+<li>LQT 含义：L 近似承载 P 主能量；Q/T 承载 SV/SH（S 能量），旋转用于分离 P 与 S。</li>
+<li>关键参数：
+<ul>
+<li>β：由事件位置与台站几何确定；</li>
+<li>φ：在 P 初至后短窗内用三分量协方差矩阵偏振分析估计。</li>
+</ul>
+</li>
+<li>窗长选择：用 Kanamori(2005) 的时域主周期估计量 τ_c 指导协方差窗长（t0 常取 3 s）。</li>
+<li>三个偏振属性：
+<ul>
+<li>D(t)：主振动方向相对 L 的偏离程度（P 初至低、S 初至高）；</li>
+<li>P(t)：线性度（P/S 初至通常高，但单独不能区分 P 与 S）；</li>
+<li>H(t)：横向能量占比（S 高、P 低）。</li>
+</ul>
+</li>
+<li>S 波特征函数：<strong>$CFS = D^2(t)·P^2(t)·H^2(t)$</strong> ，并可用  <strong>$W(t)=sqrt(Q^2+T^2)$</strong> 引入振幅权重形成 CFSW，以增强 S 初至峰值。</li>
+<li>局限性：CFS 依赖 φ 估计准确与 S 近线性偏振；分裂、散射、转换相和旋转误差会削弱无歧义识别，需要进一步结合台网相干性与剖面处理。</li>
+<li>从单台到台网：偏振分析输出单条时间序列 CFSW（S 波偏振特征的压缩表示）；为增强稳健性，在 CFSW 道集中分析横向相干性与表观速度。</li>
+<li>道集类型：
+<ul>
+<li>CSG：同一事件、不同台站；</li>
+<li>CRG：同一台站、不同事件；</li>
+<li>剖面按“震源距”排序而非震中距，以适应事件深度分布；不同波型可由剖面斜率（表观速度）区分。</li>
+</ul>
+</li>
+<li>图1b：对 CFSW 道进行减速（reduction）后使 S 在 0 s 附近对齐；叠加道增强相干的 S 峰值并压制不相干能量；整体 0.1 s 偏移来自偏振滤波窗长导致的系统延迟。</li>
+<li>何时用 CSG/CRG：CSG 需要单事件被大量台站记录并覆盖足够震源距范围；台站稀疏但事件多时 CRG 更有利。</li>
+<li>线性动校正与速度分析：
+<ul>
+<li>先对齐 P 初至；</li>
+<li>假设一组 vp/vs，按 <strong>$t_ik = t_s - t_p = (Δx/vp)(vp/vs - 1)$</strong> 计算每道时间移；</li>
+<li>叠加 <strong>$S_i = Σ_k CFSW^k(t - t_ik)$</strong>；</li>
+<li>扫描 vp/vs，取叠加幅度最大者作为最佳对齐与速度比估计，并据此拾取 S 到时；</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2>Application and Results</h2>
+<ul>
+<li>数据：5675 条三分量速度记录（626 次局地地震），时间 2007/12–2010/03；Mw 0.9–3.0；震源距 2.3–103.6 km；筛选条件为 S/N &gt; 5 且 P 拾取误差 &lt; 0.2 s；HYPO71 + 区域 1D vp 模型完成定位。</li>
+<li>单台结果（图2）：好例子中 H、D、P 与 CFSW 在理论 S 到时同步增强且 P–S 间窗内能量弱；坏例子中 CFSW 在直达 S 前出现强峰，可能为转换相，提示“单道仍可能误判”，需要道集相干性增强。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/4f51ac80-df9a-4b5c-a84c-39c422ce1063"><img width="850" height="277" alt="Image" src="https://github.com/user-attachments/assets/4f51ac80-df9a-4b5c-a84c-39c422ce1063" style="max-width: 100%; height: auto; max-height: 277px;"></a></p>
+<ul>
+<li>道集选择与剖面处理：因事件数远大于台站数，将 CFSW 组成 CRG 覆盖 0–50 km 震源距；对每道做幅度归一化、取包络并去均值（处理极性变化）、高通（仅作图像增强不作物理解释）、按震源距分箱叠加以均衡采样。</li>
+<li>CRG 相干性与速度（图3）：多台站 CRG 剖面显示极佳横向相干性，第一到达与 S 首到一致；线性 LMO + stacking 速度分析以叠加幅度峰值确定最优平均 vs；归一化叠加幅度 &gt; 0.75 给出速度范围；平均 vs 约 2.7 km/s，横向变化小。-</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/f7c0b036-7679-46a7-b045-41147c5d3721"><img width="850" height="277" alt="Image" src="https://github.com/user-attachments/assets/f7c0b036-7679-46a7-b045-41147c5d3721" style="max-width: 100%; height: auto; max-height: 277px;"></a></p>
+<ul>
+<li>S/N 提升评估（图4）：比较横向分量剖面 T 与偏振门控剖面 CFS×T 的超越概率 P(S/N ≥ 阈值)=1-Cdf；S/N 由 S 后 2 s 信号 RMS 与 S 前 1 s（P coda）噪声 RMS 计算（物理上通常取比值）；S/N &gt; 3 的概率在 SNR3 从 5.5%→55.4%，VDS3 从 18.5%→68%，显著提高可拾取比例。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/059b50a9-d77b-4ee6-b9c8-725ac55180a6"><img width="850" height="546" alt="Image" src="https://github.com/user-attachments/assets/059b50a9-d77b-4ee6-b9c8-725ac55180a6" style="max-width: 100%; height: auto; max-height: 546px;"></a></p>
+<ul>
+<li>相位正确性验证（图5）：在剖面拾取首到并用测得速度计算理论 S 到时，残差-距离与走时-距离分布显示一致性，支持所识别相位为 S 波。</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/52afc17e-500c-4f36-ad47-6eac65e826e3"><img width="954" height="659" alt="Image" src="https://github.com/user-attachments/assets/52afc17e-500c-4f36-ad47-6eac65e826e3" style="max-width: 100%; height: auto; max-height: 659px;"></a></p>
+<p><a href="https://www.researchgate.net/publication/222089459_S-Wave_Identification_by_Polarization_Filtering_and_Waveform_Coherence_Analyses" rel="nofollow">Paper Link</a></p></div>
+<div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://Lszidv.github.io">芜尽</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","Lszidv/Lszidv.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+
+
+</script>
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</html>
