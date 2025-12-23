@@ -272,7 +272,443 @@ $R$ 为 RBF 中心，$\tau$ 控制高斯核的宽度。</li>
 </ul>
 </li>
 </ul>
-<hr></div>
+<hr>
+<p>#3 Experiments</p>
+<h2>3.1 实验数据集与标签设计</h2>
+<ul>
+<li>
+<p>数据集构成：</p>
+<ul>
+<li>使用两个中国大规模地震数据集：
+<ul>
+<li>DiTing：约 2.50×10^6 条三分量波形（CSN，2013.01–2020.12）。</li>
+<li>DiTing 2.0：额外约 0.76×10^6 条波形（2020.03–2023.02）。</li>
+</ul>
+</li>
+<li>两者均含专家标注的 P/S 到时、震中距与震级。</li>
+</ul>
+</li>
+<li>
+<p>波形与物理参数分布：</p>
+<ul>
+<li>每条记录长度为 180 s，采样率为 50 Hz（约 9000 采样点 × 3 分量）。</li>
+<li>震级范围：0–7.7，震中距最大约 660 km。</li>
+<li>通过台站空间分布与震级/距离直方图展示数据的广泛覆盖与多样性。</li>
+</ul>
+</li>
+<li>
+<p>检测与拾取标签设计：</p>
+<ul>
+<li>地震检测标签：
+<ul>
+<li>时间序列逐采样二值标注，1 表示“有震”，0 表示“无震”。</li>
+<li>事件起始：P 波初至时刻 $T_P$。</li>
+<li>事件结束：<br>
+$T_{\text{end}} = T_P + \lambda (T_S - T_P),\ \lambda = 2$
+</li>
+<li>即以 P–S 时间差为尺度构造检测窗口，覆盖 P、S 及部分尾波。</li>
+</ul>
+</li>
+<li>相位拾取标签：
+<ul>
+<li>P 波与 S 波的到时采样点记为标签峰值（1）。</li>
+<li>周围采样点按高斯分布平滑衰减至 0，标签总宽度为 0.5 s（约 25 个采样点）。</li>
+<li>相当于构造“概率型软标签”，降低对单点精准对齐的过拟合。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2>3.2 Evaluation 指标</h2>
+<ul>
+<li>
+<p>分类任务（事件检测 / 相位拾取）：</p>
+<ul>
+<li>使用指标：
+<ul>
+<li>精确率 $ \mathrm{Pr} = \dfrac{T_p}{F_p + T_p} $</li>
+<li>召回率 $ \mathrm{Re} = \dfrac{T_p}{F_n + T_p} $</li>
+<li>F1 分数 $F1 = \dfrac{2 \times \mathrm{Pr} \times \mathrm{Re}}{\mathrm{Pr} + \mathrm{Re}}$
+</li>
+</ul>
+</li>
+<li>含义：
+<ul>
+<li>
+$T_p$：真正例数，$F_p$：假正例数，$F_n$：假负例数。</li>
+<li>精确率：模型预测为“有震”中真正有震的比例。</li>
+<li>召回率：真实“有震”样本中被模型检出的比例。</li>
+<li>F1：在误报与漏报之间的综合权衡指标。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>回归任务（震级估计 / 到时误差统计等）：</p>
+<ul>
+<li>平均误差（Mean）：<br>
+$\mathrm{Mean} = \frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)$
+<ul>
+<li>反映预测整体偏高或偏低的“系统性偏差”。</li>
+<li>误差标准差（未显式给出公式）体现误差的波动程度。</li>
+</ul>
+</li>
+<li>均方根误差（RMSE）：</li>
+<li>平均绝对误差（MAE）：</li>
+<li>决定系数（$ R^2 $）：<br>
+$R^2 = 1 - \frac{\sum_{i=1}^{N} (y_i - \hat{y}<em>i)^2}{\sum</em>{i=1}^{N} (y_i - \bar{y})^2}, \quad\bar{y} = \frac{1}{N} \sum_{i=1}^{N} y_i$
+<ul>
+<li>衡量模型对数据方差的解释程度，$R^2 \to 1$ 表示拟合很好。</li>
+<li>在震级回归等任务中，常与 RMSE / MAE 一起使用判断回归性能。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>整体评价体系：</p>
+<ul>
+<li>对分类任务，用 Pr / Re / F1 综合衡量“检出能力”和“误报情况”，特别关注召回率以减少漏震。</li>
+<li>对回归任务，用 Mean + 标准差判断是否存在系统偏差与稳定性问题，用 RMSE / MAE 衡量误差水平，用 $R^2$ 判断整体拟合优度。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2>3.3 Training details</h2>
+<ul>
+<li>
+<p>优化器与学习率策略：</p>
+<ul>
+<li>采用 Adam 优化器（Kingma, 2014），以提高在大规模、多任务地震数据上的训练稳定性与收敛速度。</li>
+<li>使用 CyclicLR 学习率调度（Smith, 2017）：
+<ul>
+<li>学习率在区间 $[1 \times 10^{-4},\ 1 \times 10^{-3}]$ 内周期性循环：
+<ul>
+<li>从最小值 $1 \times 10^{-4}$ 逐步升至最大值 $1 \times 10^{-3}$ ， - 再降回最小值。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>公平性与模型选择：  - 所有对比模型（包括 EffiSeisM 与基线）使用相同的训练超参数： - 相同优化器与学习率策略 - 相同训练 epoch 数。</p>
+<ul>
+<li>在训练过程中，以验证集表现最优的 checkpoint 作为最终模型，用于测试集评估： - 相当于基于验证集的模型选择/早停策略。</li>
+</ul>
+</li>
+</ul>
+<h2>3.4.1 Comparison with other methods 小结</h2>
+<ul>
+<li>
+<p>实验与对比模型设置：</p>
+<ul>
+<li>在三个关键任务上系统评估 EffiSeisM：
+<ul>
+<li>地震检测</li>
+<li>相位拾取（P/S）</li>
+<li>震级估计</li>
+</ul>
+</li>
+<li>对比基线包括：
+<ul>
+<li>MagNet</li>
+<li>EQTransformer</li>
+<li>PhaseNet</li>
+<li>SeisT 系列（SeisT-S / M / L）</li>
+</ul>
+</li>
+<li>保障公平性：
+<ul>
+<li>统一训练/验证/测试划分（事件级划分）</li>
+<li>相同训练策略与超参数（优化器、学习率调度等）</li>
+<li>测试阶段仅做振幅归一化，不额外“美化”数据</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>训练效率</p>
+</li>
+<li>
+<p>震级估计结果</p>
+</li>
+<li>
+<p>DiTing 上的检测与 P/S 拾取</p>
+<ul>
+<li>P 波拾取（Phase-P）：
+<ul>
+<li>相比轻量 SeisT-S，EffiSeisM 在 <strong>$Pr$</strong>/<strong>$Re$</strong>/<strong>$F1$</strong> 上分别提升约 3.1%、4.2%、3.7%。</li>
+<li>相比大模型 SeisT-L，各指标平均提升约 2%，并具有最小平均到时误差。</li>
+<li>说明在同等或更低计算代价下，P 到时预测更准、更稳。</li>
+</ul>
+</li>
+<li>S 波拾取（Phase-S）：
+<ul>
+<li>EffiSeisM 精确率约 90.52%，F1 约 84.16，均为所有模型中最高。</li>
+<li>SeisT-L 召回率略高（约 79.50%），但 F1 低于 EffiSeisM，说明其以牺牲精确率换取了部分召回。</li>
+<li>EffiSeisM 在保持较高召回的同时，整体精确率与 F1 更优，更适合需要平衡误报/漏报的实际应用。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>DiTing 2.0 上的泛化与鲁棒性</p>
+<ul>
+<li>数据量只有 DiTing 的约三分之一：
+<ul>
+<li>在这种少数据设定下，大容量模型（EQTransformer、SeisT-L）在部分指标上略优于 EffiSeisM。</li>
+<li>表明在模式更简单、数据更少时，大模型仍能稳定拟合有限模式。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2>3.4.2 Efficiency evaluation</h2>
+<ul>
+<li>
+<p>评估目标：</p>
+<ul>
+<li>验证 EffiSeisM 通过轻量化与高效架构设计在 <strong>训练效率、参数规模与精度</strong> 三方面的综合提升。</li>
+<li>既看训练与参数效率，也看推理效率和在不同计算负载下的可扩展性。</li>
+</ul>
+</li>
+<li>
+<p>训练效率与参数量（基于 DiTing 2.0，图 3）：</p>
+<ul>
+<li>对比维度：<strong>$R^2$</strong>（震级估计精度）、单次训练时间、模型内存占用（参数规模）。</li>
+<li>EffiSeisM：
+<ul>
+<li>$R^2 \approx 0.92$</li>
+<li>训练时间 ≈ 4.92 s</li>
+<li>参数规模 ≈ 488 KB</li>
+</ul>
+</li>
+<li>SeisT-M / SeisT-L：
+<ul>
+<li>
+$R^2$ 与 EffiSeisM 接近，但：</li>
+<li>训练时间分别约 7.23 s 与 8.71 s</li>
+<li>参数规模分别约 1244 KB 与 2100 KB</li>
+</ul>
+</li>
+<li>MagNet：
+<ul>
+<li>参数略少（约 446 KB），但：</li>
+<li>训练时间 ≈ 13.7 s（远高于 EffiSeisM）</li>
+<li>
+$R^2 \approx 0.87$（明显低于 EffiSeisM）</li>
+</ul>
+</li>
+<li>结论：
+<ul>
+<li>EffiSeisM 在 “精度–速度–参数量” 三维度上整体最优，</li>
+<li>真正实现了高精度与资源效率之间的最佳折中。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>推理效率评估设计：</p>
+<ul>
+<li>与多任务基线模型 SeisT（含 S/M/L 变体）比较。</li>
+<li>两组实验：</li>
+</ul>
+</li>
+<li>
+<p>实验一：固定样本数、改变 batch size（图 4(a)）：</p>
+<ul>
+<li>输入样本数：10,000。</li>
+<li>随着 batch size 增大，EffiSeisM 始终保持较低推理时间。</li>
+<li>例如：
+<ul>
+<li>batch size = 50 时：
+<ul>
+<li>EffiSeisM：≈ 3.5 s</li>
+<li>SeisT-L：≈ 5.9 s</li>
+<li>时间缩短约 40%。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>在小 batch 下，EffiSeisM 优势更明显：
+<ul>
+<li>特别适合资源有限、需要实时响应的场景（如在线预警、边缘计算）。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>实验二：固定 batch size、改变样本数（图 4(b)）：</p>
+<ul>
+<li>随着输入样本数增加，所有模型推理时间均随之增长（符合预期）。</li>
+<li>EffiSeisM 在所有输入规模下均优于各 SeisT 变体：
+<ul>
+<li>当输入规模为 100k 时：
+<ul>
+<li>EffiSeisM：≈ 33.9 s</li>
+<li>SeisT-S：≈ 36.5 s</li>
+<li>SeisT-M：≈ 47.6 s</li>
+<li>SeisT-L：≈ 64.6 s</li>
+<li>相比 SeisT-L 时间缩短接近 48%。</li>
+</ul>
+</li>
+<li>当输入规模为 10k 时：
+<ul>
+<li>EffiSeisM：≈ 5.01 s</li>
+<li>SeisT-L：≈ 8.35 s</li>
+<li>时间缩短约 40%。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/419abde4-a9c3-470c-ad1f-9e14a07db9ab"><img width="376" height="493" alt="Image" src="https://github.com/user-attachments/assets/419abde4-a9c3-470c-ad1f-9e14a07db9ab" style="max-width: 100%; height: auto; max-height: 493px;"></a></p>
+<h2>3.4.3 模块贡献</h2>
+<ul>
+<li>模块消融实验（Detection / P-phase / S-phase）：
+<ul>
+<li>对检测、P 相和 S 相拾取任务进行消融（见表 6），比较不同模块组合下的 Pr / Re / F1。</li>
+<li>结果表明：
+<ul>
+<li>去掉任一关键模块（SSC / FSC / SSM）都会导致性能下降，去除 SSM 层退化最严重。</li>
+<li>完整 EffiSeisM 在三个任务上 F1 分数分别约为 96.05%、91.42%、84.01%，优于所有消融变体。</li>
+</ul>
+</li>
+<li>优化与收敛分析：
+<ul>
+<li>单独使用 SSM 层时，训练收敛明显变慢（图 5）。</li>
+<li>引入 FSC 层后，训练速度与稳定性显著提升：
+<ul>
+<li>FSC 层通过多尺度卷积精炼特征，使输入特征更适合 SSM 建模；</li>
+<li>有助于调节梯度流、降低过拟合、加速收敛。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>总体结论：
+<ul>
+<li>SSC 模块（多尺度 + RBF）、FSC 层（快速多尺度卷积）与 SSM 层（时序依赖建模）在结构与优化层面都对性能有重要贡献。</li>
+<li>消融结果验证了这些设计选择的必要性和合理性，同时展示了 EffiSeisM 框架在多任务地震监测中的鲁棒性与通用性。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/4e37efe5-7ce4-4ac2-8645-6a419ed31081"><img width="376" height="257" alt="Image" src="https://github.com/user-attachments/assets/4e37efe5-7ce4-4ac2-8645-6a419ed31081" style="max-width: 100%; height: auto; max-height: 257px;"></a></p>
+---
+# 4. Discussion 
+<ul>
+<li>
+<p>整体贡献与适用场景：</p>
+<ul>
+<li>提出高效多任务模型 EffiSeisM，将卷积架构与状态空间建模相结合。</li>
+<li>在包含约 300 万条波形的 DiTing 与 DiTing 2.0 上验证，覆盖地震检测、相位拾取和震级估计三大任务。</li>
+<li>模型结构紧凑（约 488 KB），在不牺牲精度的前提下实现高效训练与推理，适合资源受限环境下的地震监测和预警部署。</li>
+</ul>
+</li>
+<li>
+<p>震级估计误差分布：</p>
+<ul>
+<li>使用误差分布（预测震级与真实震级之差）分析各模型性能：
+<ul>
+<li>EffiSeisM 的误差分布尖锐、集中且近似对称围绕 0，说明系统偏差小，<strong>$RMSE$</strong> 和 <strong>$MAE$</strong> 较低。</li>
+<li>SeisT 各变体误差分布更宽，MagNet 最分散，对应更大的误差和更低的 <strong>$R^2$</strong>。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>严格阈值下的相位拾取鲁棒性：</p>
+<ul>
+<li>在 DiTing 上将相位拾取容差阈值从 0.5 s 收紧至 0.2 s：
+<ul>
+<li>所有模型的 P/S 拾取 F1 分数均下降约 10%，反映出高时间分辨率拾取的难度。</li>
+</ul>
+</li>
+<li>在 0.2 s 严格阈值下：
+<ul>
+<li>P 相拾取：EffiSeisM 相较 EQTransformer 和 SeisT-L 提升约 5%，较 SeisT-S 提升约 6.3%。</li>
+<li>S 相拾取：EffiSeisM 与 SeisT-M/L 表现相近，但明显优于 EQTransformer（约 7.4%）和 SeisT-S（约 2%）。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>真实连续波形上的泛化验证（Fig. 8）：</p>
+<ul>
+<li>在 LSA 台站一段真实三分量宽频带连续波形（2025-02-11 17:10:30–17:15:00 UTC）上比较各模型表现：
+<ul>
+<li>PhaseNet：对噪声极为敏感，容易产生错误相位识别。</li>
+<li>EQTransformer 与 SeisT-S：能够检测地震并较准确拾取 P 相，但对相对较弱的 S 相到时识别较差。</li>
+<li>SeisT-M / SeisT-L：整体性能相近，SeisT-L 检测曲线更稳定，两者 P 相拾取准确，但在弱 S 相到时上仍然存在困难。</li>
+<li>EffiSeisM：在检测与 P 拾取上表现优秀，并在捕捉微弱 S 相到时方面明显优于其他模型。</li>
+</ul>
+</li>
+<li>结论：
+<ul>
+<li>EffiSeisM 能够从原始连续宽频带波形中提取更深层次的时序特征，</li>
+<li>在实际噪声环境和复杂波形条件下保持鲁棒性和高精度，体现出较高的工程应用潜力。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/eeb700d1-8b08-45cb-ae21-dd4a22170663"><img width="678" height="474" alt="Image" src="https://github.com/user-attachments/assets/eeb700d1-8b08-45cb-ae21-dd4a22170663" style="max-width: 100%; height: auto; max-height: 474px;"></a></p>
+<ul>
+<li>综合讨论</li>
+</ul>
+<hr>
+<h1>5. Conclusion</h1>
+<ul>
+<li>
+<p>核心工作概括：</p>
+<ul>
+<li>提出 EffiSeisM：一种将卷积架构与状态空间建模（SSM）相结合的高效多任务模型。</li>
+<li>支持三大任务：
+<ul>
+<li>地震检测</li>
+<li>相位拾取（P/S）</li>
+<li>震级估计</li>
+</ul>
+</li>
+<li>在 DiTing 与 DiTing 2.0 共约 300 万条样本上进行系统训练与评估。</li>
+</ul>
+</li>
+<li>
+<p>性能与效率优势：</p>
+<ul>
+<li>紧凑架构（参数量大幅减少），在保证高精度的同时显著降低计算开销：
+<ul>
+<li>训练更快、推理更快，适合大规模地震监测与批量数据处理。</li>
+</ul>
+</li>
+<li>多任务统一框架减少冗余计算与模型维护成本：
+<ul>
+<li>一次前向即可输出检测 + 拾取 + 震级结果。</li>
+<li>提升整体系统的通用性与鲁棒性。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>状态空间模型带来的改进：</p>
+<ul>
+<li>SSM 的引入增强了对长时间依赖与时序结构的建模能力：
+<ul>
+<li>提高不同震级、震源距和噪声条件下的精度与可靠性。</li>
+</ul>
+</li>
+<li>在优化资源使用的前提下保持性能一致性：
+<ul>
+<li>兼顾内存占用、计算复杂度与实际运行成本。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><a href="https://www.sciencedirect.com/science/article/pii/S009830042500189X?via%3Dihub#tbl6" rel="nofollow">Paper Link</a></p></div>
 <div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
