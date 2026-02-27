@@ -1,5 +1,19 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>芜尽</title><link>https://Lszidv.github.io</link><description>Only love can set us free</description><copyright>芜尽</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/160511559?s=400&amp;u=68ec73daff523efd8652079b221d42e446d01cb6&amp;v=4</url><title>avatar</title><link>https://Lszidv.github.io</link></image><lastBuildDate>Sun, 21 Dec 2025 14:45:03 +0000</lastBuildDate><managingEditor>芜尽</managingEditor><ttl>60</ttl><webMaster>芜尽</webMaster><item><title>[PW]Short Note S-Wave Identification by Polarization Filtering and Waveform Coherence Analyses</title><link>https://Lszidv.github.io/post/%5BPW%5DShort%20Note%20S-Wave%20Identification%20by%20Polarization%20Filtering%20and%20Waveform%20Coherence%20Analyses.html</link><description>## Abstract 
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>芜尽</title><link>https://Lszidv.github.io</link><description>Only love can set us free</description><copyright>芜尽</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/160511559?s=400&amp;u=68ec73daff523efd8652079b221d42e446d01cb6&amp;v=4</url><title>avatar</title><link>https://Lszidv.github.io</link></image><lastBuildDate>Fri, 27 Feb 2026 09:44:04 +0000</lastBuildDate><managingEditor>芜尽</managingEditor><ttl>60</ttl><webMaster>芜尽</webMaster><item><title>HDF5</title><link>https://Lszidv.github.io/post/HDF5.html</link><description>
+## 目录
+- [1. HDF5 是什么](#1-hdf5-是什么)
+- [2. 与 SAC / miniSEED 的区别：为什么要用 HDF5](#2-与-sac--miniseed-的区别为什么要用-hdf5)
+- [3. 核心对象模型：Group / Dataset / Attribute](#3-核心对象模型group--dataset--attribute)
+- [4. 设计你的地球物理数据集：两种 schema](#4-设计你的地球物理数据集两种-schema)
+- [5. 性能核心：Chunk / Compression / Cache](#5-性能核心chunk--compression--cache)
+- [6. 并行与数据规模：sharding、VDS、Parallel HDF5](#6-并行与数据规模shardingvdsparallel-hdf5)
+- [7. 地球物理工程实践：从 SAC/miniSEED 到 HDF5](#7-地球物理工程实践从-sacminiseed-到-hdf5)
+
+---
+
+## 1. HDF5 是什么
+
+HDF5（Hierarchical Data Format v5）是一个**二进制科学数据容器**，核心能力是把“**数据 + 元数据 + 组织结构 + 高性能 I/O 策略**”放进一个文件里。</description><guid isPermaLink="true">https://Lszidv.github.io/post/HDF5.html</guid><pubDate>Wed, 25 Feb 2026 22:37:37 +0000</pubDate></item><item><title>[PW]Short Note S-Wave Identification by Polarization Filtering and Waveform Coherence Analyses</title><link>https://Lszidv.github.io/post/%5BPW%5DShort%20Note%20S-Wave%20Identification%20by%20Polarization%20Filtering%20and%20Waveform%20Coherence%20Analyses.html</link><description>## Abstract 
 - 研究动机：微地震高分辨率成像需要大量且一致的相位到时数据，S 相对地下物理参数（Vs、Vp/Vs、各向异性等）尤为关键。</description><guid isPermaLink="true">https://Lszidv.github.io/post/%5BPW%5DShort%20Note%20S-Wave%20Identification%20by%20Polarization%20Filtering%20and%20Waveform%20Coherence%20Analyses.html</guid><pubDate>Sun, 21 Dec 2025 14:24:03 +0000</pubDate></item><item><title>[PW]EffiSeisM: An efficient multi-task deep learning model for earthquake monitoring</title><link>https://Lszidv.github.io/post/%5BPW%5DEffiSeisM-%20An%20efficient%20multi-task%20deep%20learning%20model%20for%20earthquake%20monitoring.html</link><description># ABSTRACT
 
 本文提出多任务地震监测模型 **EffiSeisM**，在单一框架中同时完成地震检测、P/S 相拾取与震级估计。</description><guid isPermaLink="true">https://Lszidv.github.io/post/%5BPW%5DEffiSeisM-%20An%20efficient%20multi-task%20deep%20learning%20model%20for%20earthquake%20monitoring.html</guid><pubDate>Wed, 03 Dec 2025 15:57:13 +0000</pubDate></item><item><title>[[PW]Earthquake transformer—an attentive deeplearning model for simultaneous earthquake detection and phase picking</title><link>https://Lszidv.github.io/post/%5B%5BPW%5DEarthquake%20transformer%E2%80%94an%20attentive%20deeplearning%20model%20for%20simultaneous%20earthquake%20detection%20and%20phase%20picking.html</link><description># 摘要

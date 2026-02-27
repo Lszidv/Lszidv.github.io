@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="
+## 目录
+- [1. HDF5 是什么](#1-hdf5-是什么)
+- [2. 与 SAC / miniSEED 的区别：为什么要用 HDF5](#2-与-sac--miniseed-的区别为什么要用-hdf5)
+- [3. 核心对象模型：Group / Dataset / Attribute](#3-核心对象模型group--dataset--attribute)
+- [4. 设计你的地球物理数据集：两种 schema](#4-设计你的地球物理数据集两种-schema)
+- [5. 性能核心：Chunk / Compression / Cache](#5-性能核心chunk--compression--cache)
+- [6. 并行与数据规模：sharding、VDS、Parallel HDF5](#6-并行与数据规模shardingvdsparallel-hdf5)
+- [7. 地球物理工程实践：从 SAC/miniSEED 到 HDF5](#7-地球物理工程实践从-sacminiseed-到-hdf5)
+
+---
+
+## 1. HDF5 是什么
+
+HDF5（Hierarchical Data Format v5）是一个**二进制科学数据容器**，核心能力是把“**数据 + 元数据 + 组织结构 + 高性能 I/O 策略**”放进一个文件里。">
+<meta property="og:title" content="HDF5">
+<meta property="og:description" content="
+## 目录
+- [1. HDF5 是什么](#1-hdf5-是什么)
+- [2. 与 SAC / miniSEED 的区别：为什么要用 HDF5](#2-与-sac--miniseed-的区别为什么要用-hdf5)
+- [3. 核心对象模型：Group / Dataset / Attribute](#3-核心对象模型group--dataset--attribute)
+- [4. 设计你的地球物理数据集：两种 schema](#4-设计你的地球物理数据集两种-schema)
+- [5. 性能核心：Chunk / Compression / Cache](#5-性能核心chunk--compression--cache)
+- [6. 并行与数据规模：sharding、VDS、Parallel HDF5](#6-并行与数据规模shardingvdsparallel-hdf5)
+- [7. 地球物理工程实践：从 SAC/miniSEED 到 HDF5](#7-地球物理工程实践从-sacminiseed-到-hdf5)
+
+---
+
+## 1. HDF5 是什么
+
+HDF5（Hierarchical Data Format v5）是一个**二进制科学数据容器**，核心能力是把“**数据 + 元数据 + 组织结构 + 高性能 I/O 策略**”放进一个文件里。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://Lszidv.github.io/post/HDF5.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
+<title>HDF5</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">HDF5</h1>
+<div class="title-right">
+    <a href="https://Lszidv.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/Lszidv/Lszidv.github.io/issues/61" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h2>目录</h2>
+<ul>
+<li><a href="#1-hdf5-%E6%98%AF%E4%BB%80%E4%B9%88">1. HDF5 是什么</a></li>
+<li><a href="#2-%E4%B8%8E-sac--miniseed-%E7%9A%84%E5%8C%BA%E5%88%AB%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E7%94%A8-hdf5">2. 与 SAC / miniSEED 的区别：为什么要用 HDF5</a></li>
+<li><a href="#3-%E6%A0%B8%E5%BF%83%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8Bgroup--dataset--attribute">3. 核心对象模型：Group / Dataset / Attribute</a></li>
+<li><a href="#4-%E8%AE%BE%E8%AE%A1%E4%BD%A0%E7%9A%84%E5%9C%B0%E7%90%83%E7%89%A9%E7%90%86%E6%95%B0%E6%8D%AE%E9%9B%86%E4%B8%A4%E7%A7%8D-schema">4. 设计你的地球物理数据集：两种 schema</a></li>
+<li><a href="#5-%E6%80%A7%E8%83%BD%E6%A0%B8%E5%BF%83chunk--compression--cache">5. 性能核心：Chunk / Compression / Cache</a></li>
+<li><a href="#6-%E5%B9%B6%E8%A1%8C%E4%B8%8E%E6%95%B0%E6%8D%AE%E8%A7%84%E6%A8%A1shardingvdsparallel-hdf5">6. 并行与数据规模：sharding、VDS、Parallel HDF5</a></li>
+<li><a href="#7-%E5%9C%B0%E7%90%83%E7%89%A9%E7%90%86%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5%E4%BB%8E-sacminiseed-%E5%88%B0-hdf5">7. 地球物理工程实践：从 SAC/miniSEED 到 HDF5</a></li>
+</ul>
+<hr>
+<h2>1. HDF5 是什么</h2>
+<p>HDF5（Hierarchical Data Format v5）是一个<strong>二进制科学数据容器</strong>，核心能力是把“<strong>数据 + 元数据 + 组织结构 + 高性能 I/O 策略</strong>”放进一个文件里。</p>
+<ul>
+<li><strong>文件里的小型文件系统</strong></li>
+<li>里面有“文件夹”（Group）和“文件”（Dataset）</li>
+<li>每个对象还能挂“属性”（Attribute）作为元数据</li>
+</ul>
+<h3>1.1 你会从 HDF5 得到什么</h3>
+<ul>
+<li><strong>层级结构</strong>：适合事件-台站-窗段（event/station/window）组织</li>
+<li><strong>自描述</strong>：shape、dtype、单位、处理参数、版本号都能固化</li>
+<li><strong>高性能 I/O</strong>：支持分块（chunk）与压缩（compression），按需切片读取</li>
+<li><strong>可扩展</strong>：可增长维度（append 新样本），可虚拟拼接（VDS）</li>
+</ul>
+<hr>
+<h2>2. 与 SAC / miniSEED 的区别</h2>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>维度</th>
+<th>SAC</th>
+<th>miniSEED</th>
+<th>HDF5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>主要定位</td>
+<td>分析与可视化友好（单道/单分量常见）</td>
+<td>台网采集/归档/交换标准（连续流强）</td>
+<td>科学数据容器（自定义 schema，训练与批处理强）</td>
+</tr>
+<tr>
+<td>组织方式</td>
+<td>海量小文件 + header</td>
+<td>波形分片 + 生态配套（StationXML）</td>
+<td>少量大文件 + 内部层级/表</td>
+</tr>
+<tr>
+<td>元数据</td>
+<td>固定 header 字段</td>
+<td>元数据常外置</td>
+<td>自由扩展 attributes / meta 表</td>
+</tr>
+<tr>
+<td>训练 I/O</td>
+<td>打开文件多，元数据开销大</td>
+<td>同上（但连续流场景强）</td>
+<td>按索引随机读快，适合 <code class="notranslate">X[N,3,T]</code></td>
+</tr>
+<tr>
+<td>适合场景</td>
+<td>震相处理、研究常用工具链</td>
+<td>台网数据分发、实时流</td>
+<td>深度学习、批量实验、可追溯数据产品</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<h3>2.1 为什么使用 HDF5</h3>
+<p>当你做 SWS（例如标签 <strong>$ (\phi,\Delta t) $</strong>）或任何窗口化学习任务时，训练访问常是：</p>
+<ul>
+<li>随机取样：<code class="notranslate">X[i,:,:]</code></li>
+<li>或读时间片段：<code class="notranslate">X[i,:,t0:t1]</code></li>
+</ul>
+<p>SAC/miniSEED 的痛点是“<strong>文件系统元数据开销</strong>”：打开/关闭/遍历海量小文件非常慢。<br>
+HDF5 的优势是“<strong>数组式访问</strong>”：按索引切片读写，吞吐更稳定。</p>
+<hr>
+<h2>3. 核心对象模型：Group / Dataset / Attribute</h2>
+<h3>3.1 Group（组）</h3>
+<ul>
+<li>类似目录</li>
+<li>用路径定位：<code class="notranslate">/events/19960126.028/SJ01</code></li>
+</ul>
+<h3>3.2 Dataset（数据集）</h3>
+<ul>
+<li>多维数组：<code class="notranslate">float32 [N,3,T]</code></li>
+<li>也可存表：compound dtype（类似结构体/表格）</li>
+</ul>
+<h3>3.3 Attribute（属性）</h3>
+<ul>
+<li>适合小规模元信息：单位、采样率、版本号、坐标系约定</li>
+<li>不适合存大数组（大数组应作为 Dataset）</li>
+</ul>
+<h3>3.4 推荐的元数据分层策略</h3>
+<ul>
+<li>文件级 attributes：全局约定（<code class="notranslate">fs</code>、<code class="notranslate">component_order</code>、<code class="notranslate">bandpass</code>、<code class="notranslate">dataset_version</code>）</li>
+<li>meta 表：样本级字段（<code class="notranslate">event_id</code>、<code class="notranslate">station</code>、<code class="notranslate">baz</code>、<code class="notranslate">evdp</code>、<code class="notranslate">quality</code>、<code class="notranslate">t0/t1</code>）</li>
+<li>dataset attributes：对特定数组的单位/解释（<code class="notranslate">units="m/s"</code>，<code class="notranslate">axis_order="NCT"</code>）</li>
+</ul>
+<hr>
+<h2>4. 地球物理数据集：两种 schema</h2>
+<blockquote>
+<p>选择 schema 的关键：“可读性”还是“训练吞吐”？</p>
+</blockquote>
+<h3>4.1 Schema A：层级树（直观、友好）</h3>
+<p>适合：数据量中等、以研究分析与手工检查为主</p>
+<p>优点：</p>
+<ul>
+<li>样本索引访问极快（<code class="notranslate">X[i]</code>）</li>
+<li>对象少，元数据开销低</li>
+<li>更易分片（sharding）</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>需要你维护索引与 meta</li>
+</ul>
+<hr>
+<h2>5. 性能核心：Chunk / Compression / Cache</h2>
+<blockquote>
+<p>一句话：HDF5 是否快，主要取决于 <strong>chunk 是否匹配访问模式</strong>。</p>
+</blockquote>
+<h3>5.1 Chunk（分块）决定切片读取成本</h3>
+<ul>
+<li>contiguous：连续布局，整段顺序读快，子集切片不一定快</li>
+<li>chunked：分块布局，支持压缩、支持 resize、子集切片更灵活</li>
+</ul>
+<h3>5.2 Compression（压缩）不一定慢</h3>
+<p>对波形这种相关性强的数据，压缩后磁盘读取量降低，常常整体更快。<br>
+但前提是：chunk 不能太大，且访问模式不要让同一 chunk 反复解压。</p>
+<h3>5.3 Cache（chunk cache）决定“是否重复解压”</h3>
+<p>如果 chunk 大于 cache，或访问模式跨很多 chunk，会造成：</p>
+<ul>
+<li>重复读</li>
+<li>重复解压</li>
+<li>看起来“压缩后更慢”</li>
+</ul>
+<h3>5.4 地球物理训练数据的经验 chunk 配方</h3>
+<p><strong>访问模式 1：以样本为单位随机读 <code class="notranslate">X[i,:,:]</code></strong></p>
+<ul>
+<li><code class="notranslate">X</code> 形状：<code class="notranslate">[N,3,T]</code></li>
+<li>chunk 建议：<code class="notranslate">[64,3,T]</code> 或 <code class="notranslate">[128,3,T]</code>（接近 batch）</li>
+</ul>
+<p><strong>访问模式 2：以时间片段读 <code class="notranslate">X[i,:,t0:t1]</code></strong></p>
+<ul>
+<li>chunk 建议：<code class="notranslate">[64,3,256]</code>（时间维也分块）</li>
+<li>注意：chunk 太小会增加元数据/索引负担</li>
+</ul>
+<hr>
+<h2>6. 并行与数据规模：sharding、VDS、Parallel HDF5</h2>
+<h3>6.1 推荐路线：sharding（分片）优先</h3>
+<p>当数据上到几十 GB / 上百 GB：</p>
+<ul>
+<li>不建议单文件过大（备份、复制、损坏风险）</li>
+<li>建议按 shard 切分：<code class="notranslate">train_000.h5 ... train_099.h5</code></li>
+</ul>
+<h3>6.2 VDS：把多个 shard 映射成一个“虚拟大数据集”</h3>
+<p>优点：</p>
+<ul>
+<li>训练侧像读单文件一样读</li>
+<li>生产侧依旧分片易管理</li>
+</ul>
+<h3>6.3 Parallel HDF5：HPC/MPI 场景的正统方案</h3>
+<p>适合：</p>
+<ul>
+<li>多进程共同写同一文件</li>
+<li>强依赖 MPI-IO 与 collective 操作语义</li>
+</ul>
+<p>工程侧常见折中：</p>
+<ul>
+<li>“写入阶段用并行或分布式生成 shard”</li>
+<li>“训练阶段多进程只读 shard”</li>
+</ul>
+<hr>
+<h2>7. 地球物理工程实践：从 SAC/miniSEED 到 HDF5</h2>
+<p>下面是一条适合 SWS / 三分量窗段学习的典型流水线：</p>
+<ol>
+<li>扫描目录与索引构建</li>
+</ol>
+<ul>
+<li>event_id、station、分量文件、起止时间、可用性</li>
+</ul>
+<ol start="2">
+<li>读取三分量并统一通道顺序</li>
+</ol>
+<ul>
+<li>固定为 <code class="notranslate">ZNE</code> 或 <code class="notranslate">ENZ</code>，并在文件级 attributes 记录 <code class="notranslate">component_order</code></li>
+</ul>
+<ol start="3">
+<li>预处理固化（建议全写入 attributes / meta）</li>
+</ol>
+<ul>
+<li>demean / detrend / taper / bandpass / resample / normalize</li>
+</ul>
+<ol start="4">
+<li>切窗与样本化</li>
+</ol>
+<ul>
+<li>得到 <code class="notranslate">X[i] = [3,Tw]</code></li>
+<li>保存 <code class="notranslate">t0/t1</code>、SNR、quality、pick 误差等到 meta</li>
+</ul>
+<ol start="5">
+<li>写入 HDF5（扁平大数组 + meta 表）</li>
+</ol>
+<ul>
+<li><code class="notranslate">/X[N,3,Tw]</code></li>
+<li><code class="notranslate">/y[N,2]</code>（phi, dt）</li>
+<li><code class="notranslate">/meta[N]</code>（event_id/station/baz/evdp/quality/…）</li>
+</ul></div>
+<div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://Lszidv.github.io">芜尽</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行 "+diffDay+" 天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.disabled=true;
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","Lszidv/Lszidv.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+
+
+</script>
+
+
+</html>
