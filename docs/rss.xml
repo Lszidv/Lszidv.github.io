@@ -1,8 +1,51 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>芜尽</title><link>https://Lszidv.github.io</link><description>Only love can set us free</description><copyright>芜尽</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/160511559?s=400&amp;u=68ec73daff523efd8652079b221d42e446d01cb6&amp;v=4</url><title>avatar</title><link>https://Lszidv.github.io</link></image><lastBuildDate>Thu, 04 Jun 2026 07:11:35 +0000</lastBuildDate><managingEditor>芜尽</managingEditor><ttl>60</ttl><webMaster>芜尽</webMaster><item><title>[Mine Earthquake]Class1</title><link>https://Lszidv.github.io/post/%5BMine%20Earthquake%5DClass1.html</link><description>
-# 煤矿微震数据分析学习笔记 · Class 1
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>芜尽</title><link>https://Lszidv.github.io</link><description>Only love can set us free</description><copyright>芜尽</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/160511559?s=400&amp;u=68ec73daff523efd8652079b221d42e446d01cb6&amp;v=4</url><title>avatar</title><link>https://Lszidv.github.io</link></image><lastBuildDate>Thu, 04 Jun 2026 07:22:53 +0000</lastBuildDate><managingEditor>芜尽</managingEditor><ttl>60</ttl><webMaster>芜尽</webMaster><item><title>[Mine Earthquake]Class1</title><link>https://Lszidv.github.io/post/%5BMine%20Earthquake%5DClass1.html</link><description># 煤矿微震数据分析学习笔记 · Class 1
 
 &gt; 以天然地震研究为起点，学习矿震定位与能量分析
+
+---
+
+## 目录
+
+- [一、震源定位：三种方法的本质区别](#一震源定位三种方法的本质区别)
+  - [1.0 核心问题与理论基础](#10-核心问题与理论基础)
+  - [1.1 P-S 时差法（Wadati 法）](#11-p-s-时差法wadati-法)
+  - [1.2 Geiger 法（最小二乘迭代定位）](#12-geiger-法最小二乘迭代定位)
+  - [1.3 Powell 法（直接搜索优化）](#13-powell-法直接搜索优化)
+  - [1.4 方法对比总结](#14-方法对比总结)
+- [二、矿震定位的核心挑战](#二矿震定位的核心挑战)
+  - [2.1 台站几何约束](#21-台站几何约束)
+  - [2.2 数学本质：欠定系统](#22-数学本质欠定系统)
+  - [2.3 解决方向](#23-解决方向)
+- [三、微震能量计算](#三微震能量计算)
+  - [3.1 为什么用能量而不用震级](#31-为什么用能量焦耳而不用震级)
+  - [3.2 震级-能量关系](#32-震级-能量关系)
+  - [3.3 能量如何从波形计算](#33-能量如何从波形计算)
+- [四、G-R 关系与 b 值](#四g-r-关系与-b-值)
+  - [4.1 公式与参数释义](#41-公式与参数释义)
+  - [4.2 a 值分析](#42-a-值分析)
+  - [4.3 b 值的物理含义](#43-b-值的物理含义)
+  - [4.4 b 值的估计方法](#44-b-值的估计方法)
+  - [4.5 b 值变化的统计显著性](#45-b-值变化的统计显著性)
+- [五、b 值与矿震预警的连接](#五b-值与矿震预警的连接)
+  - [5.1 理论链条](#51-理论链条lab--field)
+  - [5.2 矿震中的对应关系](#52-矿震中的对应关系)
+  - [5.3 预测指标与 b 值的对应](#53-沈玉恒-ppt-预测指标与-b-值的对应)
+  - [5.4 预警中的注意事项](#54-预警中的注意事项)
+- [六、CT 层析成像](#六ct-层析成像)
+  - [6.1 核心目标](#61-核心目标)
+  - [6.2 正问题：走时计算](#62-正问题走时计算)
+  - [6.3 反问题：矩阵方程的建立](#63-反问题矩阵方程的建立)
+  - [6.4 联合反演](#64-鸡和蛋问题定位与-ct-的联合反演)
+  - [6.5 欠定问题与正则化](#65-欠定问题与正则化)
+  - [6.6 棋盘测试](#66-棋盘测试checkerboard-test)
+  - [6.7 完整逻辑链](#67-ct-在矿震监测中的完整逻辑链)
+- [七、微震与矿压的联合监测](#七微震与矿压的联合监测)
+  - [7.1 两套系统的本质差异](#71-两套系统的本质差异)
+  - [7.2 四种联合状态](#72-为什么必须联合四种状态的物理含义)
+  - [7.3 联合的核心价值](#73-联合的核心价值补充深度信息)
+  - [7.4 完整联合监测体系](#74-完整联合监测体系)
+- [八、附录：关键公式汇总](#八附录关键公式汇总)
 
 ---
 
@@ -18,7 +61,7 @@
 **原始数据流：**
 
 ```
-连续波形采样 → 滤波去噪（带通/Bandpass） → STA/LTA 拾取 P 波到时  → 偏振分析拾取 S 波到时（深度学习直接拾取P\S） → 结合速度模型 → 定位反演
+连续波形采样 → 滤波去噪（带通/Bandpass） → STA/LTA 拾取 P 波到时 → 偏振分析拾取 S 波到时(深度学习直接拾取P/S) → 结合速度模型 → 定位反演
 ```
 
 **核心方程（走时方程）：** 对于第 $i$ 个台站，P 波理论到时为：
