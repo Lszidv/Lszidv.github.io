@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="
+# 煤矿微震数据分析学习笔记 · Class 1
+
+> 以天然地震研究为起点，学习矿震定位与能量分析
+
+---
+
+## 一、震源定位：三种方法的本质区别
+
+### 1.0 核心问题与理论基础
+
+地震（微震）发生后，需要通过连续波形记录反演以下四个未知量：
+
+- **空间位置**：经度 $x$ 、纬度 $y$ 、深度 $z$ （矿震场景中通常对应走向、倾向、垂向）
+- **发震时刻**： $t_0$ （事件发生的绝对时间）
+
+**原始数据流：**
+
+```
+连续波形采样 → 滤波去噪（带通/Bandpass） → STA/LTA 拾取 P 波到时  → 偏振分析拾取 S 波到时（深度学习直接拾取P\S） → 结合速度模型 → 定位反演
+```
+
+**核心方程（走时方程）：** 对于第 $i$ 个台站，P 波理论到时为：
+
+$$ T_i^{\text{calc}} = t_0 + \int_{\text{source}}^{\text{station}_i} \frac{ds}{v(x,y,z)} $$
+
+在均匀速度模型中简化为：
+
+$$ T_i^{\text{calc}} = t_0 + \frac{D_i}{V_p} $$
+
+其中 $D_i$ 为震源到第 $i$ 个台站的直线距离， $V_p$ 为 P 波速度。">
+<meta property="og:title" content="[Mine Earthquake]Class1">
+<meta property="og:description" content="
+# 煤矿微震数据分析学习笔记 · Class 1
+
+> 以天然地震研究为起点，学习矿震定位与能量分析
+
+---
+
+## 一、震源定位：三种方法的本质区别
+
+### 1.0 核心问题与理论基础
+
+地震（微震）发生后，需要通过连续波形记录反演以下四个未知量：
+
+- **空间位置**：经度 $x$ 、纬度 $y$ 、深度 $z$ （矿震场景中通常对应走向、倾向、垂向）
+- **发震时刻**： $t_0$ （事件发生的绝对时间）
+
+**原始数据流：**
+
+```
+连续波形采样 → 滤波去噪（带通/Bandpass） → STA/LTA 拾取 P 波到时  → 偏振分析拾取 S 波到时（深度学习直接拾取P\S） → 结合速度模型 → 定位反演
+```
+
+**核心方程（走时方程）：** 对于第 $i$ 个台站，P 波理论到时为：
+
+$$ T_i^{\text{calc}} = t_0 + \int_{\text{source}}^{\text{station}_i} \frac{ds}{v(x,y,z)} $$
+
+在均匀速度模型中简化为：
+
+$$ T_i^{\text{calc}} = t_0 + \frac{D_i}{V_p} $$
+
+其中 $D_i$ 为震源到第 $i$ 个台站的直线距离， $V_p$ 为 P 波速度。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://Lszidv.github.io/post/%5BMine%20Earthquake%5DClass1.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
+<title>[Mine Earthquake]Class1</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+.copy-feedback {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 50px;
+    color: var(--color-fg-on-emphasis);
+    background-color: var(--color-fg-muted);
+    border-radius: 3px;
+    padding: 5px 8px;
+    font-size: 12px;
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">[Mine Earthquake]Class1</h1>
+<div class="title-right">
+    <a href="https://Lszidv.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/Lszidv/Lszidv.github.io/issues/62" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h1>煤矿微震数据分析学习笔记 · Class 1</h1>
+<blockquote>
+<p>以天然地震研究为起点，学习矿震定位与能量分析</p>
+</blockquote>
+<hr>
+<h2>一、震源定位：三种方法的本质区别</h2>
+<h3>1.0 核心问题与理论基础</h3>
+<p>地震（微震）发生后，需要通过连续波形记录反演以下四个未知量：</p>
+<ul>
+<li>
+<strong>空间位置</strong>：经度 $x$ 、纬度 $y$ 、深度 $z$ （矿震场景中通常对应走向、倾向、垂向）</li>
+<li>
+<strong>发震时刻</strong>： $t_0$ （事件发生的绝对时间）</li>
+</ul>
+<p><strong>原始数据流：</strong></p>
+<pre class="notranslate"><code class="notranslate">连续波形采样 → 滤波去噪（带通/Bandpass） → STA/LTA 拾取 P 波到时  → 偏振分析拾取 S 波到时（深度学习直接拾取P\S） → 结合速度模型 → 定位反演
+</code></pre>
+<p><strong>核心方程（走时方程）：</strong> 对于第 $i$ 个台站，P 波理论到时为：</p>
+<p>$$ T_i^{\text{calc}} = t_0 + \int_{\text{source}}^{\text{station}_i} \frac{ds}{v(x,y,z)} $$</p>
+<p>在均匀速度模型中简化为：</p>
+<p>$$ T_i^{\text{calc}} = t_0 + \frac{D_i}{V_p} $$</p>
+<p>其中 $D_i$ 为震源到第 $i$ 个台站的直线距离， $V_p$ 为 P 波速度。</p>
+<p>定位的本质是最小化观测到时与理论到时之间的残差：</p>
+<p>$$ \min_{x,y,z,t_0} \sum_{i=1}^{n} \left[ T_i^{\text{obs}} - T_i^{\text{calc}}(x,y,z,t_0) \right]^2 $$</p>
+<hr>
+<h3>1.1 P-S 时差法（Wadati 法）</h3>
+<h4>原理推导</h4>
+<p>P 波和 S 波同时从震源出发。由于 $V_p &amp;gt; V_s$ ，到达同一台站的时间差为：</p>
+<p>$$ \Delta t_{SP} = t_S - t_P = \frac{D}{V_s} - \frac{D}{V_p} = D \cdot \left( \frac{1}{V_s} - \frac{1}{V_p} \right) $$</p>
+<p>从中解出震源距 $D$ ：</p>
+<p>$$ D = \Delta t_{SP} \cdot \frac{V_p \cdot V_s}{V_p - V_s} $$</p>
+<p><strong>核心优势：</strong> 发震时刻 $t_0$ 在上述推导中完全消掉——两个到时相减时 $t_0$ 被抵消，这是此法不需要知道发震时刻的根本原因，而非巧合。</p>
+<h4>数值示例</h4>
+<p>$$\Delta t_{SP} = 2\ \text{s},\quad V_p = 5\ \text{km/s},\quad V_s = 3\ \text{km/s}$$</p>
+<p>$$ D = 2 \times \frac{5 \times 3}{5 - 3} = 2 \times \frac{15}{2} = 15\ \text{km} $$</p>
+<h4>WADATI 图验证</h4>
+<p>Wadati（1933）提出利用 S-P 与 P 波到时的关系检验定位可靠性。由走时方程：</p>
+<p>$$ t_S - t_P = \left( \frac{V_p}{V_s} - 1 \right) \cdot (t_P - t_0) $$</p>
+<p>因此，对所有台站的 $(t_p, t_s - t_p)$ 数据点做直线拟合，斜率 $\kappa = V_p/V_s - 1$ ，由此验证速度模型是否与观测一致。如果数据点偏离直线，说明速度模型不当或 S 波拾取有误。</p>
+<h4>定位流程</h4>
+<ol>
+<li>每个台站：拾取 $\Delta t_{SP}$ → 计算震源距 $D$
+</li>
+<li>以台站为球心、 $D$ 为半径画球面（三维）或圆周（二维）</li>
+<li>最少 3 个台站 → 3 个球面 → 交点即震源位置</li>
+</ol>
+<p><strong>局限分析：</strong></p>
+<ul>
+<li>
+<strong>S 波拾取困难</strong>：近场（&lt; 500 m）高噪声环境中 S 波淹没在 P 波尾波中。矿震事件常来自工作面附近，噪声高，S 波信噪比低。</li>
+<li>
+<strong>最少 3 站约束</strong>：煤矿井下可用台站数量有限（通常 6-12 站），若某台站失效则定位精度急剧下降。</li>
+<li>
+<strong>速度模型敏感</strong>： $V_p/V_s$ 比值假设为常数（通常 1.73），但实际煤层中的 $V_p/V_s$ 随含水率、裂隙密度变化显著（可达 1.5-2.5）。</li>
+</ul>
+<hr>
+<h3>1.2 Geiger 法（最小二乘迭代定位）</h3>
+<h4>核心思路</h4>
+<p>Geiger（1912）提出的定位方法至今仍是地震定位的标准算法。与 P-S 时差法不同，它将 $t_0$ 作为第四个未知数<strong>联合求解</strong>。</p>
+<p><strong>未知数向量：</strong> $\mathbf{m} = (x, y, z, t_0)^T$</p>
+<p><strong>最少台站数：</strong> 4 个（4 个未知数 × 4 个独立方程）</p>
+<p><strong>注：</strong> 4 个台站只是必要条件。当台站近似共面时，方程组条件数大，实际需要更多台站。更严格地说，需要台站从至少 4 个不同方向约束震源，即方位角覆盖 &gt; 180° 且具有垂向分量差异。</p>
+<h4>数学框架</h4>
+<p>Geiger 法的核心是对非线性走时方程做一阶 Taylor 展开，转化为线性方程组迭代求解。</p>
+<p><strong>Step 1：Taylor 展开</strong></p>
+<p>将走时方程在初始猜测 $\mathbf{m}_0$ 处展开：</p>
+<p>$$ T_i^{\text{obs}} - T_i^{\text{calc}}(\mathbf{m}_0) = \frac{\partial T_i}{\partial x}\Delta x + \frac{\partial T_i}{\partial y}\Delta y + \frac{\partial T_i}{\partial z}\Delta z + \frac{\partial T_i}{\partial t_0}\Delta t_0 $$</p>
+<p>即：</p>
+<p>$$ \mathbf{r} = \mathbf{G} \cdot \Delta\mathbf{m} $$</p>
+<p><strong>Step 2：偏导数计算</strong></p>
+<p>对于均匀模型 $T_i = t_0 + D_i / V_p$ ：</p>
+<p>$$ \frac{\partial T_i}{\partial x} = \frac{x - x_i}{V_p \cdot D_i},\quad \frac{\partial T_i}{\partial t_0} = 1 $$</p>
+<p>$y, z$ 分量同理。注意当 $D_i \to 0$ （台站无限接近震源）时偏导数趋于奇异，初始猜测不能离真值太远。</p>
+<p><strong>Step 3：最小二乘求解</strong></p>
+<p>$$ \Delta\mathbf{m} = (\mathbf{G}^T\mathbf{G})^{-1} \mathbf{G}^T \mathbf{r} $$</p>
+<p><strong>Step 4：更新并迭代</strong></p>
+<p>$$ \mathbf{m}_{k+1} = \mathbf{m}_k + \Delta\mathbf{m} $$</p>
+<p>当 $|\Delta\mathbf{m}| &amp;lt; \varepsilon$ （典型值 1 m）或迭代次数超过上限时停止。</p>
+<h4>收敛条件与发散处理</h4>
+<ul>
+<li>
+<strong>初始位置偏差过大</strong> → 线性近似失效 → 残差振荡发散</li>
+<li>
+<strong>$\mathbf{G}^T\mathbf{G}$ 接近奇异</strong> → 台站分布差（线性排列）→ 方程欠约束</li>
+<li>
+<strong>阻尼最小二乘（Levenberg-Marquardt）</strong> 可在 $\mathbf{G}^T\mathbf{G}$ 对角线上加阻尼因子 $\lambda$ 稳定求解：</li>
+</ul>
+<p>$$ \Delta\mathbf{m} = (\mathbf{G}^T\mathbf{G} + \lambda \mathbf{I})^{-1} \mathbf{G}^T \mathbf{r} $$</p>
+<h4>对矿震场景的优势</h4>
+<p>不依赖 S 波——在以下情况至关重要：</p>
+<ul>
+<li>工作面前方 50 m 内事件：S 波与 P 波尾波混叠</li>
+<li>小能量事件（&lt; 100 J）：S 波振幅弱，难以可靠拾取</li>
+<li>煤层波导效应：P 波沿煤层传播，S 波被严重衰减</li>
+</ul>
+<hr>
+<h3>1.3 Powell 法（直接搜索优化）</h3>
+<h4>本质：无需梯度的非线性优化</h4>
+<p>与 Geiger 法（依赖梯度 $\partial T/\partial x$ ）不同，Powell 法属于<strong>直接搜索法</strong>（direct search），不需要计算导数。这一差异在地震定位中具有实际意义。</p>
+<h4>核心算法：共轭方向搜索</h4>
+<p>Powell 法的精髓在于沿一组<strong>共轭方向</strong>依次做一维搜索（线搜索）。对于二次函数，沿 $n$ 个共轭方向各搜索一次即可精确到达极小点。</p>
+<p><strong>算法流程（简化）：</strong></p>
+<ul>
+<li>
+<p><strong>步骤 1：</strong> 初始化方向集： $\mathbf{d}_1, \dots, \mathbf{d}_4$ （通常沿坐标轴方向）</p>
+</li>
+<li>
+<p><strong>步骤 2：</strong> 从 $\mathbf{m}_0$ 出发，依次沿各方向 $\mathbf{d}_k$ 做线搜索，极小化残差：</p>
+</li>
+</ul>
+<p>$$
+\min_{\alpha} \ \sum_i \left[ T_i^{\text{obs}} - T_i^{\text{calc}}(\mathbf{m} + \alpha \mathbf{d}_k) \right]^2
+$$</p>
+<ul>
+<li>
+<p><strong>步骤 3：</strong> 沿新方向（ $\mathbf{m}_n - \mathbf{m}_0$ 方向）再做一次线搜索</p>
+</li>
+<li>
+<p><strong>步骤 4：</strong> 将新方向加入方向集，替换贡献最小的方向</p>
+</li>
+<li>
+<p><strong>步骤 5：</strong> 重复直到收敛</p>
+</li>
+</ul>
+<p><strong>与 Geiger 法的比较：</strong></p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>特性</th>
+<th>Geiger 法</th>
+<th>Powell 法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>需要梯度</td>
+<td>是（ $\partial T / \partial \mathbf{m}$ ）</td>
+<td>否</td>
+</tr>
+<tr>
+<td>收敛速度</td>
+<td>二次收敛（近极小点时快）</td>
+<td>超线性收敛（近极小点时慢于 Geiger）</td>
+</tr>
+<tr>
+<td>对初值敏感度</td>
+<td>高（Taylor 展开假设）</td>
+<td>低（全局方向）</td>
+</tr>
+<tr>
+<td>局部极小值</td>
+<td>易陷入（受台站分布影响）</td>
+<td>相对鲁棒（全局搜索特性）</td>
+</tr>
+<tr>
+<td>适用情况</td>
+<td>台站覆盖好的区域</td>
+<td>台站稀疏或初值不确定时</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<p><strong>矿震场景下的使用建议：</strong> 两种方法可结合使用——先以 Powell 法获得粗定位（鲁棒、不依赖梯度），再将结果作为 Geiger 法的初始值做精细定位（快速、可提供误差估计）。</p>
+<hr>
+<h3>1.4 方法对比总结</h3>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>方法</th>
+<th>需要波型</th>
+<th>发震时刻</th>
+<th>最少台站</th>
+<th>定位方式</th>
+<th>约束</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P-S 时差法</td>
+<td>P 波 + S 波</td>
+<td>消掉，不需知</td>
+<td>3 个</td>
+<td>球面交会（解析）</td>
+<td>需要可靠 S 波</td>
+</tr>
+<tr>
+<td>Geiger 法</td>
+<td>仅 P 波</td>
+<td>作为未知数联合求解</td>
+<td>4 个（理论下限）</td>
+<td>迭代优化（梯度）</td>
+<td>需要初值</td>
+</tr>
+<tr>
+<td>Powell 法</td>
+<td>任意（取决于目标函数）</td>
+<td>作为未知数联合求解</td>
+<td>4 个（理论下限）</td>
+<td>直接搜索（无梯度）</td>
+<td>速度较慢</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<hr>
+<h2>二、矿震定位的核心挑战</h2>
+<h3>2.1 台站几何约束</h3>
+<p>天然地震台网通常覆盖震源区上方及四周数百公里范围的区域，台站呈二维网状分布。矿震监测的根本制约在于：<strong>台站只能沿巷道布置</strong>。</p>
+<p><strong>巷道中的台站排列：</strong></p>
+<pre class="notranslate"><code class="notranslate">工作面方向 →
+┌──────┬──────┬──────┬──────┐
+│ 台1   │ 台2   │ 台3   │ 台4   │   ← 线性排列（近似一维）
+└──────┴──────┴──────┴──────┘
+</code></pre>
+<p>三个球面的交点问题：当球心共线时，三个球面交于一个圆而非一个点，即定位方程在垂向几乎无约束，深度方向的定位误差可达水平方向的 3-10 倍。</p>
+<h3>2.2 数学本质：欠定系统</h3>
+<p>定位矩阵 $\mathbf{G}$ 的条件数 $\kappa(\mathbf{G})$ 反映了台站几何的质量：</p>
+<p>$$ \kappa(\mathbf{G}) = \frac{\sigma_{\max}}{\sigma_{\min}} $$</p>
+<p>其中 $\sigma_{\max}, \sigma_{\min}$ 分别是 $\mathbf{G}$ 的最大和最小奇异值。当台站线性排列时，最小奇异值对应的方向（垂向）几乎没有约束， $\kappa$ 极大，解极不稳定。</p>
+<p><strong>方位角覆盖（Azimuthal Gap）：</strong></p>
+<p>在水平面内，台站对震源的张角范围决定了水平定位能力。定义方位角间隙角 $\theta_{\text{gap}}$ 为相邻台站间的最大方位角差：</p>
+<ul>
+<li>
+$\theta_{\text{gap}} &amp;lt; 90°$ ：定位质量极好</li>
+<li>
+$90° &amp;lt; \theta_{\text{gap}} &amp;lt; 180°$ ：水平定位尚可，深度欠约束</li>
+<li>
+$\theta_{\text{gap}} &amp;gt; 180°$ ：定位不可靠（矿震中的典型情况）</li>
+</ul>
+<h3>2.3 解决方向</h3>
+<p>台站布局受巷道固定，以下方向是实际可行的：</p>
+<ol>
+<li><strong>优化定位算法</strong>：引入正则化（阻尼最小二乘）、双差定位法（利用事件对之间的相对走时差提高相对精度）、波形互相关精化相对到时</li>
+<li><strong>精细速度模型</strong>：各向异性校正（煤层 vs 围岩速度差异可超过 50%）、层状模型取代均匀模型、利用掘进揭露的岩性信息标定参数</li>
+<li><strong>多参数联合约束</strong>：结合矿压监测的宏观应力信息辅助收敛、利用事件丛集性（相近事件应有相近定位）作为先验约束</li>
+<li><strong>波形反演</strong>：不依赖到时拾取，直接拟合全波形，在射线覆盖不足时利用散射波和尾波信息</li>
+</ol>
+<hr>
+<h2>三、微震能量计算</h2>
+<h3>3.1 为什么用能量（焦耳）而不用震级</h3>
+<p>震级（Magnitude）和能量（Energy）是两个不同层面的指标：</p>
+<ul>
+<li>
+<strong>震级</strong> $M$ 是对数尺度： $M$ 增加 2 级，能量增加约 1000 倍（而非 2 倍）。因此震级<strong>不可直接相加</strong>。</li>
+<li>
+<strong>能量</strong> $E$ （单位：焦耳 J）是线性物理量，<strong>可直接累加</strong>：</li>
+</ul>
+<p>$$
+E_{\text{total}}(\Delta t) = \sum_{k} E_k \quad (\text{时间窗 } \Delta t \text{ 内所有事件})
+$$</p>
+<p>这在实际监测中极为关键：当我们需要评价"过去 8 小时内累计释放了多少能量"或"该区域能量释放是否加速"时，必须用能量而非震级。</p>
+<h3>3.2 震级-能量关系</h3>
+<p>经典的 Gutenberg-Richter 能量-震级关系：</p>
+<p>$$ \log_{10} E = 1.5 M + 4.8 $$</p>
+<p>其中 $E$ 以焦耳计。该公式的物理基础：震源谱的角频率 $f_c$ 与应力降 $\Delta\sigma$ 和地震矩 $M_0$ 的关系（Brune 模型，1970）。</p>
+<p><strong>常用换算表：</strong></p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>震级 $M$
+</th>
+<th>能量 $E$ (J)</th>
+<th>类比（TNT当量）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-2</td>
+<td>0.06</td>
+<td>一掌击桌</td>
+</tr>
+<tr>
+<td>0</td>
+<td>63</td>
+<td>一拳冲墙</td>
+</tr>
+<tr>
+<td>1</td>
+<td>2,000</td>
+<td>手榴弹</td>
+</tr>
+<tr>
+<td>2</td>
+<td>63,000</td>
+<td>1 kg TNT</td>
+</tr>
+<tr>
+<td>3</td>
+<td>2,000,000</td>
+<td>30 kg TNT</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<p>煤矿微震事件震级多在 -3 到 2 之间，能量在 $10^{-3}$ 到 $10^5$ J 量级，远小于天然地震。</p>
+<h3>3.3 能量如何从波形计算</h3>
+<h4>理论推导</h4>
+<p>震源辐射地震波的能流密度（Poynting 矢量）为：</p>
+<p>$$ S(t) = \rho v \cdot \dot{u}^2(t) $$</p>
+<p>其中 $\rho$ 为介质密度， $v$ 为波速， $\dot{u}$ 为质点振动速度（即波形振幅的一阶时间导数）。</p>
+<p>对台站记录的波场在时间上积分，并对球面几何做校正，得到震源辐射能量：</p>
+<p>$$ E = 4\pi \rho v \cdot R^2 \cdot \int_{t_1}^{t_2} \dot{u}^2(t) , dt $$</p>
+<p>其中 $R$ 为震源距。简化表达：</p>
+<p>$$ E \propto \rho v R^2 \int A^2(t) , dt \quad \text{（振幅平方对时间积分）} $$</p>
+<p><strong>注：</strong> 上式隐含了各向同性辐射假设。实际辐射具有方向性（双力偶震源机制），需做辐射花样校正。在矿震场景中，由于事件多、台站少，通常不单独做辐射图案校正，而是假设各向同性，通过统计平均逼近。</p>
+<h4>实际计算步骤</h4>
+<ul>
+<li><strong>步骤 1：截取波形</strong> — 以 P 波到时为中心，截取一定时窗（如 P 波前 0.5 s 至 S 波后 2 s）</li>
+<li><strong>步骤 2：去仪器响应</strong> — 将波形从 counts 转换为速度（m/s）</li>
+<li><strong>步骤 3：积分能量密度</strong></li>
+</ul>
+<p>$$
+E_{\text{obs}} = \int_{t_{\text{start}}}^{t_{\text{end}}} v^2(t) , dt
+$$</p>
+<ul>
+<li>
+<p><strong>步骤 4：几何扩散校正</strong> — $E_{\text{source}} = E_{\text{obs}} \times R^2$ （球面扩散）</p>
+</li>
+<li>
+<p><strong>步骤 5：衰减校正</strong> — $E_{\text{source}} = E_{\text{obs}} \times R^2 \times e^{\alpha R}$ （非弹性衰减）</p>
+<p>其中 $\alpha = \pi f / (Q v)$ ， $Q$ 为品质因子， $\alpha$ 为衰减系数。矿山场景中 $Q$ 值通常较低（50-200），衰减校正不可忽略。</p>
+</li>
+</ul>
+<h4>矿震能量计算的误差来源</h4>
+<ul>
+<li>
+<strong>衰减校正的 $Q$ 值不确定</strong>：煤层 $Q$ 值低且各向异性，校准困难</li>
+<li>
+<strong>台站增益差异</strong>：近场台站饱和（削波），远场台站信噪比低</li>
+<li>
+<strong>S 波能量主导</strong>：S 波能量通常为 P 波的 10-30 倍，漏拾 S 波会严重低估能量</li>
+<li>
+<strong>辐射图案</strong>：双力偶源的辐射零点方向能量极低</li>
+</ul>
+<hr>
+<h2>四、G-R 关系与 $b$ 值</h2>
+<h3>4.1 公式与参数释义</h3>
+<p>Gutenberg-Richter（1944）关系描述地震的频度-震级分布：</p>
+<p>$$ \log_{10} N(M) = a - b \cdot M $$</p>
+<p>其中：</p>
+<ul>
+<li>
+$N(M)$ ：震级 $\ge M$ 的事件累积数量</li>
+<li>
+$a$ ：截距，表征区域总地震活动率（活动水平）</li>
+<li>
+$b$ ：斜率，表征大小地震的相对比例</li>
+</ul>
+<p><strong>等效幂律形式：</strong></p>
+<p>$$ N(M) = 10^a \cdot 10^{-bM} = A \cdot 10^{-bM} $$</p>
+<p>事件按震级的概率密度函数为指数分布：</p>
+<p>$$ f(M) = b \ln(10) \cdot 10^{-b(M - M_{\min})}, \quad M \ge M_{\min} $$</p>
+<h3>4.2 $a$ 值分析</h3>
+<p>$a$ 值控制整条 G-R 线的高度。由 $\log_{10} N = a - bM$ 可知：</p>
+<p>$$ N(M=0) = 10^a $$</p>
+<ul>
+<li>
+$a$ 增大 1 → $\log_{10} N$ 上移 1 → 各震级事件数均增加 10 倍（等比例上移）</li>
+<li>反映区域的构造活动性或采掘扰动强度</li>
+<li>采深增加、推进速度加快 → $a$ 值升高</li>
+</ul>
+<h3>4.3 $b$ 值的物理含义</h3>
+<p>$b$ 值控制大小地震的比例。设 $M_1 &amp;lt; M_2$ ：</p>
+<p>$$ \frac{N(M_1)}{N(M_2)} = \frac{10^{a - bM_1}}{10^{a - bM_2}} = 10^{b(M_2 - M_1)} $$</p>
+<p>特殊情况 $b=1$ 时，震级每增加 1 级，事件数减少 <strong>10 倍</strong>。</p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>
+$b$ 值</th>
+<th>特征</th>
+<th>物理含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$b &amp;lt; 0.7$</td>
+<td>低</td>
+<td>大事件占比异常高 → 应力高度集中，接近破裂临界状态</td>
+</tr>
+<tr>
+<td>$b \approx 1.0$</td>
+<td>正常</td>
+<td>全球平均、区域常态，应力分布相对均匀</td>
+</tr>
+<tr>
+<td>$b &amp;gt; 1.3$</td>
+<td>高</td>
+<td>小事件占绝对主导 → 应力分散，裂隙发育或卸压状态</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<h3>4.4 $b$ 值的估计方法</h3>
+<p><strong>最小二乘估计：</strong></p>
+<p>$$ \hat{b} = \frac{ \sum (M_i - \bar{M})(\log_{10} N_i - \overline{\log_{10} N}) }{ \sum (M_i - \bar{M})^2 } $$</p>
+<p>缺陷：大震级区间仅含少量事件但等权重，受尾部波动影响大。</p>
+<p><strong>最大似然估计（Aki, 1965）——推荐方法：</strong></p>
+<p>$$ \hat{b} = \frac{ \log_{10} e }{ \bar{M} - M_{\min} } \approx \frac{0.4343}{\bar{M} - M_{\min}} $$</p>
+<p>其中 $\bar{M}$ 是样本震级均值， $M_{\min}$ 是完备震级阈值（所有 $\ge M_{\min}$ 的事件都被检测到）。</p>
+<p><strong>$M_{\min}$ （完备震级）的确定</strong>：</p>
+<p>G-R 曲线在低震级端偏离线性——小事件漏检。确定 $M_{\min}$ 的方法包括：</p>
+<ol>
+<li>
+<strong>最大曲率法</strong>：取频度-震级曲线曲率最大点</li>
+<li>
+<strong>拟合优度法（GOF）</strong>：取使幂律拟合吻合度达到 90% 的最低震级</li>
+<li>
+<strong>$b$ 值稳定性法</strong>：增加 $M_{\min}$ ，取 $b$ 值开始稳定时的震级</li>
+</ol>
+<h3>4.5 $b$ 值变化的统计显著性</h3>
+<p>$b$ 值的变化需要与不确定性比较才能判断是否显著。Aki（1965）给出 $b$ 值的标准差估计：</p>
+<p>$$ \sigma_b \approx \frac{b}{\sqrt{N}} $$</p>
+<p>其中 $N$ 为用于估计的事件总数。当 $b$ 值变化 $|\Delta b| &amp;gt; 2\sigma_b$ 时才具有统计显著性。例如： $N=100$ 、 $b=1.0$ → $\sigma_b \approx 0.1$ ，需要 $|\Delta b| &amp;gt; 0.2$ 才显著。煤矿单日事件通常 $N&amp;lt;50$ ，统计显著性是一个重要制约。</p>
+<hr>
+<h2>五、 $b$ 值与矿震预警的连接</h2>
+<h3>5.1 理论链条（Lab → Field）</h3>
+<p>实验室岩石力学实验（Scholz, 1968；Lockner, 1992）表明：</p>
+<p>$$ \text{差应力} \uparrow \quad \rightarrow \quad b \text{ 值} \downarrow $$</p>
+<p>物理机制：</p>
+<ul>
+<li>低应力状态下：微裂隙随机发育 → 小事件为主 → $b$ 值高</li>
+<li>接近破裂强度时：微裂隙从随机生长转为定向贯通 → 裂隙级联合并 → 大事件比例上升 → $b$ 值下降</li>
+<li>声发射实验（Lei et al., 2003）：加载至峰值应力的 80%-95% 区间， $b$ 值从 ~1.5 降至 ~0.6</li>
+</ul>
+<h3>5.2 矿震中的对应关系</h3>
+<p>将实验室结论映射到采矿场景：</p>
+<pre class="notranslate"><code class="notranslate">采掘活动（推进/爆破/放顶）
+  → 局部应力升高（掘进头前方、老顶悬露区）
+  → 微破裂从随机转为有序（沿主应力方向排列）
+  → b 值系统性下降
+  → 同时伴随：Emax 升高、事件空间聚集、能量释放加速
+  → 冲击地压/煤与瓦斯突出风险显著增加
+</code></pre>
+<h3>5.3 沈玉恒 PPT 预测指标与 $b$ 值的对应</h3>
+<p>四项指标监测的是同一物理过程的<strong>不同侧面</strong>：</p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>PPT 指标</th>
+<th>定义</th>
+<th>与 $b$ 值下降的等价关系</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$E_{\max}$</td>
+<td>时间窗内最大单次能量</td>
+<td>
+$b$ ↓ → 大事件变多 → $E_{\max}$ ↑</td>
+</tr>
+<tr>
+<td>
+$E$ （累计能量）</td>
+<td>时间窗内能量之和</td>
+<td>
+$b$ ↓ → 每事件平均能量增大 → $\sum E$ ↑</td>
+</tr>
+<tr>
+<td>
+$k$ （频次变化率）</td>
+<td>$\Delta N / \Delta t$</td>
+<td>
+$b$ ↓ 时总频次不一定变，但需结合 $E_{\max}$ 判断</td>
+</tr>
+<tr>
+<td>
+$f$ （分布集中度）</td>
+<td>事件空间分布离散度</td>
+<td>应力集中 → 破裂定向 → 空间聚集 → $f$ ↓（更集中）</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<p><strong>核心结论：</strong> $b$ 值与四项 PPT 指标不是互相独立的，而是同一应力状态的<strong>不同表达方式</strong>。 $b$ 值提供了从频度-震级分布角度观测应力积累的视角，PPT 指标提供了从能量、空间、时间维度监测危险的视角。多维交叉验证可降低误报率。</p>
+<h3>5.4 预警中的注意事项</h3>
+<ul>
+<li>
+<strong>时空窗选择</strong>：窗太短 → $N$ 太小 → $b$ 值统计不可靠；窗太长 → 掩盖短时危险信号。建议滑动窗长度确保 $N &amp;gt; 50$
+</li>
+<li>
+<strong>$b$ 值下降 ≠ 必然大事件</strong>： $b$ 值低也可能是较大事件刚发生后的应力释放期</li>
+<li>
+<strong>结合 $a$ 值</strong>： $a$ 值升高 + $b$ 值下降（活动加剧且大事件比例上升）才是真正的危险信号</li>
+<li>
+<strong>空间分区</strong>：全局 $b$ 值可能正常，但局部（如掘进头前方 20 m 区域）可能已显著降低</li>
+</ul>
+<hr>
+<h2>六、CT 层析成像</h2>
+<h3>6.1 核心目标</h3>
+<p>以微震事件为<strong>被动震源</strong>（无需人工激发），反演工作面周围的速度分布 $v(x,y,z)$ ，进而识别应力集中区。</p>
+<p><strong>物理基础（岩石物理关系）：</strong></p>
+<ul>
+<li>应力 ↑ → 孔隙/裂隙闭合 → 弹性模量 ↑ → $V_p, V_s$ ↑ → <strong>高速区</strong>
+</li>
+<li>采动卸压 → 裂隙张开/扩展 → 弹性模量 ↓ → $V_p, V_s$ ↓ → <strong>低速区</strong>
+</li>
+</ul>
+<p>Birch 定律（1961）给出速度-密度的经验关系：<br>
+$$ V_p = a(M) + b \cdot \rho $$<br>
+其中 $a(M)$ 与平均原子量有关， $b \approx 3.05\ \text{km} \cdot \text{s}^{-1} \cdot \text{g}^{-1} \cdot \text{cm}^3$ 。</p>
+<p><strong>判据总结：</strong></p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>速度特征</th>
+<th>岩石状态</th>
+<th>应力状态</th>
+<th>冲击地压风险</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>高速（ $\Delta V_p / V_p &amp;gt; +3%$ ）</td>
+<td>压实</td>
+<td>应力集中</td>
+<td><strong>高</strong></td>
+</tr>
+<tr>
+<td>正常速度（ $</td>
+<td>\Delta V_p / V_p</td>
+<td>&lt; 3%$ ）</td>
+<td>原岩</td>
+</tr>
+<tr>
+<td>低速（ $\Delta V_p / V_p &amp;lt; -3%$ ）</td>
+<td>破碎</td>
+<td>卸压/采空</td>
+<td>低（但需关注顶板稳定性）</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<hr>
+<h3>6.2 正问题：走时计算</h3>
+<p>给定速度模型 $v(\mathbf{r})$ ，震源 $\mathbf{s}$ 到台站 $\mathbf{r}$ 的走时由程函方程（Eikonal Equation）控制：</p>
+<p>$$ |\nabla T(\mathbf{r})| = \frac{1}{v(\mathbf{r})} = s(\mathbf{r}) $$</p>
+<p>其中 $s(\mathbf{r})$ 为慢度（slowness），是速度的倒数： $s = 1/v$ 。</p>
+<p>沿射线路径积分：</p>
+<p>$$ T = \int_{\mathbf{s}}^{\mathbf{r}} \frac{dl}{v(\mathbf{r})} = \int_{\mathbf{s}}^{\mathbf{r}} s(\mathbf{r}) , dl $$</p>
+<p><strong>非线性来源：</strong> 射线路径 $\mathbf{r}(l)$ 本身满足射线方程（Snell 定律的连续形式），而射线方程依赖于 $v(\mathbf{r})$ 。速度变了 → 射线路径改变 → 走时改变，这是典型的非线性正问题。</p>
+<p><strong>射线追踪方法概览：</strong></p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>方法</th>
+<th>原理</th>
+<th>优势</th>
+<th>劣势</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Shooting（打靶法）</td>
+<td>从震源发射射线，调整出射角命中台站</td>
+<td>直观</td>
+<td>收敛慢，存在影区</td>
+</tr>
+<tr>
+<td>Bending（弯曲法）</td>
+<td>初始直线路径，逐步弯曲满足 Fermat 原理</td>
+<td>对初值要求低</td>
+<td>可能收敛到局部极小</td>
+</tr>
+<tr>
+<td>Eikonal FD（程函方程有限差分）</td>
+<td>直接求解程函方程，全场走时</td>
+<td>鲁棒、无影区</td>
+<td>仅能处理初至波</td>
+</tr>
+<tr>
+<td>Fast Marching（快速行进法）</td>
+<td>波前扩展法求解程函方程</td>
+<td>高效</td>
+<td>仅能处理初至波</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<p>矿震 CT 常用 Bending 法（配合伪弯曲法 pseudo-bending，Um &amp; Thurber, 1987），兼顾效率和适应性。</p>
+<hr>
+<h3>6.3 反问题：矩阵方程的建立</h3>
+<h4>网格离散化</h4>
+<p>将监测区域离散为 $N$ 个三维网格块（像素/体素 voxel），每个网格块具有待反演的慢度值 $s_j$ 。网格大小需同时满足：</p>
+<ul>
+<li><strong>分辨率需求</strong>：网格小于期望探测的最小异常体尺寸</li>
+<li><strong>射线覆盖</strong>：每个网格至少被 5-10 条射线穿过（否则欠约束）</li>
+<li><strong>事件定位误差</strong>：网格宽于平均定位误差（否则反演结果无物理意义）</li>
+</ul>
+<h4>走时方程离散化</h4>
+<p>第 $i$ 条射线（从第 $i$ 个微震事件到某台站）在离散模型中：</p>
+<p>$$ T_i^{\text{obs}} = T_i^{\text{calc}} + \delta t_i = \sum_{j=1}^{N} L_{ij} \cdot s_j + \delta t_i $$</p>
+<p>其中 $L_{ij}$ 是第 $i$ 条射线在第 $j$ 个网格中的路径长度。</p>
+<p>将所有 $M$ 条走时方程写成矩阵形式：</p>
+<p>$$ \delta\mathbf{t} = \mathbf{L} \cdot \delta\mathbf{s} $$</p>
+<p>矩阵维度：</p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>量</th>
+<th>维度</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$\delta\mathbf{t}$</td>
+<td>$M \times 1$</td>
+<td>观测走时与理论走时的残差（已知）</td>
+</tr>
+<tr>
+<td>$\mathbf{L}$</td>
+<td>$M \times N$</td>
+<td>射线路径矩阵（正向计算得到）</td>
+</tr>
+<tr>
+<td>$\delta\mathbf{s}$</td>
+<td>$N \times 1$</td>
+<td>各网格慢度扰动（待求）</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<h4>迭代求解算法</h4>
+<p>由于 $\mathbf{L}$ 通常大且稀疏（ $M$ 几千到几万， $N$ 几百到几千），直接求伪逆 $(\mathbf{L}^T\mathbf{L})^{-1}\mathbf{L}^T$ 不可行。实际采用迭代类算法：</p>
+<p><strong>SIRT（Simultaneous Iterative Reconstruction Technique）：</strong></p>
+<p>$$ \delta s_j^{(k+1)} = \delta s_j^{(k)} + \frac{\eta}{\sum_i L_{ij}} \sum_i \frac{L_{ij} \cdot r_i^{(k)}}{\sum_j L_{ij}} $$</p>
+<p>其中 $r_i^{(k)} = \delta t_i - \sum_j L_{ij} \delta s_j^{(k)}$ 为当前残差， $\eta$ 为松弛因子（0 &lt; $\eta$ &lt; 1，常用 0.1-0.5）。</p>
+<p><strong>SART（Simultaneous Algebraic Reconstruction Technique）：</strong> SIRT 的改进版，收敛更快，对欠定区域表现更好。矿震 CT 中 SIRT 最为常用。</p>
+<hr>
+<h3>6.4 鸡和蛋问题：定位与 CT 的联合反演</h3>
+<p>震源定位需要速度模型，CT 反演需要震源位置——两者相互依赖，构成经典反演难题。</p>
+<p><strong>解决方法——迭代联合反演：</strong></p>
+<pre class="notranslate"><code class="notranslate">初始化：假定均匀速度模型 v₀
+    ↓
+① 用 v₀ 定位所有微震事件 → 获得 (x, y, z, t₀) 目录
+    ↓
+② 对每个震源-台站对追踪射线 → 计算 L 矩阵和理论走时 T_calc
+    ↓
+③ 计算走时残差 δt = T_obs - T_calc
+    ↓
+④ 求解 δt = L · δs → 获得慢度扰动 → 更新速度模型 v_{k+1}
+    ↓
+⑤ 用新速度模型 v_{k+1} 重新定位事件
+    ↓
+⑥ 检查收敛：|v_{k+1} - v_k| &lt; ε 或 RMS 走时残差不再下降
+    ↓ No → 回到②
+    ↓ Yes
+输出：最终速度模型 + 精确定位目录
+</code></pre>
+<p><strong>收敛判据：</strong></p>
+<ul>
+<li>RMS（均方根）走时残差 $&amp;lt; 1$ ms（典型值）</li>
+<li>速度模型更新量 $&amp;lt; 5$ m/s</li>
+<li>迭代次数通常 3-5 次即可收敛</li>
+</ul>
+<hr>
+<h3>6.5 欠定问题与正则化</h3>
+<h4>欠定的根源</h4>
+<p>矿震台站沿巷道线性排列 → 射线主要沿巷道方向（水平）→ 垂直方向无台站接收 → 垂直方向速度分辨率为零。</p>
+<p>数学上： $\mathbf{L}$ 矩阵列满秩但行数 $M \ll N$ （有效独立方程数远小于未知数），解空间为 $N - \text{rank}(\mathbf{L})$ 维的仿射空间，存在无穷多组解。</p>
+<h4>正则化的引入</h4>
+<p>通过添加先验信息约束将欠定问题转化为适定问题：</p>
+<p><strong>光滑性约束（Tikhonov 一阶/二阶导数）：</strong></p>
+<p>$$ \Phi_{\text{smooth}} = \iint |\nabla s|^2 , dV \quad \text{或} \quad \iint |\nabla^2 s|^2 , dV $$</p>
+<p>离散形式：</p>
+<p>$$ \Phi_{\text{smooth}} = \sum_{\text{相邻网格 } j,k} (s_j - s_k)^2 $$</p>
+<p>总目标函数：</p>
+<p>$$ \Phi = \underbrace{ |\delta\mathbf{t} - \mathbf{L} \delta\mathbf{s} |^2 }_{\text{数据拟合}} + \lambda^2 \underbrace{ |\mathbf{D} \delta\mathbf{s} |^2 }_{\text{光滑性约束}} $$</p>
+<p>其中 $\mathbf{D}$ 为离散导数算子， $\lambda$ 为正则化参数。</p>
+<p><strong>正则化参数的选取（L-曲线法）：</strong></p>
+<p>以 $\log|\delta\mathbf{t} - \mathbf{L} \delta\mathbf{s}|$ vs $\log|\mathbf{D} \delta\mathbf{s}|$ 作图，曲线呈 L 形。最佳 $\lambda$ 取在 L 形拐角处：既不过拟合数据（ $\lambda$ 太小），也不过依赖先验约束（ $\lambda$ 太大）。</p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>约束类型</th>
+<th>正则项</th>
+<th>过强时的副作用</th>
+<th>深度学习类比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>光滑性</td>
+<td>$|\mathbf{D} \delta\mathbf{s}|^2$</td>
+<td>异常边缘被抹平，小异常消失</td>
+<td>图拉普拉斯正则化</td>
+</tr>
+<tr>
+<td>阻尼</td>
+<td>$|\delta\mathbf{s}|^2$</td>
+<td>结果向 $\mathbf{s}_0$ 塌陷，异常被缩小</td>
+<td>L2 权重衰减</td>
+</tr>
+<tr>
+<td>稀疏性</td>
+<td>$|\delta\mathbf{s}|_1$</td>
+<td>可能仅恢复最大异常</td>
+<td>L1 (LASSO)</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<p><strong>矿震 CT 的推荐策略：</strong> 先施加较强阻尼（稳定全局结构），再逐步减小阻尼、引入光滑约束（恢复细节），即从粗到细的联合迭代策略。</p>
+<hr>
+<h3>6.6 棋盘测试（Checkerboard Test）</h3>
+<p><strong>目的：</strong> 量化反演结果在不同空间位置的可信度，而非验证模型是否正确。</p>
+<p><strong>流程：</strong></p>
+<ol>
+<li>构造人工棋盘模型：相邻网格块交替设定 ±5% 的速度扰动</li>
+<li>用真实射线几何（与反演相同的 $\mathbf{L}$ 矩阵）做正演，计算合成走时 $T^{\text{syn}}$
+</li>
+<li>加入符合实际噪声水平（如 0.5-1 ms）的随机噪声</li>
+<li>用与真实数据完全相同的反演流程求解</li>
+<li>比较恢复的棋盘图案与原始棋盘：<strong>恢复好</strong> = 射线在该处覆盖充分 → 该处结果可信</li>
+</ol>
+<p><strong>矿震 CT 的典型分辨率分布：</strong></p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>方向</th>
+<th>射线覆盖</th>
+<th>分辨率</th>
+<th>典型可分辨尺度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>沿巷道（水平X）</td>
+<td>密集</td>
+<td><strong>好</strong></td>
+<td>10-20 m</td>
+</tr>
+<tr>
+<td>垂直巷道（水平Y）</td>
+<td>稀疏</td>
+<td><strong>差</strong></td>
+<td>30-50 m</td>
+</tr>
+<tr>
+<td>深度方向（Z）</td>
+<td>几乎无</td>
+<td><strong>最差</strong></td>
+<td>50-100 m</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<p><strong>实际解读策略：</strong> CT 结果对<strong>工作面正前方</strong>（射线主要穿过的区域）可信；对侧面围岩和深部（射线边缘或缺失方向的区域）需谨慎解读，宜结合其它监测手段（如钻孔应力计、矿压）交叉验证。</p>
+<hr>
+<h3>6.7 CT 在矿震监测中的完整逻辑链</h3>
+<pre class="notranslate"><code class="notranslate">微震事件自动拾取 &amp; 初始定位（均匀模型）
+    │
+    ▼
+┌──────────────────────────────────────┐
+│  迭代联合反演（通常 3-5 轮）         │
+│  ┌─ 定位事件                         │
+│  ├─ 射线追踪（Bending / Eikonal）     │
+│  ├─ 求解 δt = L · δs（SIRT + 正则化） │
+│  ├─ 更新速度模型                      │
+│  └─ 回到定位 → 重复                   │
+└──────────────────────────────────────┘
+    │
+    ▼
+最终速度模型 v(x,y,z) + 棋盘测试 → 确定可信区域
+    │
+    ▼
+速度异常解读：
+  高速区 = 岩石压实 = 应力集中 = ⚠ 冲击地压危险区
+  低速区 = 岩石破碎 = 采空区/卸压区 = 相对安全
+    │
+    ▼
+与其他监测手段联合 → 综合预警 &amp; 针对性治理措施
+</code></pre>
+<hr>
+<h2>七、微震与矿压的联合监测</h2>
+<h3>7.1 两套系统的本质差异</h3>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>维度</th>
+<th>微震监测</th>
+<th>矿压监测</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>物理原理</strong></td>
+<td>弹性波传播（被动声学）</td>
+<td>力学量直接测量</td>
+</tr>
+<tr>
+<td><strong>测量对象</strong></td>
+<td>质点振动速度 → 反演震源参数</td>
+<td>液压支架压力、锚杆轴力、围岩位移</td>
+</tr>
+<tr>
+<td><strong>空间覆盖</strong></td>
+<td>三维体（定位能力强时覆盖整个监测区域）</td>
+<td>一维线（沿工作面一线）</td>
+</tr>
+<tr>
+<td><strong>提供信息</strong></td>
+<td>破裂位置、深度、能量、震源机制</td>
+<td>支架载荷、顶板下沉量、帮部变形量</td>
+</tr>
+<tr>
+<td><strong>不能提供</strong></td>
+<td>绝对应力数值（仅相对速度变化）</td>
+<td>破裂深度、破裂源具体位置</td>
+</tr>
+<tr>
+<td><strong>采样特性</strong></td>
+<td>连续触发（100-500 Hz）</td>
+<td>定时采集（1-5 分钟一次）</td>
+</tr>
+<tr>
+<td><strong>数据量</strong></td>
+<td>极大（波形存储）</td>
+<td>中等（时序数据）</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<h3>7.2 为什么必须联合：四种状态的物理含义</h3>
+<p>仅靠单套系统存在盲区。联合后的四种状态对应不同的物理过程和风险：</p>
+<p><strong>① 静默期（微震静默 + 压力升高）→ 高危：能量积累</strong></p>
+<p>这一状态对应实验室岩石加载至峰值应力前的<strong>扩容硬化阶段</strong>：裂隙被压密，摩擦锁定抑制了小破裂的发生，但应变能仍在持续累积。此时的物理量：</p>
+<ul>
+<li>弹性应变能密度： $U_e = \sigma^2 / (2E)$ 持续升高</li>
+<li>但 $dU_e / dt$ 未能通过微破裂释放</li>
+</ul>
+<p>一旦某点应力达到局部破裂强度，<strong>能量瞬间释放</strong>即为大能量冲击地压事件。这个阶段矿压监测是唯一能感知危险的手段。</p>
+<p><strong>② 微震静默 + 压力平稳 → 待观察</strong></p>
+<p>两种可能：</p>
+<ul>
+<li>工作面停采，采掘扰动停止，应力状态稳定 → 真正安全</li>
+<li>煤体流变（蠕变）过程中应力缓慢重新分布，积累刚触发 → 需延长观察窗口</li>
+</ul>
+<p><strong>③ 微震活跃 + 压力下降 → 安全：稳态释放</strong></p>
+<p>典型的安全状态。老顶周期性断裂（周期来压）后：断裂面成形 → 支架压力下降；断裂过程中微震事件活跃 → 能量以众多小事件的形式平稳释放。类比：用许多小裂缝释放应力，比突然断裂安全。</p>
+<p><strong>④ 微震活跃 + 压力升高 → 高危：破裂加剧且支撑失效</strong></p>
+<p>最危险状态——破裂正在扩展（微震频繁），且支撑系统（支架+锚杆+锚索）无法控制围岩变形（压力持续升高）。可能对应：</p>
+<ul>
+<li>顶板大面积来压：断裂带扩展超出支架支护范围</li>
+<li>冲击地压前兆：关键层接近失稳，微破裂加速</li>
+</ul>
+<p><strong>联合判断矩阵：</strong></p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>微震状态</th>
+<th>矿压状态</th>
+<th>风险等级</th>
+<th>物理含义</th>
+<th>建议措施</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>静默</td>
+<td>压力升高</td>
+<td>🔴 高危</td>
+<td>能量积累，静默期</td>
+<td>立即预警，加强支护</td>
+</tr>
+<tr>
+<td>静默</td>
+<td>压力平稳</td>
+<td>🟡 待观察</td>
+<td>停采或蠕变初期</td>
+<td>延长时间窗观察</td>
+</tr>
+<tr>
+<td>活跃</td>
+<td>压力下降</td>
+<td>🟢 安全</td>
+<td>小破裂稳态释放</td>
+<td>正常推进</td>
+</tr>
+<tr>
+<td>活跃</td>
+<td>压力升高</td>
+<td>🔴 高危</td>
+<td>破裂加剧+支撑失效</td>
+<td>停止作业，紧急预警</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<h3>7.3 联合的核心价值：补充深度信息</h3>
+<p>微震与矿压联合的最大价值在于将矿压监测的一维信息扩展为三维。</p>
+<p><strong>实例：</strong> 工作面第 45 号支架（距运输巷 45 m）处压力传感器显示载荷异常偏高。</p>
+<p>此时仅靠矿压数据，只知道"这个位置的顶板压力大"，但不知道压力量来自哪个层位的哪层岩石。可能的来源包括：</p>
+<ul>
+<li>近场直接顶（距煤层 2-5 m）的砂质泥岩垮落</li>
+<li>远处老顶（距煤层 20-40 m）的厚层砂岩断裂</li>
+<li>更高处的关键层（距煤层 80-120 m）活动</li>
+</ul>
+<p><strong>微震事件的深度定位补充信息：</strong> 45 号支架附近，过去 4 小时内微震事件集中在煤层上方约 28 m 处，对应老顶厚砂岩层位。</p>
+<p>→ <strong>联合判读：</strong> 老顶厚砂岩层正在断裂，导致了支架压力升高。</p>
+<p>→ <strong>精确措施：</strong> 对老顶层位实施水力致裂（定向切顶），而非盲目加固支架（若问题来自深部硬岩，浅部加固无效）。</p>
+<p><strong>联合信息流程：</strong></p>
+<pre class="notranslate"><code class="notranslate">支架压力异常（水平位置: 45号架附近）
+  │  知道：顶板载荷异常大
+  │  不知道：哪层岩石在活动
+  │
+  ├──→ 微震事件空间分布查询
+  │    事件集中在 (X: 45m, Z: -28m)
+  │    对应老顶厚砂岩层
+  │    → 是这层岩石在断裂
+  │
+  ▼
+联合判读结论：
+  Z = -28 m 老顶厚砂岩断裂 → 压力来源明确
+  → 治理决策：对该层位实施高压水力致裂
+  → 目的：切断应力传递路径，卸压
+</code></pre>
+<h3>7.4 完整联合监测体系</h3>
+<pre class="notranslate"><code class="notranslate">┌───────────────────────┐     ┌──────────────────────┐
+│     微震监测系统      │     │     矿压监测系统      │
+├───────────────────────┤     ├──────────────────────┤
+│ · 事件目录（x,y,z,t） │     │ · 支架压力时序       │
+│ · 能量时序 E(t)       │     │ · 锚杆/锚索轴力       │
+│ · b 值时空演化        │     │ · 围岩位移量          │
+│ · 震源机制（可选）    │     │ · 顶板离层量          │
+│ · CT 速度分布         │     │ · 钻孔应力            │
+└───────────┬───────────┘     └──────────┬───────────┘
+            │                            │
+            └──────────┬─────────────────┘
+                       ▼
+            ┌──────────────────┐
+            │    联合分析引擎  │
+            ├──────────────────┤
+            │ · 空间关联：微震 │
+            │   位置 ↔ 矿压    │
+            │   传感器位置      │
+            │ · 时序关联：能量 │
+            │   加速 ↔ 压力变化 │
+            │ · 层位判识：微震 │
+            │   深度 ↔ 岩层柱  │
+            │   状图            │
+            │ · CT 速度 ↔       │
+            │   应力集中区      │
+            └────────┬─────────┘
+                     ▼
+            ┌──────────────────┐
+            │  三维应力状态图像│
+            │  (位置+深度+强度)│
+            └────────┬─────────┘
+                     ▼
+            ┌──────────────────┐
+            │  精确预警 +       │
+            │  针对性加固方案   │
+            └──────────────────┘
+</code></pre>
+<hr>
+<h2>八、附录：关键公式汇总</h2>
+<h3>震源定位</h3>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>名称</th>
+<th>公式</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P-S 距震源距</td>
+<td>$D = \Delta t_{SP} \cdot \frac{V_p V_s}{V_p - V_s}$</td>
+<td>均匀模型，消掉 $t_0$
+</td>
+</tr>
+<tr>
+<td>Geiger 线性化</td>
+<td>$\mathbf{r} = \mathbf{G} \cdot \Delta\mathbf{m}$</td>
+<td>Taylor 一阶展开</td>
+</tr>
+<tr>
+<td>Geiger 最小二乘解</td>
+<td>$\Delta\mathbf{m} = (\mathbf{G}^T\mathbf{G})^{-1} \mathbf{G}^T \mathbf{r}$</td>
+<td>法方程</td>
+</tr>
+<tr>
+<td>阻尼最小二乘</td>
+<td>$\Delta\mathbf{m} = (\mathbf{G}^T\mathbf{G} + \lambda \mathbf{I})^{-1} \mathbf{G}^T \mathbf{r}$</td>
+<td>Levenberg-Marquardt</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<h3>能量与震级</h3>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>名称</th>
+<th>公式</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>G-R 能量-震级</td>
+<td>$\log_{10} E = 1.5M + 4.8$</td>
+<td>
+$E$ 单位：J</td>
+</tr>
+<tr>
+<td>辐射能量</td>
+<td>$E = 4\pi \rho v R^2 \int \dot{u}^2(t) dt$</td>
+<td>球面扩散</td>
+</tr>
+<tr>
+<td>G-R 关系</td>
+<td>$\log_{10} N = a - bM$</td>
+<td>频度-震级分布</td>
+</tr>
+<tr>
+<td>
+$b$ 值 MLE</td>
+<td>$\hat{b} = \frac{0.4343}{\bar{M} - M_{\min}}$</td>
+<td>Aki (1965)</td>
+</tr>
+<tr>
+<td>
+$b$ 值标准误</td>
+<td>$\sigma_b \approx b / \sqrt{N}$</td>
+<td>显著性参考</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<h3>层析成像</h3>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>名称</th>
+<th>公式</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>程函方程</td>
+<td>$|\nabla T| = 1/v$</td>
+<td>走时正问题</td>
+</tr>
+<tr>
+<td>走时离散化</td>
+<td>$\delta\mathbf{t} = \mathbf{L} \cdot \delta\mathbf{s}$</td>
+<td>反问题矩阵方程</td>
+</tr>
+<tr>
+<td>正则化目标函数</td>
+<td>$\Phi = |\delta\mathbf{t} - \ma$</td>
+<td></td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table></div>
+<div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://Lszidv.github.io">芜尽</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行 "+diffDay+" 天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z', 'copy': 'M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z', 'check': 'M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.disabled=true;
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","Lszidv/Lszidv.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const createClipboardHTML = (codeContent, additionalClasses = '') => `
+        <pre class="notranslate"><code class="notranslate">${codeContent}</code></pre>
+        <div class="clipboard-container position-absolute right-0 top-0 ${additionalClasses}">
+            <clipboard-copy class="ClipboardButton btn m-2 p-0" role="button" style="display: inherit;">
+                <svg height="16" width="16" class="octicon octicon-copy m-2"><path d="${IconList["copy"]}"></path></svg>
+                <svg height="16" width="16" class="octicon octicon-check color-fg-success m-2 d-none"><path d="${IconList["check"]}"></path></svg>
+            </clipboard-copy>
+            <div class="copy-feedback">Copied!</div>
+        </div>
+    `;
+
+    const handleCodeElements = (selector = '') => {
+        document.querySelectorAll(selector).forEach(codeElement => {
+            const codeContent = codeElement.innerHTML;
+            const newStructure = document.createElement('div');
+            newStructure.className = 'snippet-clipboard-content position-relative overflow-auto';
+            newStructure.innerHTML = createClipboardHTML(codeContent);
+
+            const parentElement = codeElement.parentElement;
+            if (selector.includes('highlight')) {
+                parentElement.insertBefore(newStructure, codeElement.nextSibling);
+                parentElement.removeChild(codeElement);
+            } else {
+                parentElement.parentElement.replaceChild(newStructure, parentElement);
+            }
+        });
+    };
+
+    handleCodeElements('pre.notranslate > code.notranslate');
+    handleCodeElements('div.highlight > pre.notranslate');
+
+    let currentFeedback = null;
+    document.querySelectorAll('clipboard-copy').forEach(copyButton => {
+        copyButton.addEventListener('click', () => {
+            const codeContent = copyButton.closest('.snippet-clipboard-content').innerText;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = codeContent;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            const copyIcon = copyButton.querySelector('.octicon-copy');
+            const checkIcon = copyButton.querySelector('.octicon-check');
+            const copyFeedback = copyButton.nextElementSibling;
+
+            if (currentFeedback && currentFeedback !== copyFeedback) {currentFeedback.style.display = 'none';}
+            currentFeedback = copyFeedback;
+
+            copyIcon.classList.add('d-none');
+            checkIcon.classList.remove('d-none');
+            copyFeedback.style.display = 'block';
+            copyButton.style.borderColor = 'var(--color-success-fg)';
+
+            setTimeout(() => {
+                copyIcon.classList.remove('d-none');
+                checkIcon.classList.add('d-none');
+                copyFeedback.style.display = 'none';
+                copyButton.style.borderColor = '';
+            }, 2000);
+        });
+    });
+});
+
+</script>
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</html>

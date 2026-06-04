@@ -139,13 +139,13 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <ul>
 <li>我们在30秒的时间窗口上训练了三个模型，分别使用无随机偏移、有限随机偏移（10到15秒）和完全随机偏移（0到30秒）。通过滑动测试波形并记录P波到达预测，我们发现没有随机偏移的模型会在固定的P波到达时间（10秒）产生高概率分数，而有限偏移的模型则会在窗口边缘出现偏差。</li>
 </ul>
-<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/92f53c70-ee9a-49be-aefe-a2118e95cee9"><img width="1385" height="911" alt="Image" src="https://github.com/user-attachments/assets/92f53c70-ee9a-49be-aefe-a2118e95cee9" style="max-width: 100%; height: auto; max-height: 911px;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/92f53c70-ee9a-49be-aefe-a2118e95cee9"><img width="1385" height="911" alt="Image" src="https://github.com/user-attachments/assets/92f53c70-ee9a-49be-aefe-a2118e95cee9" style="max-width: 100%; height: auto; max-height: 911px;; aspect-ratio: 1385 / 911; background-color: var(--bgColor-muted); border-radius: 6px" class="js-gh-image-fallback"></a></p>
 <h2>随机偏移的优势</h2>
 <ul>
 <li><strong>实时随机偏移</strong>：能够增加样本的多样性，提高性能。</li>
 <li><strong>固定时间偏移</strong>：可能导致模型只对固定时间窗口有效，无法处理其他时间段的数据。</li>
 </ul>
-<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/5fb39697-bed9-4859-afbd-76d8d71cab07"><img width="903" height="366" alt="Image" src="https://github.com/user-attachments/assets/5fb39697-bed9-4859-afbd-76d8d71cab07" style="max-width: 100%; height: auto; max-height: 366px;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/5fb39697-bed9-4859-afbd-76d8d71cab07"><img width="903" height="366" alt="Image" src="https://github.com/user-attachments/assets/5fb39697-bed9-4859-afbd-76d8d71cab07" style="max-width: 100%; height: auto; max-height: 366px;; aspect-ratio: 903 / 366; background-color: var(--bgColor-muted); border-radius: 6px" class="js-gh-image-fallback"></a></p>
 <ul>
 <li>为了避免零填充引入的偏差，建议使用较大的训练窗口（如90秒），并检查增强前后的到达时间分布。</li>
 </ul>
@@ -154,7 +154,7 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <li>地震训练数据通常只包含一个单独的事件，但这可能导致神经网络学习到偏差，忽视时间窗口内的较小事件。为了解决这个问题，我们引入了事件叠加方法，通过将多个事件合成一个训练样本来消除这种偏差，从而提高模型在检测多个事件时的性能。</li>
 </ul>
 <h2>训练效果</h2>
-<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/a5494808-09cb-4623-a5da-c12661ce4e2d"><img width="884" height="879" alt="Image" src="https://github.com/user-attachments/assets/a5494808-09cb-4623-a5da-c12661ce4e2d" style="max-width: 100%; height: auto; max-height: 879px;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/a5494808-09cb-4623-a5da-c12661ce4e2d"><img width="884" height="879" alt="Image" src="https://github.com/user-attachments/assets/a5494808-09cb-4623-a5da-c12661ce4e2d" style="max-width: 100%; height: auto; max-height: 879px;; aspect-ratio: 884 / 879; background-color: var(--bgColor-muted); border-radius: 6px" class="js-gh-image-fallback"></a></p>
 <ul>
 <li>图4展示了事件叠加的效果：没有叠加事件的模型只能检测到第一个较大的地震事件，而经过事件叠加训练的模型能够成功预测第二个较小的事件。事件叠加通过随机调整事件振幅比例，增强了神经网络对较小地震的检测能力。</li>
 </ul>

@@ -1,5 +1,35 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>芜尽</title><link>https://Lszidv.github.io</link><description>Only love can set us free</description><copyright>芜尽</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/160511559?s=400&amp;u=68ec73daff523efd8652079b221d42e446d01cb6&amp;v=4</url><title>avatar</title><link>https://Lszidv.github.io</link></image><lastBuildDate>Fri, 27 Feb 2026 09:44:04 +0000</lastBuildDate><managingEditor>芜尽</managingEditor><ttl>60</ttl><webMaster>芜尽</webMaster><item><title>HDF5</title><link>https://Lszidv.github.io/post/HDF5.html</link><description>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>芜尽</title><link>https://Lszidv.github.io</link><description>Only love can set us free</description><copyright>芜尽</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/160511559?s=400&amp;u=68ec73daff523efd8652079b221d42e446d01cb6&amp;v=4</url><title>avatar</title><link>https://Lszidv.github.io</link></image><lastBuildDate>Thu, 04 Jun 2026 07:11:35 +0000</lastBuildDate><managingEditor>芜尽</managingEditor><ttl>60</ttl><webMaster>芜尽</webMaster><item><title>[Mine Earthquake]Class1</title><link>https://Lszidv.github.io/post/%5BMine%20Earthquake%5DClass1.html</link><description>
+# 煤矿微震数据分析学习笔记 · Class 1
+
+&gt; 以天然地震研究为起点，学习矿震定位与能量分析
+
+---
+
+## 一、震源定位：三种方法的本质区别
+
+### 1.0 核心问题与理论基础
+
+地震（微震）发生后，需要通过连续波形记录反演以下四个未知量：
+
+- **空间位置**：经度 $x$ 、纬度 $y$ 、深度 $z$ （矿震场景中通常对应走向、倾向、垂向）
+- **发震时刻**： $t_0$ （事件发生的绝对时间）
+
+**原始数据流：**
+
+```
+连续波形采样 → 滤波去噪（带通/Bandpass） → STA/LTA 拾取 P 波到时  → 偏振分析拾取 S 波到时（深度学习直接拾取P\S） → 结合速度模型 → 定位反演
+```
+
+**核心方程（走时方程）：** 对于第 $i$ 个台站，P 波理论到时为：
+
+$$ T_i^{\text{calc}} = t_0 + \int_{\text{source}}^{\text{station}_i} \frac{ds}{v(x,y,z)} $$
+
+在均匀速度模型中简化为：
+
+$$ T_i^{\text{calc}} = t_0 + \frac{D_i}{V_p} $$
+
+其中 $D_i$ 为震源到第 $i$ 个台站的直线距离， $V_p$ 为 P 波速度。</description><guid isPermaLink="true">https://Lszidv.github.io/post/%5BMine%20Earthquake%5DClass1.html</guid><pubDate>Thu, 04 Jun 2026 07:09:28 +0000</pubDate></item><item><title>HDF5</title><link>https://Lszidv.github.io/post/HDF5.html</link><description>
 ## 目录
 - [1. HDF5 是什么](#1-hdf5-是什么)
 - [2. 与 SAC / miniSEED 的区别：为什么要用 HDF5](#2-与-sac--miniseed-的区别为什么要用-hdf5)
