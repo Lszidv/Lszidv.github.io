@@ -1,5 +1,27 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>芜尽</title><link>https://Lszidv.github.io</link><description>Only love can set us free</description><copyright>芜尽</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/160511559?s=400&amp;u=68ec73daff523efd8652079b221d42e446d01cb6&amp;v=4</url><title>avatar</title><link>https://Lszidv.github.io</link></image><lastBuildDate>Thu, 04 Jun 2026 07:22:53 +0000</lastBuildDate><managingEditor>芜尽</managingEditor><ttl>60</ttl><webMaster>芜尽</webMaster><item><title>[Mine Earthquake]Class1</title><link>https://Lszidv.github.io/post/%5BMine%20Earthquake%5DClass1.html</link><description># 煤矿微震数据分析学习笔记 · Class 1
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>芜尽</title><link>https://Lszidv.github.io</link><description>Only love can set us free</description><copyright>芜尽</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/160511559?s=400&amp;u=68ec73daff523efd8652079b221d42e446d01cb6&amp;v=4</url><title>avatar</title><link>https://Lszidv.github.io</link></image><lastBuildDate>Thu, 04 Jun 2026 07:47:35 +0000</lastBuildDate><managingEditor>芜尽</managingEditor><ttl>60</ttl><webMaster>芜尽</webMaster><item><title>[Mine Earthquake]Class2</title><link>https://Lszidv.github.io/post/%5BMine%20Earthquake%5DClass2.html</link><description># 煤矿冲击地压波速前兆提取学习笔记 · Class 2
+
+&gt; 从物理机制出发，理解噪声互相关测量 dv/v 的完整链路及前兆提取方法
+
+---
+
+## 目录
+
+- [一、冲击地压的物理本质](#一冲击地压的物理本质)
+- [二、应力-裂隙-波速的关系](#二应力-裂隙-波速的关系)
+- [三、噪声互相关测量 dv/v](#三噪声互相关测量-dvv)
+- [四、'前高后低'统计规律](#四前高后低统计规律)
+- [五、标签设计](#五标签设计)
+- [六、数据基础](#六数据基础)
+- [七、下一步：特征工程](#七下一步特征工程)
+
+---
+
+## 一、冲击地压的物理本质
+
+### 1.1 定义与机制
+
+冲击地压（Rock Burst）是煤矿深部开采中一种典型的动力灾害。</description><guid isPermaLink="true">https://Lszidv.github.io/post/%5BMine%20Earthquake%5DClass2.html</guid><pubDate>Thu, 04 Jun 2026 07:45:24 +0000</pubDate></item><item><title>[Mine Earthquake]Class1</title><link>https://Lszidv.github.io/post/%5BMine%20Earthquake%5DClass1.html</link><description># 煤矿微震数据分析学习笔记 · Class 1
 
 &gt; 以天然地震研究为起点，学习矿震定位与能量分析
 

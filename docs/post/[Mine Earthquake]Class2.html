@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="# 煤矿冲击地压波速前兆提取学习笔记 · Class 2
+
+> 从物理机制出发，理解噪声互相关测量 dv/v 的完整链路及前兆提取方法
+
+---
+
+## 目录
+
+- [一、冲击地压的物理本质](#一冲击地压的物理本质)
+- [二、应力-裂隙-波速的关系](#二应力-裂隙-波速的关系)
+- [三、噪声互相关测量 dv/v](#三噪声互相关测量-dvv)
+- [四、'前高后低'统计规律](#四前高后低统计规律)
+- [五、标签设计](#五标签设计)
+- [六、数据基础](#六数据基础)
+- [七、下一步：特征工程](#七下一步特征工程)
+
+---
+
+## 一、冲击地压的物理本质
+
+### 1.1 定义与机制
+
+冲击地压（Rock Burst）是煤矿深部开采中一种典型的动力灾害。">
+<meta property="og:title" content="[Mine Earthquake]Class2">
+<meta property="og:description" content="# 煤矿冲击地压波速前兆提取学习笔记 · Class 2
+
+> 从物理机制出发，理解噪声互相关测量 dv/v 的完整链路及前兆提取方法
+
+---
+
+## 目录
+
+- [一、冲击地压的物理本质](#一冲击地压的物理本质)
+- [二、应力-裂隙-波速的关系](#二应力-裂隙-波速的关系)
+- [三、噪声互相关测量 dv/v](#三噪声互相关测量-dvv)
+- [四、'前高后低'统计规律](#四前高后低统计规律)
+- [五、标签设计](#五标签设计)
+- [六、数据基础](#六数据基础)
+- [七、下一步：特征工程](#七下一步特征工程)
+
+---
+
+## 一、冲击地压的物理本质
+
+### 1.1 定义与机制
+
+冲击地压（Rock Burst）是煤矿深部开采中一种典型的动力灾害。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://Lszidv.github.io/post/%5BMine%20Earthquake%5DClass2.html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
+<title>[Mine Earthquake]Class2</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+.copy-feedback {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 50px;
+    color: var(--color-fg-on-emphasis);
+    background-color: var(--color-fg-muted);
+    border-radius: 3px;
+    padding: 5px 8px;
+    font-size: 12px;
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">[Mine Earthquake]Class2</h1>
+<div class="title-right">
+    <a href="https://Lszidv.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/Lszidv/Lszidv.github.io/issues/63" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><h1>煤矿冲击地压波速前兆提取学习笔记 · Class 2</h1>
+<blockquote>
+<p>从物理机制出发，理解噪声互相关测量 dv/v 的完整链路及前兆提取方法</p>
+</blockquote>
+<hr>
+<h2>目录</h2>
+<ul>
+<li><a href="#%E4%B8%80%E5%86%B2%E5%87%BB%E5%9C%B0%E5%8E%8B%E7%9A%84%E7%89%A9%E7%90%86%E6%9C%AC%E8%B4%A8">一、冲击地压的物理本质</a></li>
+<li><a href="#%E4%BA%8C%E5%BA%94%E5%8A%9B-%E8%A3%82%E9%9A%99-%E6%B3%A2%E9%80%9F%E7%9A%84%E5%85%B3%E7%B3%BB">二、应力-裂隙-波速的关系</a></li>
+<li><a href="#%E4%B8%89%E5%99%AA%E5%A3%B0%E4%BA%92%E7%9B%B8%E5%85%B3%E6%B5%8B%E9%87%8F-dvv">三、噪声互相关测量 dv/v</a></li>
+<li><a href="#%E5%9B%9B%E5%89%8D%E9%AB%98%E5%90%8E%E4%BD%8E%E7%BB%9F%E8%AE%A1%E8%A7%84%E5%BE%8B">四、"前高后低"统计规律</a></li>
+<li><a href="#%E4%BA%94%E6%A0%87%E7%AD%BE%E8%AE%BE%E8%AE%A1">五、标签设计</a></li>
+<li><a href="#%E5%85%AD%E6%95%B0%E6%8D%AE%E5%9F%BA%E7%A1%80">六、数据基础</a></li>
+<li><a href="#%E4%B8%83%E4%B8%8B%E4%B8%80%E6%AD%A5%E7%89%B9%E5%BE%81%E5%B7%A5%E7%A8%8B">七、下一步：特征工程</a></li>
+</ul>
+<hr>
+<h2>一、冲击地压的物理本质</h2>
+<h3>1.1 定义与机制</h3>
+<p>冲击地压（Rock Burst）是煤矿深部开采中一种典型的动力灾害。其根本物理过程可以表述为：高应力作用下，煤岩体内储存的弹性应变能发生<strong>突发性、不可控的释放</strong>，导致围岩瞬间失稳破坏，并以弹性波（地震波）的形式向四周辐射能量。</p>
+<p><strong>完整过程链：</strong></p>
+<pre class="notranslate"><code class="notranslate">构造应力 / 采掘扰动
+  → 围岩应力重分布 → 局部应力集中
+  → 微裂隙从随机生长转为定向扩展
+  → 裂隙级联、贯通 → 破裂成核
+  → 岩体突然失稳破裂
+  → 弹性应变能以地震波形式释放 → 冲击地压
+</code></pre>
+<h3>1.2 能量视角</h3>
+<p>从能量角度，冲击地压的本质是弹性应变能 $U_e$ 的积累-释放过程。单位体积的弹性应变能为：</p>
+<p>$$ U_e = \frac{1}{2E} \left[ \sigma_1^2 + \sigma_2^2 + \sigma_3^2 - 2\nu(\sigma_1\sigma_2 + \sigma_2\sigma_3 + \sigma_3\sigma_1) \right] $$</p>
+<p>其中 $E$ 为弹性模量， $\nu$ 为泊松比， $\sigma_1, \sigma_2, \sigma_3$ 为主应力。</p>
+<p>在单轴简化情况下（煤矿回采空间附近近似）：</p>
+<p>$$ U_e = \frac{\sigma^2}{2E} $$</p>
+<p>以典型煤矿参数估算：若 $\sigma = 30\ \text{MPa}$ ， $E = 5\ \text{GPa}$ ，则 $U_e \approx 90\ \text{kJ/m}^3$ 。一个体积为 $100\ \text{m}^3$ 的破坏区域释放的总应变能约 $9\ \text{MJ}$ ，相当于约 2 kg TNT 当量——足以造成严重的巷道破坏。</p>
+<h3>1.3 应力积累阶段的关键信号</h3>
+<p>煤岩体在宏观破坏之前经历了一个复杂的微破裂演化过程，可以分为以下阶段（参考 Brace et al., 1966 和 Scholz, 1968 的实验室岩石力学研究）：</p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>阶段</th>
+<th>应力水平（占峰值百分比）</th>
+<th>微裂隙行为</th>
+<th>可观测信号</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>裂隙压密</td>
+<td>0-20%</td>
+<td>原生裂隙闭合</td>
+<td>波速略升</td>
+</tr>
+<tr>
+<td>弹性变形</td>
+<td>20-40%</td>
+<td>无明显新裂隙</td>
+<td>波速稳定</td>
+</tr>
+<tr>
+<td>裂隙稳定扩展</td>
+<td>40-70%</td>
+<td>翼形裂隙开始生长</td>
+<td>波速开始各向异性下降</td>
+</tr>
+<tr>
+<td>裂隙加速扩展</td>
+<td>70-90%</td>
+<td>裂隙级联合并、贯通</td>
+<td>波速显著下降，声发射加速</td>
+</tr>
+<tr>
+<td>宏观破裂</td>
+<td>&gt;90%</td>
+<td>裂隙网络整体贯通</td>
+<td>波速骤降，大能量事件</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<p><strong>核心要点：</strong> 微裂隙的演化在宏观破坏之前就已开始，且通过波速变化可以被观测到——这正是波速作为前兆指标的物理基础。</p>
+<hr>
+<h2>二、应力-裂隙-波速的关系</h2>
+<h3>2.1 弹性波速的基本公式</h3>
+<p>地震波的传播速度由介质的弹性模量和密度决定。对于各向同性弹性介质：</p>
+<p><strong>P 波速度：</strong></p>
+<p>$$ V_p = \sqrt{ \frac{K + \frac{4}{3}G}{\rho} } $$</p>
+<p><strong>S 波速度：</strong></p>
+<p>$$ V_s = \sqrt{ \frac{G}{\rho} } $$</p>
+<p>其中：</p>
+<ul>
+<li>
+$K$ ：体积模量（Bulk Modulus），抵抗体积压缩的能力</li>
+<li>
+$G$ ：剪切模量（Shear Modulus），抵抗形状改变的能力</li>
+<li>
+$\rho$ ：介质密度</li>
+</ul>
+<p>从公式可以直接推导波速变化的方向性信号：</p>
+<ul>
+<li>裂隙张开 → 介质抵抗形变能力降低 → $K \downarrow, G \downarrow$ → $V_p \downarrow, V_s \downarrow$
+</li>
+<li>裂隙闭合 → 介质抵抗形变能力增强 → $K \uparrow, G \uparrow$ → $V_p \uparrow, V_s \uparrow$
+</li>
+</ul>
+<p>$V_p/V_s$ 比值的变化则可进一步区分孔隙度变化（流体效应）和裂隙密度变化：</p>
+<p>$$ \frac{V_p}{V_s} = \sqrt{ \frac{K}{G} + \frac{4}{3} } $$</p>
+<p>裂隙密度增大时 $K/G$ 减小 → $V_p/V_s$ 降低。干燥裂隙的 $V_p/V_s$ 灵敏度远高于饱水裂隙，煤矿环境中这一特征需结合水文条件解读。</p>
+<h3>2.2 各向同性压应力下的裂隙行为（静水压力）</h3>
+<p>在静水压力条件下（ $\sigma_1 \approx \sigma_2 \approx \sigma_3$ ），所有方向的裂隙受到均匀压应力：</p>
+<ul>
+<li>裂隙面法向应力 $\sigma_n \approx \sigma_1$ ，各方向一致</li>
+<li>所有方向的已有裂隙均被压缩闭合</li>
+<li>→ $K, G$ 整体升高 → $V_p$ 均匀升高</li>
+<li>→ 介质保持<strong>各向同性</strong>（各方向波速相等）</li>
+</ul>
+<p>这种情况在煤矿中对应<strong>未受采掘扰动影响的深部原岩区</strong>。</p>
+<h3>2.3 偏应力下的各向异性响应（煤矿典型状态）</h3>
+<p>在偏应力条件下（ $\sigma_1 \gg \sigma_3$ ），不同取向的裂隙行为截然不同，介质产生<strong>应力诱导的各向异性</strong>：</p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>裂隙取向</th>
+<th>受力状态</th>
+<th>裂隙行为</th>
+<th>对模量的影响</th>
+<th>对 $V_p$ 的影响</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>裂隙面垂直于 $\sigma_1$
+</td>
+<td>裂隙面法向应力 $ = \sigma_1$ （最大）</td>
+<td>被压合闭合</td>
+<td>$K \uparrow, G \uparrow$</td>
+<td>平行 $\sigma_1$ 方向的 $V_p$ 升高</td>
+</tr>
+<tr>
+<td>裂隙面平行于 $\sigma_1$
+</td>
+<td>裂隙面法向应力 $ = \sigma_3$ （最小）</td>
+<td>翼形裂隙向外扩展</td>
+<td>$K \downarrow, G \downarrow$</td>
+<td>垂直 $\sigma_1$ 方向的 $V_p$ 降低</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<p>这两种机制的竞争导致：</p>
+<p>$$ V_p^{\parallel} &gt; V_p^{\perp} $$</p>
+<p>其中 $\parallel$ 表示平行于最大主应力 $\sigma_1$ 的方向， $\perp$ 表示垂直于 $\sigma_1$ 的方向。</p>
+<p><strong>S 波分裂的物理来源：</strong></p>
+<p>横波进入各向异性介质后，分裂为偏振方向互相垂直的快波和慢波（类似光进入双折射晶体）。快波偏振方向 = 裂隙最密集方向 = 最大主应力 $\sigma_1$ 方向。因此，S 波分裂参数（快波偏振方向、快慢波时差）可以直接反演应力方向和各向异性强度。Crampin（1978）的广泛扩张各向异性（EDA）模型是这一现象的理论基础。</p>
+<h3>2.4 波速变化的非单调性：先升后降</h3>
+<p>波速并非单调下降。在不同应力阶段，压合效应与新生裂隙效应此消彼长：</p>
+<p><strong>阶段一：低应力阶段（已存在的裂隙被压合）</strong></p>
+<p>原生裂隙（层面裂隙、节理、构造裂隙）在采掘应力初期被压合 → $K, G$ 小幅提升 → $V_p$ 小幅上升（通常 &lt; 1%）。</p>
+<p><strong>阶段二：中等应力阶段（翼形裂隙新生）</strong></p>
+<p>随着偏应力增大，平行于 $\sigma_1$ 的裂隙末端开始出现翼形裂隙（wing crack），向外弯曲扩展 → 裂隙密度增加 → $V_p$ 开始从峰值下降。</p>
+<p><strong>阶段三：高应力阶段（临近破裂）</strong></p>
+<p>翼形裂隙大量互联、贯通 → 裂隙密度急剧增大 → $V_p$ 显著下降（可达 2-5%）。此时微震事件的 $b$ 值也同步下降（Class 1 已讨论）。</p>
+<p><strong>阶段四：破裂发生后（弹性恢复）</strong></p>
+<p>宏观破裂释放应力 → 部分裂隙弹性回弹闭合 → $V_p$ 快速小幅恢复（通常 &lt; 1%，恢复量取决于裂隙的不可逆变形成分）。</p>
+<p><strong>非单调性对统计的影响：</strong></p>
+<p>6 小时窗口的满足率仅 35.7%（低于随机基线 50%），正是因为极短窗口捕捉的是破裂后的弹性恢复期——事件发生前几个小时的波速处于最低点，事件后几个小时的波速正在反弹，"前低后高"占主导，与总体"前高后低"规律相反。</p>
+<h3>2.5 孔隙压力的叠加效应</h3>
+<p>煤矿中，煤层瓦斯的孔隙压力是另一个不可忽略的因素。有效应力原理（Terzaghi, 1923）：</p>
+<p>$$ \sigma_{\text{eff}} = \sigma_{\text{total}} - P_{\text{pore}} $$</p>
+<p>其中 $P_{\text{pore}}$ 为孔隙流体压力。孔隙压力升高 → 有效正应力下降 → 裂隙面摩擦力减小 → 裂隙更容易张开 → $V_p$ 下降。</p>
+<p>在煤矿环境中，偏应力机制（翼形裂隙扩展）和孔隙压力机制（有效应力下降）<strong>同时存在且均可导致波速下降</strong>。二者对 $V_p/V_s$ 的效应不同——孔隙压力变化主要影响 $K$ （降低 $V_p/V_s$ ），而裂隙密度变化同时影响 $K$ 和 $G$ （降低 $V_p/V_s$ 但幅度不同）——这在理论上可通过联合反演 $V_p$ 和 $V_s$ 的变化来区分。</p>
+<h3>2.6 完整应力-波速链路总结</h3>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>阶段</th>
+<th>主导机制</th>
+<th>波速变化</th>
+<th>波速变化量级</th>
+<th>各向异性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>低应力（原岩）</td>
+<td>各向同性压实，原生裂隙闭合</td>
+<td>略升</td>
+<td>+0.5% ~ +1%</td>
+<td>弱</td>
+</tr>
+<tr>
+<td>中等偏应力</td>
+<td>竖立裂隙翼形开始生长</td>
+<td>各向异性增强，垂直 $\sigma_1$ 方向波速开始下降</td>
+<td>-1% ~ -2%</td>
+<td>增强</td>
+</tr>
+<tr>
+<td>高应力（临近破裂）</td>
+<td>翼形裂隙大量扩展、级联</td>
+<td>所有方向波速显著下降</td>
+<td>-2% ~ -5%</td>
+<td>强</td>
+</tr>
+<tr>
+<td>破裂后</td>
+<td>应力卸载，裂隙弹性回弹</td>
+<td>波速快速小幅恢复</td>
+<td>+0.5% ~ +1.5%</td>
+<td>减弱</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<hr>
+<h2>三、噪声互相关测量 dv/v</h2>
+<h3>3.1 为什么不用微震事件测波速</h3>
+<p>微震事件用于测量波速面临两个根本性限制：</p>
+<ul>
+<li><strong>震源位置不确定：</strong> 每次微震事件来自不同位置，波传播路径不同，无法保证测量的是同一路径上的波速变化。路径变化与波速变化互相混淆，无法可靠分离。</li>
+<li><strong>事件稀疏且不均匀：</strong> 大能量事件发生频率低（本研究 22 个月仅 36 个可用事件），无法提供连续、等间隔的波速监测。</li>
+</ul>
+<p><strong>噪声互相关方法的优势：</strong> 台站位置固定 → 传播路径固定 → 任何互相关走时变化 $\delta t$ 反映的<strong>仅仅是同一路径上的波速变化</strong> $\delta v$ 。</p>
+<h3>3.2 背景噪声的物理本质</h3>
+<p>背景噪声（Ambient Seismic Noise）是地震仪持续记录的微小振动信号。其优势在于：</p>
+<ul>
+<li><strong>无处不在：</strong> 即使没有地震事件，地表的微震（海浪、风、交通、机械振动）也持续产生弹性波</li>
+<li><strong>路径固定：</strong> 给定台站对之间的噪声传播路径是固定的</li>
+<li><strong>长期稳定：</strong> 噪声源虽然在变化，但经过长时间叠加（stack），随机成分互相对消，相干成分累积</li>
+</ul>
+<p>背景噪声的主要频率范围：0.05-2 Hz（煤矿场景中受机械噪声影响，有效频带可能偏向更高频）。</p>
+<p><strong>噪声源在煤矿环境中的特殊性：</strong></p>
+<p>与传统天然地震学依赖的海洋微震（0.05-0.5 Hz）不同，煤矿中的背景噪声主要来自：</p>
+<ul>
+<li>采煤机、掘进机、运输机等机械振动（&gt;2 Hz）</li>
+<li>液压支架移架产生的瞬态振动</li>
+<li>爆破作业（瞬时宽频）</li>
+<li>通风系统持续振动</li>
+</ul>
+<p>这些人为噪声源虽然"不自然"，但从噪声互相关的角度看，只要是持续存在的、有固定传播路径的信号，就是可用的。</p>
+<h3>3.3 互相关（Cross-Correlation）的数学定义</h3>
+<p>两个信号 $x(t)$ 和 $y(t)$ 的互相关函数 $C_{xy}(\tau)$ 定义为：</p>
+<p>$$ C_{xy}(\tau) = \int_{-\infty}^{\infty} x(t) \cdot y(t + \tau) , dt $$</p>
+<p>离散形式（实际计算中使用）：</p>
+<p>$$ C_{xy}(\tau) = \sum_{t} x[t] \cdot y[t + \tau] $$</p>
+<p><strong>物理含义：</strong> 将信号 $y$ 沿时间轴滑动 $\tau$ ，在每个位移量 $\tau$ 处计算两信号的重叠积分（相似度）。互相关函数的最大值对应的 $\tau$ 即为两信号之间的真实时间延迟。</p>
+<p><strong>直观示例：</strong></p>
+<pre class="notranslate"><code class="notranslate">x = [0, 0, 1, 0, 0]          信号 x：时刻 2 有一个脉冲
+y = [0, 0, 0, 1, 0]          信号 y：时刻 3 有一个脉冲（晚 1 个采样点）
+
+C(τ=0) = 0×0 + 0×0 + 1×0 + 0×1 + 0×0 = 0      ← 不对齐
+C(τ=1) = 0×0 + 0×0 + 1×1 + 0×0 + 0×0 = 1      ← 峰值！找到真实延迟
+C(τ=2) = 0×0 + 0×1 + 1×0 + 0×0 + 0×0 = 0      ← 过冲
+</code></pre>
+<h3>3.4 FFT 加速原理</h3>
+<p>直接计算互相关的时域滑动复杂度为 $O(N^2)$ ，对于长时间连续波形（小时级 × 500 Hz 采样 = 百万级采样点）不可行。</p>
+<p>通过<strong>卷积定理</strong>可以在频域高效计算：</p>
+<p>$$ \mathcal{F}{C_{xy}(\tau)} = X^*(f) \cdot Y(f) $$</p>
+<p>其中 $X^*(f)$ 是 $x(t)$ 的 Fourier 变换的复共轭。</p>
+<p><strong>计算流程：</strong></p>
+<ol>
+<li>FFT： $X(f) = \mathcal{F}{x(t)}$ ， $Y(f) = \mathcal{F}{y(t)}$
+</li>
+<li>互功率谱： $S_{xy}(f) = X^*(f) \cdot Y(f)$
+</li>
+<li>IFFT： $C_{xy}(\tau) = \mathcal{F}^{-1}{S_{xy}(f)}$
+</li>
+</ol>
+<p>复杂度降为 $O(N \log N)$ ，使得小时级的噪声互相关计算成为可能。</p>
+<p><strong>相位差的物理含义：</strong></p>
+<p>如果 $y(t)$ 是 $x(t)$ 延迟了 $\Delta t$ ，即 $y(t) = x(t - \Delta t)$ ，由 Fourier 变换的位移性质：</p>
+<p>$$ Y(f) = X(f) \cdot e^{-i 2\pi f \Delta t} $$</p>
+<p>互功率谱的相位：</p>
+<p>$$ \arg\left[ X^*(f) \cdot Y(f) \right] = \arg\left[ |X(f)|^2 \cdot e^{-i 2\pi f \Delta t} \right] = -2\pi f \Delta t $$</p>
+<p>因此，相位是频率的线性函数，斜率为 $-2\pi \Delta t$ 。对所有频率的相位信息汇总（通过 IFFT），峰值即逼近真实的 $\Delta t$ 。</p>
+<h3>3.5 噪声互相关提取走时的物理逻辑</h3>
+<pre class="notranslate"><code class="notranslate">噪声源 S 持续激发弹性波
+  │
+  ├→ 先到达台站 A（时刻 t₀ + d_SA / v）
+  │
+  └→ 后到达台站 B（时刻 t₀ + d_SB / v）
+      时间差 Δt = (d_SB − d_SA) / v 依赖于 S 的位置
+
+问题：噪声源 S 的位置未知且随时间变化！
+
+解决：长时间叠加（stack）
+  ├→ 不同时刻、不同位置的噪声源产生不同的传播路径
+  ├→ 对各段短时噪声分别做互相关
+  └→ 将所有短时互相关叠加（stack）
+
+叠加结果：
+  ├→ 随机路径的波：相位随机，叠加后互相抵消
+  └→ 沿 A↔B 直线传播的面波和体波：相位相干，叠加后累积增强
+       → 互相关峰值出现在 τ* = d_AB / v（A→B 传播走时）
+</code></pre>
+<p>这一原理的核心是<strong>格林函数重建</strong>：两个台站记录的环境噪声的互相关函数，收敛于两站之间的弹性波格林函数（即如果在 A 处有一个脉冲源，在 B 处记录到的响应）。这一定理由 Lobkis &amp; Weaver (2001) 在超声实验中首次验证，随后被 Campillo &amp; Paul (2003) 和 Shapiro &amp; Campillo (2004) 推广到地震学。</p>
+<p>数据来源说明：每个 <code class="notranslate">.stk</code> 文件（如 <code class="notranslate">BDS.CCH.stk</code> ）即台站对 BDS-CCH 在某一小时内所有短时窗口的叠加互相关结果，每一行对应一个小时。</p>
+<h3>3.6 dv/v 的测量公式推导</h3>
+<p>设台站 A 和 B 之间的真实距离为 $d$ （固定不变），波速为 $v$ ，则走时为：</p>
+<p>$$ \Delta t = \frac{d}{v} $$</p>
+<p>当波速发生微小变化 $v \to v + \delta v$ （ $\delta v \ll v$ ）时，走时变为：</p>
+<p>$$ \Delta t + \delta t = \frac{d}{v + \delta v} $$</p>
+<p>对右端做 Taylor 展开：</p>
+<p>$$ \frac{d}{v + \delta v} = \frac{d}{v} \cdot \frac{1}{1 + \delta v / v} \approx \frac{d}{v} \cdot \left(1 - \frac{\delta v}{v} + \cdots\right) = \Delta t \cdot \left(1 - \frac{\delta v}{v}\right) $$</p>
+<p>因此走时变化与波速变化的关系为：</p>
+<p>$$ \delta t = -\Delta t \cdot \frac{\delta v}{v} $$</p>
+<p>重新整理得到 dv/v 的测量公式：</p>
+<p>$$ \frac{\delta v}{v} = -\frac{\delta t}{\Delta t} $$</p>
+<p><strong>关键结论：</strong></p>
+<ul>
+<li>波速下降（ $\delta v &amp;lt; 0$ ） → 走时增加（ $\delta t &amp;gt; 0$ ） → 互相关峰值向右偏移</li>
+<li>波速上升（ $\delta v &amp;gt; 0$ ） → 走时减少（ $\delta t &amp;lt; 0$ ） → 互相关峰值向左偏移</li>
+</ul>
+<p><strong>子采样精度（Subsample Precision）：</strong></p>
+<p>互相关峰值不一定在整数采样点上。实际使用二次或三次插值在峰值附近拟合抛物线，以子采样精度（subsample precision）确定峰值位置 $\tau^*$ 。对于 500 Hz 采样率，采样间隔为 2 ms，子采样插值可将走时测量精度提升至 0.1 ms 量级，对应的 dv/v 精度约为：</p>
+<p>$$ \frac{\delta v}{v} \approx \frac{0.1\ \text{ms}}{100\ \text{ms}} = 0.1% $$</p>
+<p>（假设传播走时 $\Delta t \approx 100$ ms）</p>
+<h3>3.7 多台站对合并</h3>
+<p>实际监测中，每个台站对独立测量一个 dv/v 时序。将所有有效台站对的 dv/v 取中位数（而非均值，以抵抗个别台站对的异常值），得到代表整个监测区域的平均 dv/v 时序：</p>
+<p>$$ \left( \frac{\delta v}{v} \right)_{\text{median}} = \text{median}_{k} \left{ \left( \frac{\delta v}{v} \right)_k \right}, \quad k = 1, \dots, N_{\text{pairs}} $$</p>
+<p>本研究使用 9 个有效台站的 15 个台站对，平均每小时的可用台站对数为 15.9。</p>
+<hr>
+<h2>四、"前高后低"统计规律</h2>
+<h3>4.1 规律的陈述</h3>
+<p>对 28 个大能量事件（ $E &amp;gt; 10^5\ \text{J}$ ）的统计分析发现：</p>
+<blockquote>
+<p>事件发生前 T 小时的 dv/v <strong>均值</strong> &gt; 事件发生后 T 小时的 dv/v <strong>均值</strong></p>
+</blockquote>
+<p>换句话说，大能量事件发生之前的平均波速<strong>系统性高于</strong>事件之后的平均波速。这一规律的统计显著性依赖于窗口长度 T 的选择。</p>
+<h3>4.2 物理机制</h3>
+<p>"前高后低"的物理本质是波速变化的非单调过程（见第 2.4 节）：</p>
+<ul>
+<li><strong>事件前：</strong> 应力积累阶段，原生裂隙被压合 → 波速处于偏高水平（虽然临近破裂时波速会下降，但长窗口的平均效应掩盖了短时下降）</li>
+<li><strong>事件后：</strong> 应力卸载，裂隙弹性回弹但不可逆损伤保留 → 波速整体低于事件前的平均水平</li>
+</ul>
+<p><strong>实验室验证：</strong> Scuderi et al. (2016, <em>Nature Geoscience</em>) 在实验室断层摩擦实验中，直接测量了加载全过程的 $V_p$ 变化——断层破裂前 $V_p$ 系统性下降约 1%，破裂后部分恢复但未回到原位。这一发现为煤矿现场观测中的"前高后低"提供了直接的物理依据。</p>
+<h3>4.3 最优窗口 T_opt 的确定</h3>
+<p>对窗口长度 T 从 6h 到 726h、步长 12h 进行遍历统计，计算每个窗口下满足"事件前 dv/v 均值 &gt; 事件后 dv/v 均值"的事件比例：</p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>窗口 T</th>
+<th>满足率</th>
+<th>解读</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6h</td>
+<td>35.7%</td>
+<td><strong>低于随机基线（50%）</strong> — 极短窗口捕捉破裂后弹性恢复，"前低后高"占主导</td>
+</tr>
+<tr>
+<td>30h</td>
+<td>46.4%</td>
+<td>仍低于基线，恢复效应大于前兆信号</td>
+</tr>
+<tr>
+<td>120h</td>
+<td>67.9%</td>
+<td>超过基线，前兆信号开始显现</td>
+</tr>
+<tr>
+<td>210h</td>
+<td><strong>75.0%</strong></td>
+<td><strong>峰值，T_opt</strong></td>
+</tr>
+<tr>
+<td>222h</td>
+<td>75.0%</td>
+<td>并列峰值</td>
+</tr>
+<tr>
+<td>234h</td>
+<td>75.0%</td>
+<td>并列峰值</td>
+</tr>
+<tr>
+<td>400h</td>
+<td>64.3%</td>
+<td>开始下降，信号被稀释</td>
+</tr>
+<tr>
+<td>726h</td>
+<td>46.4%</td>
+<td>趋近随机基线</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<p><strong>结论：最优窗口 $T_{\text{opt}} \approx 210$ h（约 9 天）。</strong></p>
+<p>物理含义：冲击地压前兆的完整波速变化过程（从波速开始偏离背景值到事件发生）平均持续约 9 天。这也意味着 dv/v 作为前兆指标的<strong>有效预警窗口约为 9 天</strong>。</p>
+<h3>4.4 统计显著性与不确定性</h3>
+<p>28 个样本下，75% 满足率（21/28 事件满足"前高后低"规律）的 95% 置信区间（基于 Clopper-Pearson 精确方法）：</p>
+<p>$$ \text{CI}_{95%} \approx [55%, 89%] $$</p>
+<p>下限 55% 仅略高于随机基线 50%，上限 89% 非常乐观。样本量小导致置信区间宽，这一不确定性需要在后续建模中予以考量。</p>
+<p><strong>Brenguier 等人的验证：</strong> Brenguier et al. (2008, <em>Nature Geoscience</em>) 在 Piton de la Fournaise 火山观测中，利用噪声互相关在火山喷发前数天至数周检测到 0.2-0.5% 的 dv/v 下降，恢复完成需数周。时间尺度（数天至数周）与本研究的 9 天窗口在量级上一致。</p>
+<h3>4.5 文献支撑与可信度评估</h3>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>层次</th>
+<th>评估等级</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>噪声互相关方法</td>
+<td>✓ 高可信</td>
+<td>Nature Geoscience 多篇验证，方法成熟</td>
+</tr>
+<tr>
+<td>波速下降前兆规律</td>
+<td>✓ 高可信</td>
+<td>Scuderi 2016 实验室直接验证</td>
+</tr>
+<tr>
+<td>时间尺度（~9 天）</td>
+<td>△ 中等可信</td>
+<td>与 Brenguier 2008 一致，但未独立验证</td>
+</tr>
+<tr>
+<td>煤矿冲击地压具体应用</td>
+<td>△ 创新空间</td>
+<td>尚无直接先例，本研究首次在煤矿场景验证</td>
+</tr>
+<tr>
+<td>210h 结论的统计置信度</td>
+<td>△ 中等可信</td>
+<td>28 样本，75% 满足率，CI 较宽</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<p><strong>核心参考文献：</strong></p>
+<ul>
+<li>Brenguier, F., et al. (2008). Towards forecasting volcanic eruptions using seismic noise. <em>Nature Geoscience</em>, 1(2), 126-130.</li>
+<li>Scuderi, M. M., et al. (2016). Precursory changes in seismic velocity for the spectrum of earthquake failure modes. <em>Nature Geoscience</em>, 9(9), 695-700.</li>
+<li>Campillo, M., &amp; Paul, A. (2003). Long-range correlations in the diffuse seismic coda. <em>Science</em>, 299(5606), 547-549.</li>
+</ul>
+<hr>
+<h2>五、标签设计</h2>
+<h3>5.1 核心原则：实时可用性</h3>
+<p>任何标签（label）的设计必须满足一个硬性约束：<strong>标签的生成不依赖未来信息</strong>。在实时预警场景中，当前时刻只能看到当前及历史数据，不能使用事件发生后的波速信息。</p>
+<p><strong>常见陷阱：</strong></p>
+<ul>
+<li>使用事件前后的完整波速序列计算全局均值，将高于均值的时间段标为"前兆" → 需要知道事件后的波速，实时不可用</li>
+<li>使用未来窗口的 dv/v 状态定义当前时刻的标签 → 信息泄露</li>
+</ul>
+<p><strong>正确原则：</strong></p>
+<p>标签仅基于<strong>事件发生时刻</strong>和<strong>固定的历史窗口</strong>来定义，完全不需要事件之后的数据：</p>
+<pre class="notranslate"><code class="notranslate">大能量事件发生前 T_opt 小时内 → label = 1（前兆状态）
+其余时刻                     → label = 0（正常状态）
+</code></pre>
+<h3>5.2 重叠窗口问题与处理</h3>
+<p>当两个大能量事件的时间间隔小于 $T_{\text{opt}}$ （210h）时，后一个事件的前兆窗口会包含前一个事件发生之后的波速恢复期。恢复期的波速特征（反弹）与正常状态不同，可能污染标签。</p>
+<p><strong>重叠污染示意：</strong></p>
+<pre class="notranslate"><code class="notranslate">事件 A &gt;────210h 前兆窗口────&gt; [A发生]
+                                    │
+  事件 B 前兆窗口 &gt;──────┬──────────┤
+                          │  重叠区：包含事件A后的恢复期
+                          │  → 这个区间的dv/v特征既不是"前兆"也不是"正常"
+</code></pre>
+<p><strong>方案 B（选定方案）：截断前兆窗口</strong></p>
+<ul>
+<li>每个事件的有效前兆窗口 = [上一事件发生时刻, 本事件发生时刻)，最长不超过 210h</li>
+<li>有效窗口 &lt; 48h 的事件丢弃（信息量不足且污染严重）</li>
+<li>大能量事件发生后 48h 内不纳入负样本（恢复期不等于正常状态）</li>
+</ul>
+<p><strong>三种方案的比较：</strong></p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>方案</th>
+<th>可用事件数</th>
+<th>正样本时长估算</th>
+<th>标签质量</th>
+<th>数据量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A（前间隔 &gt; 210h，最干净）</td>
+<td>14 / 36</td>
+<td>~2940h</td>
+<td>最高</td>
+<td>最少</td>
+</tr>
+<tr>
+<td>B（截断，有效窗口 ≥ 48h）</td>
+<td>26 / 36</td>
+<td>~3100h</td>
+<td>高</td>
+<td>中等</td>
+</tr>
+<tr>
+<td>C（保持原样，重叠不处理）</td>
+<td>36 / 36</td>
+<td>~4265h</td>
+<td>低（污染严重）</td>
+<td>最多</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<p><strong>选择方案 B</strong> 的理由：在标签质量和样本量之间取得平衡。26 个事件提供了足够的统计基础，同时避免了严重的标签污染。</p>
+<h3>5.3 类别不平衡问题</h3>
+<p>正样本（前兆状态）的总时长约 3100h，负样本（正常状态）约 12900h（总时长 15984h 减去正样本 3100h）。类别比例约为：</p>
+<p>$$ \frac{\text{正样本}}{\text{负样本}} \approx \frac{3100}{12900} \approx 1:4 $$</p>
+<p>这一不平衡程度尚可接受，但需在模型训练中使用类别权重（class_weight）或过采样（如 SMOTE）予以处理。评估指标中，AUC-ROC 对类别不平衡相对鲁棒，而精确率（Precision）和 F1 可能受明显影响——应优先使用 AUC-ROC 作为主评估指标。</p>
+<hr>
+<h2>六、数据基础</h2>
+<h3>6.1 完整时序概述</h3>
+<p>数据处理流程已完成的输出为一个统一的时间序列数据集：</p>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>属性</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>文件名</td>
+<td><code class="notranslate">mcstk_东滩_完整.xlsx</code></td>
+</tr>
+<tr>
+<td>时间范围</td>
+<td>2023-07-27 ~ 2025-05-22（22 个月）</td>
+</tr>
+<tr>
+<td>时间分辨率</td>
+<td>1 小时</td>
+</tr>
+<tr>
+<td>总时间点数</td>
+<td>15,984</td>
+</tr>
+<tr>
+<td>dv/v 缺失率</td>
+<td>8.9%（1423 个缺失小时）</td>
+</tr>
+<tr>
+<td>平均有效台站对数</td>
+<td>15.9 对/小时</td>
+</tr>
+<tr>
+<td>dv/v 范围</td>
+<td>约 −0.020 ~ +0.010</td>
+</tr>
+<tr>
+<td>dv/v 均值</td>
+<td>−0.0037</td>
+</tr>
+<tr>
+<td>dv/v 标准差</td>
+<td>~0.003</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<h3>6.2 处理流程</h3>
+<pre class="notranslate"><code class="notranslate">153 个 .stk.xlsx 文件（每个台站对一个文件）
+    │
+    ├→ 筛选有效台站：9 个台站 → 15 个台站对（C(9,2)-重复-无效=15）
+    │
+    ├→ 每对台站：读取每小时 dv/v
+    │
+    ├→ 每小时：取 15 个台站对 dv/v 的中位数 → 单一时序
+    │
+    ├→ 合并东滩能量目录（微震定位和能量信息）
+    │
+    └→ 输出：mcstk_东滩_完整.xlsx
+</code></pre>
+<h3>6.3 可用事件统计</h3>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>筛选条件</th>
+<th>事件数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code class="notranslate">HE_events.csv</code> 中 $E &amp;gt; 10^5$ J 的事件总数</td>
+<td>54</td>
+</tr>
+<tr>
+<td>时序覆盖范围内的事件</td>
+<td>36</td>
+</tr>
+<tr>
+<td>方案 B 可用事件</td>
+<td>26</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<p>36 个时序覆盖事件中，10 个因重叠窗口不足 48h 被方案 B 丢弃。</p>
+<h3>6.4 缺失数据处理</h3>
+<p>dv/v 的 8.9% 缺失率主要由以下原因导致：</p>
+<ul>
+<li>台站离线（设备维护、供电中断）</li>
+<li>信噪比过低（采掘活动干扰、噪声源减弱）</li>
+<li>互相关波形质量不达标</li>
+</ul>
+<p>处理策略（在特征工程中实施）：</p>
+<ul>
+<li><strong>短缺失（&lt;6h）：</strong> 线性插值</li>
+<li><strong>长缺失（≥6h）：</strong> 标记为 NaN，滑动窗口计算时跳过（不对缺失段做假数据）</li>
+<li><strong>缺失模式与事件关联分析：</strong> 需检查台站离线是否集中在大能量事件前后——若是，则缺失本身可能是前兆信号，需特殊处理</li>
+</ul>
+<hr>
+<h2>七、下一步：特征工程</h2>
+<h3>7.1 总体策略</h3>
+<p>基于 $T_{\text{opt}} = 210$ h 和方案 B 标签，构建以小时为步长的滑动窗口特征。每个特征在每小时更新，仅使用当前时刻及之前的数据（保证实时可用）。</p>
+<h3>7.2 特征设计</h3>
+<p><strong>特征 1：短窗/长窗均值比</strong></p>
+<p>$$ F_1(t) = \frac{ \frac{1}{12} \sum_{i=0}^{11} dv/v(t-i) }{ \frac{1}{120} \sum_{j=0}^{119} dv/v(t-j) } $$</p>
+<p>捕捉 dv/v 的相对下降。当 $F_1(t) &amp;lt; 1$ 且持续下降时，说明近期波速相对于历史基线在下降，为危险信号。比值形式对 dv/v 的绝对偏移和基线漂移不敏感。</p>
+<p><strong>特征 2：线性趋势斜率（滑动 OLS）</strong></p>
+<p>对过去 48 小时的 dv/v 做普通最小二乘（OLS）拟合：</p>
+<p>$$ dv/v(t) = \beta_0 + \beta_1 \cdot t + \varepsilon $$</p>
+<p>特征值： $F_2(t) = \beta_1$ （斜率）。</p>
+<p>下降速率大（ $\beta_1$ 显著为负）→ 波速正在快速下降 → 应力集中加剧 → 危险信号。</p>
+<p><strong>特征 3：Z-score 偏离度</strong></p>
+<p>$$ F_3(t) = \frac{ dv/v(t) - \mu_{120}(t) }{ \sigma_{120}(t) } $$</p>
+<p>其中 $\mu_{120}(t)$ 和 $\sigma_{120}(t)$ 分别是过去 120 小时 dv/v 的均值和标准差。</p>
+<p>Z-score 量化当前波速偏离历史基线的统计显著性。通常 $F_3 &amp;lt; -2$ （两倍标准差以下）视为显著异常。</p>
+<p><strong>特征 4：滑动标准差（波动性）</strong></p>
+<p>$$ F_4(t) = \sigma_{24}(t) = \text{std}\big[ dv/v(t), dv/v(t-1), \dots, dv/v(t-23) \big] $$</p>
+<p>波速的短期波动增大可能是裂隙加速扩展、介质不稳定的信号。</p>
+<p><strong>特征 5：微震能量与频次特征</strong></p>
+<p>结合微震目录，计算：</p>
+<p>$$ F_{5a}(t) = \log_{10} \sum_{i \in [t-24, t]} E_i \quad \text{（近 24h 能量累积对数）} $$</p>
+<p>$$ F_{5b}(t) = \frac{ N_{\text{events}}(t, t-6) }{ N_{\text{events}}(t-6, t-24) / 3 } - 1 \quad \text{（短窗 vs 长窗频次比）} $$</p>
+<p>微震能量释放加速和频次异常增加是冲击地压的经典短临前兆。</p>
+<p><strong>特征 6：波速-能量协同性</strong></p>
+<p>$$ F_6(t) = \text{corr}\big[ dv/v(t:i), \log E(t:i) \big], \quad i = 1, \dots, 48 $$</p>
+<p>计算过去 48 小时内 dv/v 和微震能量的滑动相关系数。负相关增强（波速下降同时能量增大）表明两种前兆信号正在同步强化，降低误报概率。</p>
+<h3>7.3 模型路线图</h3>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>阶段</th>
+<th>模型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>基线</td>
+<td>XGBoost</td>
+<td>可解释性强，训练快速，处理缺失值鲁棒</td>
+</tr>
+<tr>
+<td>时序模型</td>
+<td>TCN（Temporal Convolutional Network）</td>
+<td>捕获长时间依赖，训练效率高于 LSTM</td>
+</tr>
+<tr>
+<td>对比模型</td>
+<td>LSTM / BiLSTM</td>
+<td>经典时序模型，用于与 TCN 对比</td>
+</tr>
+<tr>
+<td>可选</td>
+<td>Transformer</td>
+<td>如果数据量允许（可考虑跨工作面迁移学习）</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<h3>7.4 评估指标体系</h3>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>指标</th>
+<th>含义</th>
+<th>目标</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AUC-ROC</td>
+<td>不同阈值下 TPR vs FPR 曲线下面积</td>
+<td>&gt;0.75（显著优于随机）</td>
+</tr>
+<tr>
+<td>Recall @ FPR=0.1</td>
+<td>在 10% 误报率下的召回率</td>
+<td>&gt;50%（至少一半事件被提前预警）</td>
+</tr>
+<tr>
+<td>平均预警提前量</td>
+<td>首次触发预警到事件发生的时间</td>
+<td>&gt;24h（有足够时间采取行动）</td>
+</tr>
+<tr>
+<td>误报频率</td>
+<td>每百天触发预警的次数</td>
+<td>&lt;5 次/百天（避免预警疲劳）</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<p><strong>注：</strong> 平均预警提前量需要在训练时防止标签泄漏——不能使用事件后数据来优化预警时间的定位。</p>
+<hr></div>
+<div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://Lszidv.github.io">芜尽</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行 "+diffDay+" 天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z', 'copy': 'M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z', 'check': 'M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.disabled=true;
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","Lszidv/Lszidv.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const createClipboardHTML = (codeContent, additionalClasses = '') => `
+        <pre class="notranslate"><code class="notranslate">${codeContent}</code></pre>
+        <div class="clipboard-container position-absolute right-0 top-0 ${additionalClasses}">
+            <clipboard-copy class="ClipboardButton btn m-2 p-0" role="button" style="display: inherit;">
+                <svg height="16" width="16" class="octicon octicon-copy m-2"><path d="${IconList["copy"]}"></path></svg>
+                <svg height="16" width="16" class="octicon octicon-check color-fg-success m-2 d-none"><path d="${IconList["check"]}"></path></svg>
+            </clipboard-copy>
+            <div class="copy-feedback">Copied!</div>
+        </div>
+    `;
+
+    const handleCodeElements = (selector = '') => {
+        document.querySelectorAll(selector).forEach(codeElement => {
+            const codeContent = codeElement.innerHTML;
+            const newStructure = document.createElement('div');
+            newStructure.className = 'snippet-clipboard-content position-relative overflow-auto';
+            newStructure.innerHTML = createClipboardHTML(codeContent);
+
+            const parentElement = codeElement.parentElement;
+            if (selector.includes('highlight')) {
+                parentElement.insertBefore(newStructure, codeElement.nextSibling);
+                parentElement.removeChild(codeElement);
+            } else {
+                parentElement.parentElement.replaceChild(newStructure, parentElement);
+            }
+        });
+    };
+
+    handleCodeElements('pre.notranslate > code.notranslate');
+    handleCodeElements('div.highlight > pre.notranslate');
+
+    let currentFeedback = null;
+    document.querySelectorAll('clipboard-copy').forEach(copyButton => {
+        copyButton.addEventListener('click', () => {
+            const codeContent = copyButton.closest('.snippet-clipboard-content').innerText;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = codeContent;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            const copyIcon = copyButton.querySelector('.octicon-copy');
+            const checkIcon = copyButton.querySelector('.octicon-check');
+            const copyFeedback = copyButton.nextElementSibling;
+
+            if (currentFeedback && currentFeedback !== copyFeedback) {currentFeedback.style.display = 'none';}
+            currentFeedback = copyFeedback;
+
+            copyIcon.classList.add('d-none');
+            checkIcon.classList.remove('d-none');
+            copyFeedback.style.display = 'block';
+            copyButton.style.borderColor = 'var(--color-success-fg)';
+
+            setTimeout(() => {
+                copyIcon.classList.remove('d-none');
+                checkIcon.classList.add('d-none');
+                copyFeedback.style.display = 'none';
+                copyButton.style.borderColor = '';
+            }, 2000);
+        });
+    });
+});
+
+</script>
+<script>MathJax = {tex: {inlineMath: [["$", "$"]]}};</script><script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</html>
