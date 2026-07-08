@@ -1,5 +1,311 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>芜尽</title><link>https://Lszidv.github.io</link><description>Only love can set us free</description><copyright>芜尽</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/160511559?s=400&amp;u=68ec73daff523efd8652079b221d42e446d01cb6&amp;v=4</url><title>avatar</title><link>https://Lszidv.github.io</link></image><lastBuildDate>Thu, 04 Jun 2026 07:47:35 +0000</lastBuildDate><managingEditor>芜尽</managingEditor><ttl>60</ttl><webMaster>芜尽</webMaster><item><title>[Mine Earthquake]Class2</title><link>https://Lszidv.github.io/post/%5BMine%20Earthquake%5DClass2.html</link><description># 煤矿冲击地压波速前兆提取学习笔记 · Class 2
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>芜尽</title><link>https://Lszidv.github.io</link><description>Only love can set us free</description><copyright>芜尽</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/160511559?s=400&amp;u=68ec73daff523efd8652079b221d42e446d01cb6&amp;v=4</url><title>avatar</title><link>https://Lszidv.github.io</link></image><lastBuildDate>Wed, 08 Jul 2026 06:35:46 +0000</lastBuildDate><managingEditor>芜尽</managingEditor><ttl>60</ttl><webMaster>芜尽</webMaster><item><title>Wang et al. (2017) Seasonal Crustal Seismic Velocity Changes Throughout Japan</title><link>https://Lszidv.github.io/post/Wang%20et%20al.%20%282017%29%20Seasonal%20Crustal%20Seismic%20Velocity%20Changes%20Throughout%20Japan.html</link><description># Wang et al. (2017) Seasonal Crustal Seismic Velocity Changes Throughout Japan
+
+---
+
+## 第1部分：论文信息
+
+- **标题**：日本全境的地壳季节性地震速度变化
+- **作者**：Wang, Brenguier, Campillo, Lecointre, Takeda, Aoki（法国ISTerre + 日本NIED + 东京大学地震研）
+- **期刊**：JGR: Solid Earth, 2017, 122, 7987–8002
+- **DOI**：10.1002/2017JB014307
+
+---
+
+## 第2部分：摘要与Key Points
+
+- **背景**：基于噪声的 $\delta v/v$ 受降雨、气压加载、温度等环境扰动影响，可掩盖构造/火山信号（类似GPS观测）
+- **方法**：利用日本Hi-net密集台网（718个台站）测量多年连续 $\delta v/v$
+- **发现**：
+  - 九州（南部）和北海道（北部）均观察到强季节性变化（振幅 $10^{-4} $）
+  - **九州**：夏季速度降低可由降雨引起的孔隙压力增加解释
+  - **北海道**：需更复杂模型（降水+积雪+海平面），**东西部响应不同**
+- **成果**：线性模型校正后检测阈值降至 $10^{-5} $，可识别被季节性信号掩盖的小地震响应
+
+| Key Point | 内容 |
+|-----------|------|
+| 1 | 噪声 $\delta v/v$ 在日本部分地区显示强季节性 |
+| 2 | 受特定外部扰动（如降雨）强烈影响 |
+| 3 | 季节性校正模型改善了地震响应观测 |
+
+---
+
+## 第3部分：Introduction（引言）
+
+- **方法背景**：噪声互相关方法（Campillo &amp; Paul, 2003）使连续监测 $\delta v/v$ 成为可能，已用于检测震后松弛、火山喷发前兆、地震-火山相互作用
+- **问题提出**：环境因素（降雨、热弹性应力、气压）可掩盖构造/火山信号
+  - Heki (2001) 首次揭示积雪荷载调制GPS应变——本文核心理念与此一致
+- **数据**：Hi-net 718个台站，北部501站（2008–2012），南部217站（2011–2012）
+- **方法来源**：Brenguier et al. (2014) doublet方法
+
+| 量级 | 数值 | 含义 |
+|------|------|------|
+| 同震速度降 | $\sim 10^{-3}$ | 大地震瞬时响应 |
+| 季节性变化 | $\sim 10^{-4}$ | 年周期波动 |
+| 校正后阈值 | $\sim 10^{-5}$ | 可检测小地震信号 |
+
+---
+
+## 第4部分：Data and Methods（数据与方法）
+
+### **数据**
+- 718个Hi-net台站，台间距 $\le 30$ km，分南北两时段
+
+### **预处理**
+- **1-bit归一化**：去除不规则事件，保留相位
+- **频谱白化**（0.08–2.0 Hz）：降低微震源时间变化影响
+- 每小时互相关 → 逐日叠加提高信噪比
+- 三分量9个相关组合增强稳定性
+
+### **速度测量：doublet method**（Brenguier et al., 2014）
+- **测量窗口**： $-60$ s 到 $+60$ s 时间延迟
+- **频率范围**：0.15–0.90 Hz
+- **深度灵敏度**：约8 km（上地壳，Obermann et al., 2013, 2016）
+- **核心关系**：均匀介质变化下， $\delta v/v = -\delta t/t$
+- **方法优势**：
+  - 使用**尾波（coda waves）**：降低噪声源方向性影响（Colombi et al., 2014）
+  - 即使格林函数未完美重建仍可行（Hadziioannou et al., 2011）
+  - **频域相位测量**：不受噪声频谱季节性变化影响，优于 stretching 方法（Hillers et al., 2015; Zhan et al., 2013）
+
+### **台站级平均**
+- 先按信噪比对9个分量加权平均 $\delta t/t$
+- 再对30 km内台站对的 $\delta v/v$ 取平均
+- **目的**：提高精度并降低源方向性效应
+
+### **四条代表性时间序列（Figure 1b）**
+- **TAJH**（本州东部）：2008岩手-宫城地震和2011东北地震的强同震速度降，震后恢复不完全
+- **MWDH**（本州中部）：东北地震同震降 + 强季节性波动（夏低冬高）
+- **OKBH**：2009静冈地震和2011东北地震两次速度降
+- **MJNH**（九州）：强季节性变化，6月开始降、7月最低，恢复较缓慢
+
+&lt;img width='2128' height='746' alt='Image' src='https://github.com/user-attachments/assets/da15b22b-f5f8-4723-9915-89567d7e24c3' /&gt;
+
+---
+
+## 第5部分：Seasonality &amp; Quarterly Maps（第3.1–3.2节）
+
+### **季节性强度（3.1）**
+- **Pearson相关系数**：计算不同年份间年信号的相关性
+
+$$
+CC(y_1, y_2) = \frac{\mathrm{cov}(y_1, y_2)}{\sigma_{y_1} \sigma_{y_2}}
+$$
+
+- **阈值设定**： $CC \ge 0.6$ 表示强季节性效应
+- 北部选用2008、2009、2010年（无大地震时段），空间插值1 km + 高斯滤波300 km
+- **结果**（Figure 2a）：季节性效应最强区域——**北海道、九州、本州日本海沿岸**
+
+### **季度平均速度变化（3.2）**
+- 每3个月平均 $\delta v/v $，南北分区处理以避免大地震影响
+- **两大概观异常**（Figure 3）：
+  - **九州**：第三季度（7–9月）大幅速度降低
+  - **北海道东北角**：第一季度速度升高、第二季度开始持续降低
+
+&lt;img width='714' height='625' alt='Image' src='https://github.com/user-attachments/assets/6cc40dbc-5e3e-4118-9ec9-ac38866bad1e' /&gt;
+
+### **与GRACE对比**
+- 季度 $\delta v/v$ 与 GRACE 等效水高（EWH）全球相关
+  - 北部第一季度正 $\delta v/v$ ↔ 冬季积雪EWH高
+  - 南部第三季度负 $\delta v/v$ ↔ 夏季降雨EWH高
+- **判断**：
+  - 九州：季风期强降雨 → 孔隙压力快速增加 → 地震速度降低
+  - 北海道：每年大雪，多种环境因素叠加 → 复杂地壳形变
+
+---
+
+## 第6部分：Kyushu（第3.3.1节）
+
+### **区域特征**
+- 日本西南部，除高海拔外几乎无降雪，季风期强降水
+- 使用74个Hi-net台站（2011–2012）
+
+### **观测结果**（Figure 4b）
+- 2011和2012年波形高度相似，7月瞬时速度降低约 $10^{-4} $，随后逐渐恢复
+- **关键特征**：与日降雨量**负相关**，恢复比下降更缓慢
+
+### **主导机制：孔隙压力扩散**
+- **排除**地下水直接荷载效应（该效应会增大 $\delta v/v $）
+- **确定**孔隙压力扩散为主导机制
+  - 原因：雨水入渗在上地壳数公里内产生延迟的孔隙压力变化，7月降雨最大时速度降也最大但有延迟
+- **空间分布**（Figure 4a）：强变化区与中部和南部火山带吻合
+  - 原因：火山区域岩石更多微裂纹，对外部应力变化更敏感（印证 Brenguier et al., 2014）
+
+### **孔隙弹性模型**
+
+**一维扩散方程**（Talwani et al., 2007; Rivet et al., 2015）
+
+$$
+P(r, t) = \sum_{i=1}^{n} \delta p_i \cdot \mathrm{erfc} \left[ \frac{r}{(4c (n-i) \delta t)^{1/2}} \right]
+$$
+
+- $\delta t $：时间增量， $\delta p_i = \rho g \delta h_i $：降水荷载， $c $：扩散率， $r = 8$ km
+
+**合成速度变化**（线性传递函数）
+
+$$
+(\delta v/v)_{\mathrm{syn}}(t) = \langle \frac{\delta v}{v}(t) \rangle + \frac{\mathrm{cov}(\frac{\delta v}{v}(t), P(t))}{\mathrm{var}(P(t))} (P(t) - \langle P(t) \rangle)
+$$
+
+**扩散率优化**（最小二乘）： $\sigma^2(c) = \frac{1}{n} \sum (\frac{\delta v}{v}(i) - (\delta v/v)_{\mathrm{syn}}(i, c))^2$
+
+- 最优扩散率： $c = 1$ m²/s
+- 合成曲线与实测高度相关 → **确认降雨孔隙压力控制九州季节性 $\delta v/v $**
+
+---
+
+## 第7部分：Hokkaido East（第3.3.2节）
+
+### **区域特征**
+- 日本东北部，使用95个Hi-net台站 + 112个气象站
+- 东北角（144°E–145°E）季节性效应远强于其他区域
+
+### **东西部差异**（Figure 5b）
+- **东部**：年初速度增加，2月达最大后下降（夏低冬高）
+- **西部及其他**：夏高冬低（与东部反相位）
+- 2008十勝-冲地震仅在东部台站观察到速度降；2011东北地震北海道两侧均观察到
+
+### **东部定量特征**（Figure 6b）
+- 波动振幅 &gt; $10^{-4} $，平均积雪深度约50 cm，日降雨 &lt; 50 mm
+- $\delta v/v$ 与降水**负相关**，与积雪深度**正相关**
+
+&lt;img width='1042' height='440' alt='Image' src='https://github.com/user-attachments/assets/b046453b-e390-46b1-8d43-67e6e14a8949' /&gt;
+
+### **积雪的两种可能效应**
+- **直接弹性荷载效应**（Grapenthin et al., 2006; Heki, 2001）：增加速度
+- **阻碍入渗效应**（Seiler &amp; Gat, 2007）：减少地下水补给，降低孔隙压力
+
+### **线性模型**
+
+$$
+(\delta v/v)_{\mathrm{syn}} = a \cdot P + b \cdot S + C
+$$
+
+- $P $：孔隙压力变化， $S $：积雪深度
+- 最佳拟合： $a = -4.9 \times 10^{-6}$ Pa⁻¹（降水负相关）， $b = 2.1 \times 10^{-6}$ cm⁻¹（积雪正相关）
+- **特殊地质**：东部覆盖**钏路湿地**（日本最大湿地）→ 可能增强孔隙压力响应
+
+---
+
+## 第8部分：Western Hokkaido &amp; Honshu（第3.3.3节）
+
+### **区域划分**
+- **日本阿尔卑斯**（中部本州，约138°E）：夏季速度降低
+- **日本海沿岸**（北海道西部 + 本州西侧）：夏季升高、冬季降低（与北海道东部反相位）
+- 使用92个Hi-net台站（seasonality strength &gt; 0.6）
+
+### **日本阿尔卑斯：孔隙压力模型成功**
+- 与九州类似，降雨导致的孔隙压力变化可完美解释（Figure 8）
+- 合成 $(\delta v/v)_{\mathrm{syn}}$ 与实际测量高度相关
+
+### **日本海沿岸：复杂机制**（Figure 9）
+- **排除**孔隙弹性机制：孔隙压力变化与 $\delta v/v$ **不相关**
+- **排除**积雪机制：积雪深度也无明显关联，强降雪期反而速度降低
+- 信号振幅 $10^{-4}$ 接近理论检测下限（Colombi et al., 2014）
+
+### **海平面变化（SL）的主导作用**
+- Figure 9b： $\delta v/v$ 与海平面变化呈**良好正相关，无明显相位偏移**
+- 原因：海平面高 → 海洋荷载增加 → 地壳压缩 → 地震速度升高（瞬时弹性响应）
+- Munekane (2010) 在GPS观测中也考虑了类似效应
+
+### **温度与热弹性应力**
+- 大气温度与 $\delta v/v$ 之间存在约**35天**的时间延迟（Figure B1c）
+- 原因：上覆未固结层传导热量但不传递应力，深部应变来自未固结层底界温度变化
+- 东北地震后延迟增至约64天
+- **判断**：温度与SL均与 $\delta v/v$ 高度相关且互相关联，无法完全分离；但温度在岛两侧无差异，**选用SL重建季节性信号**
+
+---
+
+## 第9部分：Linear Model Correction（第4节）
+
+### **校正模型**
+
+$$
+(\delta v/v)_{\mathrm{syn}} = a \cdot P + b \cdot S + d \cdot SL + C
+$$
+
+- $P $：孔隙压力变化， $S $：积雪深度， $SL $：海平面变化
+- $a, b, d $：权重系数， $C $：常数偏移
+- 对每个Hi-net台站，取最近的气象站和验潮站数据独立拟合
+
+&lt;img width='500' height='390' alt='Image' src='https://github.com/user-attachments/assets/9cee0258-963d-4594-8db3-31b5f8cde694' /&gt;
+
+### **校正效果**
+
+| 台站 | 校正前标准差 | 校正后标准差 |
+|------|------------|------------|
+| TREH | $1.21 \times 10^{-4}$ | $5.48 \times 10^{-5}$ |
+| ARKH | $6.23 \times 10^{-5}$ | $3.99 \times 10^{-5}$ |
+| UWEH | $4.91 \times 10^{-5}$ | $1.94 \times 10^{-5}$ |
+
+- 随机波动降低约 **1.5–2.5倍**，校正后降至 ** $10^{-5}$ 量级**
+- Figure 11：北海道东北角和九州的季节性异常**几乎完全消失**
+- 本州东北部残留异常 → 2008岩手-宫城地震的同震与震后效应
+
+&lt;img width='500' height='424' alt='Image' src='https://github.com/user-attachments/assets/7a82a4ab-d876-4101-ac4a-89d7f90a5f94' /&gt;
+
+### **局限性**
+- **空间均匀扩散率** $c = 1$ m²/s 可能非最优近似
+- 部分台站校正不佳 → 可能存在**非线性关系**或地震前后地壳特征系数变化
+
+--- 
+
+## 第10部分：Discussion &amp; Conclusion（第5节）
+
+### **各区域机制总表**
+
+| 区域 | 主导机制 | 振幅 | 备注 |
+|------|---------|------|------|
+| **九州** | 季风雨 → 孔隙压力扩散 | $\sim 10^{-4}$ | 火山区更敏感 |
+| **北海道东部** | 降水（负）+ 积雪（正） | $&gt; 10^{-4}$ | 钏路湿地增强 |
+| **北海道西部** | 海平面荷载（主） | $\sim 10^{-4}$ | 机制最复杂 |
+| **日本阿尔卑斯** | 降雨 → 孔隙压力 | 较强 | 与九州同 |
+| **本州日本海侧** | 海平面荷载 | 较弱 | 与北海道西部同 |
+
+### **积雪的未解问题**
+- 北海道东部：积雪与 $\delta v/v$ 正相关
+- **可能机制**：荷载效应压缩孔隙 + 湿地排水增强
+- **问题**：两种机制在积雪更厚的北海道西部无效，机理仍不清晰
+
+### **校正模型意义**
+- 简单线性模型使用邻近气象/海洋数据，校正后标准差降至 $10^{-5}$
+- **未来方向**：与GPS形变测量结合验证，优化校正模型
+
+---
+
+## 第11部分：Appendix A — GRACE对比
+
+- **GRACE数据**：CNES/GRGS RL03-v3月度解，1°分辨率，等效水高（EWH, cm）
+- **季度对比**（Figure A1）：
+  - **九州**：第三季度EWH高（强降雨）↔ $\delta v/v$ 降低
+  - **北海道东北**：第一季度EWH高（积雪）↔ $\delta v/v$ 升高
+  - **中部日本**：更复杂，可能受两侧海洋影响
+- **单点时间序列**（Figure A2）：不同区域呈现正或负相关，敏感度量级相当
+
+---
+
+## 第12部分：Appendix B — 时间偏移
+
+- **相关矩阵**（Figure B1b）：
+  - $\delta v/v$ 与温度：0.77
+  - $\delta v/v$ 与SL：0.78
+  - 温度与SL互相关：0.66（存在混淆）
+- **时间延迟**（Figure B1c）：
+  - $\delta v/v$ 滞后温度约**35天**（与Richter et al. 2014智利结果一致）
+  - $\delta v/v$ 与SL延迟仅约**8天**（近瞬时响应）
+  - 东北地震后温度延迟增至约64天
+- **物理解释**：上覆未固结层传导热量但不传递应力，深部应变来自底部界面的温度变化
+
+---
+
+## 整体论文贡献
+
+1. **首次系统刻画**日本全境 $\delta v/v$ 季节性的空间分布特征
+2. **区域差异化机制**：九州=孔隙压力、北海道东=降水+积雪、日本海沿岸=海平面荷载
+3. **实用校正方法**：简单线性模型将检测阈值从 $10^{-4}$ 降至 $10^{-5}$
+4. **科学意义**：为从环境噪声中提取微弱构造信号提供了有效路径，可推广至其他地区
+
+[PaperLink](https://agupubs.onlinelibrary.wiley.com/doi/10.1002/2017JB014307)
+。</description><guid isPermaLink="true">https://Lszidv.github.io/post/Wang%20et%20al.%20%282017%29%20Seasonal%20Crustal%20Seismic%20Velocity%20Changes%20Throughout%20Japan.html</guid><pubDate>Wed, 08 Jul 2026 03:07:24 +0000</pubDate></item><item><title>[Mine Earthquake]Class2</title><link>https://Lszidv.github.io/post/%5BMine%20Earthquake%5DClass2.html</link><description># 煤矿冲击地压波速前兆提取学习笔记 · Class 2
 
 &gt; 从物理机制出发，理解噪声互相关测量 dv/v 的完整链路及前兆提取方法
 
