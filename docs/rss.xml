@@ -1,5 +1,607 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>芜尽</title><link>https://Lszidv.github.io</link><description>Only love can set us free</description><copyright>芜尽</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/160511559?s=400&amp;u=68ec73daff523efd8652079b221d42e446d01cb6&amp;v=4</url><title>avatar</title><link>https://Lszidv.github.io</link></image><lastBuildDate>Wed, 08 Jul 2026 06:35:46 +0000</lastBuildDate><managingEditor>芜尽</managingEditor><ttl>60</ttl><webMaster>芜尽</webMaster><item><title>Wang et al. (2017) Seasonal Crustal Seismic Velocity Changes Throughout Japan</title><link>https://Lszidv.github.io/post/Wang%20et%20al.%20%282017%29%20Seasonal%20Crustal%20Seismic%20Velocity%20Changes%20Throughout%20Japan.html</link><description># Wang et al. (2017) Seasonal Crustal Seismic Velocity Changes Throughout Japan
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>芜尽</title><link>https://Lszidv.github.io</link><description>Only love can set us free</description><copyright>芜尽</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://avatars.githubusercontent.com/u/160511559?s=400&amp;u=68ec73daff523efd8652079b221d42e446d01cb6&amp;v=4</url><title>avatar</title><link>https://Lszidv.github.io</link></image><lastBuildDate>Tue, 28 Jul 2026 08:21:26 +0000</lastBuildDate><managingEditor>芜尽</managingEditor><ttl>60</ttl><webMaster>芜尽</webMaster><item><title>Deep learning and transfer learning of earthquake and quarry-blast discrimination: applications to southern California and eastern Kentucky.</title><link>https://Lszidv.github.io/post/Deep%20learning%20and%20transfer%20learning%20of%20earthquake%20and%20quarry-blast%20discrimination-%20applications%20to%20southern%20California%20and%20eastern%20Kentucky..html</link><description>迁移学习解决小样本
+Grad-CAM 显示 S 波起跳对地震重要，S 长周期尾波对爆破重要 
+模型预测错误的事件中，多数是分析师标记错误
+---
+
+## 1. Introduction（引言）
+
+### 1.1 研究背景
+
+```
+现代台网记录到越来越多的非天然信号（滑坡、工业爆破等）
+  → 区分天然地震与非天然信号对地震危险性分析重要
+  → 爆破污染目录会导致 b 值被高估（引用 Gulia &amp; Wiemer 2019）
+  → 分类非天然信号对'环境地震学'、'城市地震学'、'法医地震学'也有价值
+  → 在矿区：监控小震级爆破对安全生产和非法采矿检测有用
+```
+
+### 1.2 已有方法的局限
+
+| 方法类别 | 方法 | 局限 |
+|---------|------|------|
+| 基于震源参数 | 位置/发震时间 | 需要准确的前置分析，限制实时应用 |
+| 基于波形（人工特征） | Lg 谱比、P/S 比值、ML-Mc 差等 | ① 人工特征的泛化性差（跨区域性能下降）；② 高噪声时小事件难以可靠测量 |
+
+### 1.3 DL 方法的优势与问题
+
+**优势**：
+```
+深度学习可从数据中自动提取隐性特征
+  → 特征在训练中贪婪搜寻，输出→输入映射
+  → 可能比人工定义特征更具代表性
+```
+
+**问题**：
+```
+DL 模型参数量大 → 需要大量高质量标记数据防过拟合
+  → 有些地区监测历史短、地震活动性低、缺少人工标记
+  → 解决办法：迁移学习（利用富数据区的知识，迁移至缺数据区）
+```
+
+### 1.4 本文方案
+
+```
+加州（数据充足） → 直接训练 CNN
+用大数量标记的地震和爆破
+
+肯塔基（地震仅 150 个） → 迁移学习（以加州模型为起点，微调/冻结）
+加州模型先验知识 + 少量肯塔基标记数据
+
+通用策略：数据增强缓解两类区的类别不平衡
+```
+
+**关键引文链**：
+- Gulia &amp; Wiemer (2019): 爆破污染→b 值高估→大震概率低估
+- Linville et al. (2019): DL 用于事件分类的先驱工作
+- Chai et al. (2020): DL 迁移学习用于地震相位拾取
+- Yosinski et al. (2014): DL 特征的可迁移性理论
+
+---
+
+## 2. Data（数据）
+
+### 2.1 Southern California（南加州）—— Table 1 的核心
+
+| 项目 | 数值 |
+|------|------|
+| 数据源 | SCSN, 2011–2020 |
+| 最终数据量 | 29,075 地震 (583,706 条记录) + 6,632 爆破 (77,707 条记录) |
+| 类别比 | ~4.4:1（事件级），~5.5:1（记录级） |
+| 台站 | 337 个 |
+| 震中距 | ≤100 km |
+| 震级范围 | EQ: -0.48 &lt; ML &lt; 5.51；QB: 0.17 &lt; ML &lt; 2.56 |
+
+**预处理流程**（记录在 2.1 段末）：
+
+```
+原始波形 (100 Hz, HH[E|N|Z])
+  ↓ 去趋势 + Hanning 窗 + 全局归一化（三分量最大标准差归一化）
+  ↓ PhaseNet P 波拾取（理论到时 ±3 s 内搜索）
+  ↓ 质量控制：SNR &gt; 0 dB + PhaseNet 概率 &gt; 0.3
+  ↓ 1–15 Hz 带通滤波
+  ↓ 截取：P 波前 5 s ~ 后 55 s → 输入维度 [3, 5500]
+```
+
+用 PhaseNet 代替 SCSN 官方拾取 → 拾取量更大（更丰富的训练数据）
+用低 SNR 阈值（&gt; 0 dB）→ 增加训练数据的多样性，增强模型对噪声的鲁棒性
+
+**数据选择细节**：
+- 从 SCSN 目录中每 6 个地震保留 1 个 → 缓解原始类别不平衡
+- Ridgecrest 2019 余震移除 → 避免对特定序列过拟合
+- 最终数据集有 1,721,092 条三分量地震记录 + 312,911 条爆破记录
+
+### 2.2 Eastern Kentucky（东肯塔基）—— 与你最相关的数据
+
+| 项目 | 数值 | 
+|------|------|
+| 数据源 | Miao et al. (2020) 已编译数据集 | 
+| 时间范围 | 2015.6–2019.3 | 
+| 地震量 | **仅 150 个**（2,091 条记录） | 
+| 爆破量 | 4,218 个（56,643 条记录） |
+| 类别比 | ~28:1（爆破占优）← 与加州完全相反 |
+| 台站 | 35 区域台 + 13 EKMMP 临时台 |  
+| 震中距 | 多数 &gt;100 km（比加州远）| 
+
+**两数据集的关键差异**（论文原文强调）：
+
+| 维度 | 加州 | 肯塔基 |
+|------|:----:|:------:|
+| 数据量 | 大（~660k 记录） | 小（~59k 记录，少一个量级） |
+| 少数类 | 爆破（~11%） | 地震（~3.4%） |
+| 区域地质 | 活跃构造区，高速减 | 稳定区，低速减衰减 |
+| 台网密度 | 密（~21 站/事件） | 疏（~13 站/事件） |
+| 震中距 | 多数 &lt; 100 km | 多数 &gt; 100 km |
+---
+
+## 3. Methods（方法）
+
+### 3.1 Data Division and Augmentation
+
+**时间顺序分割**（Table 1 详细列出）：
+
+```
+加州：
+  训练集: 2011.1–2018.9（70%: 20,353 EQ + 4,643 QB）
+  验证集: 2018.9–2019.7（10%: 2,907 EQ + 663 QB）
+  测试集: 2019.7–2020.12（20%: 5,815 EQ + 1,326 QB）
+
+肯塔基：
+  训练集: 2015.6–2017.10（70%: 105 EQ + 2,952 QB）
+  验证集: 2017.10–2018.1（10%: 15 EQ + 421 QB）
+  测试集: 2018.1–2019.3（20%: 30 EQ + 845 QB）
+```
+
+**关键原则**：
+1. **事件级分割**：来自同一事件的所有记录归入同一子集 → 防止数据泄露
+2. **时间顺序分割**：模拟真实在线监测场景（与随机分割不同）→ 评估更真实
+
+**数据增强策略**：
+
+| 策略 | 加州（少数类=爆破） | 肯塔基（少数类=地震） |
+|------|:------------------:|:--------------------:|
+| **随机时间偏移（核心）** | 爆破×5，地震×1 | 地震×16，爆破×1 |
+| 通道丢弃 | 随机丢 1–2 分量 | 同左 |
+| 数据缺口 | 随机 &lt;11s 段置零 | 同左 |
+| 波形裁剪 | 随机 &lt;50% 缩小动态范围 | 同左 |
+| 叠加噪声 | 幅度比 &lt;0.2 | 同左 |
+
+**随机时间偏移的设计原理**（论文未明说但可以推理）：
+- 时间偏移给出不同的 P 波位置相对于固定 60s 窗口
+- 同一事件的不同偏移版本，CNN 学到的是 P-S 相对时差等不变特征
+- → 相当于数据量 × 增强倍数
+
+**增强是针对 SNR &gt; 1 dB 的记录**，低 SNR 的记录不变，以防噪声增强导致模型混乱。</description><guid isPermaLink="true">https://Lszidv.github.io/post/Deep%20learning%20and%20transfer%20learning%20of%20earthquake%20and%20quarry-blast%20discrimination-%20applications%20to%20southern%20California%20and%20eastern%20Kentucky..html</guid><pubDate>Tue, 14 Jul 2026 06:36:14 +0000</pubDate></item><item><title>Generalized neural network trained with a small amount of base samples: Application to event detection and phase picking in downhole microseismic monitoring.</title><link>https://Lszidv.github.io/post/Generalized%20neural%20network%20trained%20with%20a%20small%20amount%20of%20base%20samples-%20Application%20to%20event%20detection%20and%20phase%20picking%20in%20downhole%20microseismic%20monitoring..html</link><description>小样本数据增强 + U-Net 微震检测与 PS 拾取
+
+
+## 0. 论文定位表
+
+| 项目 | 内容 |
+|------|------|
+| **任务** | 井下微震事件检测 + P/S 波到时时拾取 |
+| **核心方法** | 2D U-Net + **7 种物理驱动数据增强** |
+| **原始样本量** | **仅 10 个**（水力压裂 Stage 14 起始段） |
+| **增强后样本量** | 82,800 个（增强 8,280 倍） |
+| **测试场景 1** | 同工程不同 Stage（Stage 18, 367m 距接收阵列） |
+| **测试场景 2** | **完全独立的新工程 + 新区域**（Stage 13 of Project 2, 1197m 距，不同速度模型） |
+
+
+---
+
+## 1. Introduction（引言）
+
+### 1.1 大数据的成功与不足（论文前三段）
+
+**大数据的成功案例**（论文列举）：
+```
+Ross et al. (2018): 450 万条三分量记录 → 通用相位检测网络
+Zhu &amp; Beroza (2019) PhaseNet: 234,117 个地震, 889 台站 → U-Net P/S 拾取
+Mousavi et al. (2020): 100 万波形 + 45 万地震 + 30 万噪声 → 检测量翻倍
+```
+
+**困境**（论文第四段核心）：
+
+勘探行业数据不公开 → 没大数据
+  很多应用只能从同一工程获取训练 + 测试数据
+  换工程/区域就得重新训练
+
+两个替代方案：
+ **（1）合成数据训练（Yang &amp; Ma 2019 用有限差分正演）→ 但复杂情况仍需真实数据**
+ **（2）迁移学习（Chai et al. 2020a）→ 需要少量新区域标记数据**
+
+
+
+### 1.2 微震监测的特殊挑战
+
+```
+井下微震监测常用走时网格搜索定位
+  → 事件检测 + P/S 到时拾取是基础步骤
+
+传统 STA/LTA 的问题：
+  → 低 SNR 时效果差
+  → 坏道影响大
+
+已有 ML 方法：
+  → 多为单接收器相位拾取（Ma et al. 2020; Zheng et al. 2020）
+  → 合成数据训练
+  → 但跨工程/区域的泛化性很少被测试
+```
+
+### 1.3 本文方案
+
+```
+核心思想：医学图像分割的启发
+  → U-Net 在医学上：仅 30 张原始图像 + 数据增强 = 通用分割模型
+  → 本文：仅 10 个微震样本 + 7 种物理增强 = 泛化检测/拾取模型
+
+关键设计：
+  1) 2D U-Net（非 1D）：同时处理多个接收器 → 学习 P/S 时差特征
+  2) 7 种增强方法模拟不同物理因素（速度模型、接收器几何、震源机制等）
+  3) 全自动实时监测流程（NN → 网格搜索定位）
+
+测试策略：
+  训练：Project 1, Stage 14 的开头 10 个事件
+  测试 A：同 Project 1 的 Stage 18（不同深度、不同波形特征）
+  测试 B：完全未知的 Project 2（不同接收器几何、不同速度模型、不同距离）
+
+
+---
+
+## 2. Neural Network and Data Augmentation（方法与数据增强——核心）
+
+### 2.1 U-Net 架构
+
+**输入输出**：
+```
+输入: [12 receivers × 512 time points × 3 components] → 视为 '图像' (12×512×3)
+输出: [12 × 512 × 1] → 高斯分布标签（P/S 到时位置为高斯峰值）
+
+采样率: 1 ms
+窗口长度: 512 ms（保证包含完整 P/S 相位）
+P/S 时差: 50 ms ~ 数百 ms（取决于震中距）
+接收器数量: 最大 12（不足时补零）
+```
+
+**U-Net 结构**（20 层 2D 卷积）：
+```
+输入 (12×512×3)
+  ↓
+┌─ Conv3×3 → Conv3×3 → MaxPool (2×2) ───────┐  通道: 3→64
+├─ Conv3×3 → Conv3×3 → MaxPool (2×2) ───────┤  通道: 64→128
+├─ Conv3×3 → Conv3×3 → MaxPool (2×2) ───────┤  通道: 128→256
+├─ Conv3×3 → Conv3×3 → MaxPool (2×2) ───────┤  通道: 256→512
+├─ Conv3×3 → Conv3×3 ───────────────────────┤  通道: 512→1024，特征图 (16×3)
+├─ UpConv2×2 → Conv3×3 → Conv3×3 ──────────┤  通道: 1024→512
+├─ UpConv2×2 → Conv3×3 → Conv3×3 ──────────┤  通道: 512→256
+├─ UpConv2×2 → Conv3×3 → Conv3×3 ──────────┤  通道: 256→128
+└─ UpConv2×2 → Conv3×3 → Conv3×3 ──────────┘  通道: 128→64 → 1（Sigmoid）
+
+输出 (12×512×1)
+每层都有 Skip Connection（左侧对应深度直接拼接到右侧）
+```
+
+&lt;img width='565' height='360' alt='Image' src='https://github.com/user-attachments/assets/8fd68cbb-b329-40fc-bb67-8f747a999202' /&gt;
+
+**与 PhaseNet (Zhu &amp; Beroza 2019) 的关键差异**：
+
+| 维度 | PhaseNet | 本文 |
+|------|:--------:|:----:|
+| 卷积维度 | 1D（单道处理） | **2D（多道同时处理）** |
+| 输入 | 单台站 3C 波形 [3, N] | 多接收器 3C 波形 [N_recv, N_time, 3] |
+| 学习特征 | 单道 P/S 波形特征 | **多道 P/S 时差特征（moveout）** |
+| 标签 | P/S/Noise 三条高斯曲线 | **一条高斯曲线（P+S 共用）** |
+
+**为什么用一条而不是三条高斯标签**（论文讨论部分说明）：
+```
+数据增强后，P 和 S 的波形特征差异被扭曲
+  → 难以区分 P 和 S
+  → 改为学习 P/S 整体的 moveout 曲线
+  → 输出后用到时曲线分析区分 P 和 S
+```
+
+**高斯标签设计**：
+```
+P/S 到时位置 → 高斯峰值，方差 10⁻⁵ s²
+  → 训练时标签有不确定性容忍度
+  → 提高收敛性
+```
+
+### 2.2 7 种数据增强方法——完整流水线
+
+**数据增强的哲学**（论文隐含但明确）：
+
+&gt; 'Data augmentation can yield a training set with more generalized features based on the original samples, and it **might play a more important role than the size of the original training set**.'
+
+#### 增强流程（顺序执行）
+
+```
+[Step 1] 接收器顺序反转（×2）
+  → 模拟事件在接收阵列上方 vs 下方
+  → 10 个原始样本 → 20 个
+
+[Step 2] 分量旋转（×40）
+  → 随机旋转角（ϕ, θ, φ）独立应用于 P 和 S 波
+  → 模拟不同方位角、不同震源机制的偏振变化
+  → 20 → 800 个
+
+[Step 3] P/S 到时移动（×20）
+  → 随机移动首尾到时（±50 ms），插值生成新到时曲线
+  → 保证 P/S 时差 ≥50 ms
+  → 模拟不同速度模型、不同事件位置
+  → 800 → 16,000 个
+
+[Step 4] P 振幅调整（随机从 16,000 选基）
+  → 乘以 0.02–0.8 的随机因子
+  → 模拟不同 P/S 振幅比
+  → 生成 14,400 个
+
+[Step 5] 叠加噪声（随机从之前选基）
+  → 从连续数据截取 200 个噪声窗
+  → 信号/噪声振幅比 = 2–8 随机
+  → 10,400 个
+
+[Step 6] 添加坏道（随机选接收器）
+  → 将选定接收器的波形替换为噪声
+  → 模拟传感器故障
+  → 1,000 个
+
+[Step 7] 剔除接收器（随机数目）
+  → 模拟不同工程接收器数不同的情况
+  → 40,800 个
+
+额外：200 个纯噪声样本 → 增强检测能力
+─────────────────────────────────────
+总计: 20+800+16,000+14,400+10,400+1,000+40,800+200 = 82,800
+```
+
+**对数据增强重要性的验证**（Discussion 段）：
+```
+删掉'分量旋转'增强：仅能检测 182 个事件（vs 506）
+删掉'P/S 到时移动'或'接收器反转'：0 事件（完全失效）
+→ 说明物理合理的增强比样本量更重要
+```
+
+### 2.3 训练设置
+
+| 参数 | 值 |
+|------|:---:|
+| 框架 | TensorFlow |
+| 优化器 | Adam |
+| 学习率 | 10⁻⁴ |
+| 损失函数 | 二值交叉熵 |
+| Epochs | 200 |
+| 验证集 | 15% 随机抽样 |
+| 原始样本 | 10 个事件 |
+
+---
+
+## 3. Real-Time Event Detection and Location Workflow（实时监测流程）
+
+### 3.1 推理过程
+
+```
+连续波形数据
+  ↓ 截取 512 ms 窗口，步长 256 ms（50% 重叠）
+  ↓ 每个接收器：三分量各自除以最大振幅（保留相对幅值）
+  ↓
+U-Net 推理 → 输出 [12, 512, 1] 高斯概率分布
+  ↓
+对每个接收器道：
+  找第一个最大概率 → P 或 S 到时
+  跳过 20 ms（高斯半径）找第二个最大概率 → 另一个到时
+  ↓
+若 &gt;13 个 P/S 到时（12 个接收器共 24 个）的概率 &gt;0.7
+  → 判定为微震事件
+若概率不足 → 判定为噪声或非完整事件
+  ↓
+重复事件去除：比较相邻窗口的到时，保留最早的 P+S 完整事件
+```
+
+### 3.2 网格搜索定位
+
+```
+走时表：根据速度模型 + 接收器几何预计算
+
+垂直监测井 → 2D 网格搜索（深度 + 水平距离）
+  方位角：P 波质点运动估计（SVD, 5–200 Hz 滤波, P 波后 10 ms）
+
+斜井 → 3D 网格搜索
+  粗网格 (20 m) → 找初始位置 → 细网格 (5 m) 精化
+```
+
+### 3.3 实时性能
+
+```
+U-Net 推理: 3.1 s 处理 10 s 连续数据（Intel i7-8565U）
+网格搜索定位: 0.2–18.0 s / 事件
+→ 满足实时监测需求
+```
+
+---
+
+## 4. Applying the Trained Model to Independent Hydraulic Fracturing Stage（结果 1：同工程跨 Stage）
+
+### 4.1 实验设计
+
+```
+训练集: Project 1, Stage 14, 前 10 个事件（距接收阵列 ~510 m）
+测试集 A: Project 1, Stage 18（~367 m，不同深度，不同波形特征）
+测试集 B: Project 1, Stage 14 剩余事件
+```
+
+### 4.2 检测结果
+
+| 测试集 | 检测事件数 |
+|:-----:|:---------:|
+| Stage 14（含训练集） | 1,933 |
+| Stage 18（未见 Stage） | 1,172 |
+
+**最关键的对比例**（论文亮点）：
+```
+用 176 个 Stage 14 事件训练（无数据增强）
+  → 检测 Stage 18 时完全失效
+  → 因为 Stage 14 和 18 的 moveout、偏振、振幅比都不同
+
+用 10 个事件 + 增强训练
+  → Stage 18 成功检测 1,172 个事件
+  → 波形特征差异很大也能泛化
+
+### 4.3 典型波形对比（Fig. 7）
+
+论文展示了两个 Stage 的典型波形，P/S 到时曲线、振幅比、尾波特征均不同 → 模型仍能正确检测和拾取。</description><guid isPermaLink="true">https://Lszidv.github.io/post/Generalized%20neural%20network%20trained%20with%20a%20small%20amount%20of%20base%20samples-%20Application%20to%20event%20detection%20and%20phase%20picking%20in%20downhole%20microseismic%20monitoring..html</guid><pubDate>Tue, 14 Jul 2026 06:24:40 +0000</pubDate></item><item><title>Wang, Q.-Y., &amp; Yao, H. J. (2020). Monitoring of velocity changes based on seismic ambient noise: A brief review and perspective.</title><link>https://Lszidv.github.io/post/Wang%2C%20Q.-Y.%2C%20%26%20Yao%2C%20H.%20J.%20%282020%29.%20Monitoring%20of%20velocity%20changes%20based%20on%20seismic%20ambient%20noise-%20A%20brief%20review%20and%20perspective..html</link><description>
+## 要点
+
+- 列出了若干最先进的监测方法：MWCS、stretching、DTW、小波互谱、贝叶斯反演、贝叶斯MCMC
+- 总结了不同尺度和不同机制的噪声监测应用：地震同震/震后、火山喷发预报、环境强迫、小尺度水库/滑坡
+- 噪声监测技术可追踪多种物理参数的变化，适用于地球及地外行星地震学
+
+---
+
+## 1. 引言
+
+- **研究动机**：研究地壳应力状态对理解地球的构造和非构造过程至关重要
+- **理论基础**：监测地震波速度变化是探测地壳应力状态变化的有效工具——已在理论和实验两方面得到验证（Birch, 1961; Nur &amp; Simmons, 1969; O'Connell &amp; Budiansky, 1974; Schoenberg, 1980; Yamamura et al., 2003）
+- **可行性**：持续且广泛分布的地震噪声使我们可以通过连续互相关或自相关重建格林函数（Aki, 1957; Claerbout, 1968; Lobkis &amp; Weaver, 2001; Campillo &amp; Paul, 2003; Shapiro &amp; Campillo, 2004; Larose et al., 2005a; Campillo, 2006, 2011）
+- **能力**：通过测量 $\delta v/v$，可以研究深部地壳应力状态，且时间上连续——为地壳动力过程（地震、火山及其他活动）提供关键约束
+- **环境监测**：还可用于监测各种环境变化引起的浅部速度变化
+- **小尺度应用**：可应用于滑坡、水库等小尺度场景，用于灾害预测与早期预警
+- **论文结构**：简要综述方法及主要应用领域；讨论亟需的研究方向和未来发展可能
+
+---
+
+## 2. 方法论
+
+### 2.1 尾波干涉测量
+
+- **起源**：Poupinet et al.（1984）从地震双重波中提取相位偏移；Snieder et al.（2002）推广到不同流逝时间的滑动窗口 + 线性回归
+- **基本假设**：波场变化是均匀的
+
+**核心公式**：
+
+$$
+\delta t / t = -\delta v / v
+$$
+
+- 走时相对变化与波速相对变化呈反比
+
+### 2.2 四种测量方法
+
+#### 移动窗互谱分析（MWCS）
+
+- **域**：频率域
+- **原理**：在滑动窗口内测量相位偏移，通过两次线性回归得到 $\delta v/v$
+- **参数**：滑动窗口宽度、流逝时间范围、质量控制阈值等
+- **文献**：Brenguier et al.（2008a, b）; Clarke et al.（2011）
+- **优势**：经典方法，成熟稳定，频率域可分选噪声
+- **劣势**：需仔细定义多项参数
+
+#### Stretching 方法
+
+- **域**：时间域
+- **原理**：对当前互相关函数施加拉伸系数 $\varepsilon$，优化其与参考函数的相关系数；$\delta v/v = -\varepsilon$
+- **文献**：Lobkis &amp; Weaver（2003）; Sens-Schönfelder &amp; Wegler（2006）
+- **优势**：直观简单，单参数
+- **劣势**：可能被噪声源频谱变化**污染**（Zhan et al., 2013）
+
+#### 动态时间规整（DTW）
+
+- **域**：时间域
+- **原理**：利用全部信息——尾波走时偏移、振幅和去相干信息
+- **文献**：Mikesell et al.（2015）
+- **优势**：更灵活，允许非均匀走时偏移
+- **劣势**：计算量大，对噪声敏感
+
+#### 小波互谱分析
+
+- **域**：时频域
+- **原理**：连续小波变换，提供最优时频联合分辨率，实现全流逝时间测量
+- **文献**：Mao et al.（2020）
+- **优势**：对多频段和深度分析有强大的计算优势
+- **劣势**：较新方法
+
+### 2.3 反演增强
+
+**线性反演（Brenguier et al., 2014）**：
+
+$$
+\delta v_j - \delta v_i \approx \delta v_{ij}
+$$
+
+- 有助于避免选择任意参考互相关函数
+- 贝叶斯最小二乘反演可获取精确连续的速度变化
+- **正则化**可分别聚焦于快速或长期变化
+
+**贝叶斯 MCMC（Taylor &amp; Hillers, 2020）**：
+- 构建 $\delta v/v$ 的全后验概率分布
+- 有效处理大数据量问题
+- 纳入测量不确定性信息
+
+### 2.4 弹道波监测
+
+- **动机**：尾波监测空间分辨率不足、深度定位困难
+- **方法**：使用从噪声互相关中恢复的弹道波（体波 + 面波：基阶 + 一阶高阶）进行监测
+- **要求**：小尺度目标化密集台阵
+- **优势**：更好的深度定位
+- **劣势**：对噪声源属性高敏感，需密集台阵降低偏差
+
+### 2.5 尾波 vs 弹道波对比
+
+| 属性 | 尾波 | 弹道波 |
+|------|------|--------|
+| 噪声源敏感性 | 低（散射增强信噪比） | 高 |
+| 格林函数要求 | 无需完美重建也可用 | 需要更高质量 |
+| 空间分辨率 | 有限（散射路径复杂） | 更好（直达路径） |
+| 深度定位 | 困难 | 可能 |
+
+### 2.6 主动源 vs 被动源
+
+- **被动源**：基于噪声，连续、低成本、覆盖范围广
+- **主动源**：地震双重波或人工源；高信噪比、时间可重复可控
+- **主动源优势**：可捕捉瞬时同震变化，被动源监测因时间分辨率与收敛时间的权衡而可能低估
+- **联合使用**：显著提高检测精度
+
+---
+
+## 3. 应用
+
+### 3.1 地震同震与震后速度变化
+
+**一般模式**：
+- 快速同震速度降低 → 缓慢震后指数恢复
+
+**机制**：
+- 浅层动态震动（非线性弹性行为、慢动力学）
+- 深层地震引起的应力变化
+
+**Parkfield（Brenguier et al., 2008a）**：
+- $\delta v/v \sim 0.08\%$
+- 浅层同震损伤 + 深层同震应力变化 + 震后应力松弛
+
+**2011 Mw 9.0 东北-冲地震（Wang et al., 2019）**：
+- 首次观测到**深度（频率）依赖的速度变化**
+  - 1–7 s 周期频段（~0.07%）：浅层降低，与动态应力（PGV）相关——机械弱化
+  - 8–30 s 周期频段（~0.04%）：深层降低，由静态应变主导
+- 日本中部火山区对同震动态应力扰动高度敏感（Brenguier et al., 2014）
+
+### 3.2 火山区域速度变化
+
+**Piton de la Fournaise（Brenguier et al., 2008b）**：
+- 喷发前出现系统性 $\delta v/v$ 降低（~0.05%）作为**前兆**
+- 速度变化与火山系统膨胀或压缩密切相关
+- 异质性应力分布可导致对同一火山活动产生**相反**的速度响应
+
+**Kilauea（Liu et al., 2019）**：
+- 两阶段速度变化：岩浆上升引起的压缩 + 岩浆注入裂隙
+
+**Takano et al.（2020）**：
+- 将弹道波监测应用于 Piton de la Fournaise
+- 浅层岩浆房微小增压引起的应变复杂性导致速度变化
+
+### 3.3 环境速度变化
+
+**目的**：研究环境相关的瞬态速度变化有助于**分离**构造相关的变形
+
+**地下水与降雨**：
+- $\delta v/v$ 降低可达 $10^{-2}\%$ 至 $10^{-1}\%$
+- 降雨入渗 → 延迟的孔隙压力增强（地壳顶部数km）→ 剪切模量降低 → $\delta v/v$ 降低
+- 速度变化相对于降水峰值有延迟（水力扩散所致）
+
+**案例：日本九州**：
+- 2011年7月和2012年7月出现显著速度降低
+- 火山区下方降低更显著——证实了火山区域的高敏感性
+
+**其他环境因素**：
+
+| 因素 | 效应 | 时间尺度 |
+|------|------|---------|
+| 热弹性应力 | 年周期变化 | 季节 |
+| 大气压 | 微小调制 | 天~季节 |
+| 潮汐效应 | 微小调制 | 半日~月 |
+| 永久冻土冻融 | 显著调制 | 季节 |
+| 积雪 | 弹性荷载（压缩）+ 融化后孔隙压力变化 | 季节 |
+| 海面高度 | 直接弹性荷载 | 变化 |
+
+**复杂性**：同一环境因素对不同深度、距离、断层走向的介质可产生**相反**的 $\delta v/v$ 响应。</description><guid isPermaLink="true">https://Lszidv.github.io/post/Wang%2C%20Q.-Y.%2C%20%26%20Yao%2C%20H.%20J.%20%282020%29.%20Monitoring%20of%20velocity%20changes%20based%20on%20seismic%20ambient%20noise-%20A%20brief%20review%20and%20perspective..html</guid><pubDate>Wed, 08 Jul 2026 09:30:22 +0000</pubDate></item><item><title>Wang et al. (2017) Seasonal Crustal Seismic Velocity Changes Throughout Japan</title><link>https://Lszidv.github.io/post/Wang%20et%20al.%20%282017%29%20Seasonal%20Crustal%20Seismic%20Velocity%20Changes%20Throughout%20Japan.html</link><description># Wang et al. (2017) Seasonal Crustal Seismic Velocity Changes Throughout Japan
 
 ---
 

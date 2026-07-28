@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="小样本数据增强 + U-Net 微震检测与 PS 拾取
+
+
+## 0. 论文定位表
+
+| 项目 | 内容 |
+|------|------|
+| **任务** | 井下微震事件检测 + P/S 波到时时拾取 |
+| **核心方法** | 2D U-Net + **7 种物理驱动数据增强** |
+| **原始样本量** | **仅 10 个**（水力压裂 Stage 14 起始段） |
+| **增强后样本量** | 82,800 个（增强 8,280 倍） |
+| **测试场景 1** | 同工程不同 Stage（Stage 18, 367m 距接收阵列） |
+| **测试场景 2** | **完全独立的新工程 + 新区域**（Stage 13 of Project 2, 1197m 距，不同速度模型） |
+
+
+---
+
+## 1. Introduction（引言）
+
+### 1.1 大数据的成功与不足（论文前三段）
+
+**大数据的成功案例**（论文列举）：
+```
+Ross et al. (2018): 450 万条三分量记录 → 通用相位检测网络
+Zhu & Beroza (2019) PhaseNet: 234,117 个地震, 889 台站 → U-Net P/S 拾取
+Mousavi et al. (2020): 100 万波形 + 45 万地震 + 30 万噪声 → 检测量翻倍
+```
+
+**困境**（论文第四段核心）：
+
+勘探行业数据不公开 → 没大数据
+  很多应用只能从同一工程获取训练 + 测试数据
+  换工程/区域就得重新训练
+
+两个替代方案：
+ **（1）合成数据训练（Yang & Ma 2019 用有限差分正演）→ 但复杂情况仍需真实数据**
+ **（2）迁移学习（Chai et al. 2020a）→ 需要少量新区域标记数据**
+
+
+
+### 1.2 微震监测的特殊挑战
+
+```
+井下微震监测常用走时网格搜索定位
+  → 事件检测 + P/S 到时拾取是基础步骤
+
+传统 STA/LTA 的问题：
+  → 低 SNR 时效果差
+  → 坏道影响大
+
+已有 ML 方法：
+  → 多为单接收器相位拾取（Ma et al. 2020; Zheng et al. 2020）
+  → 合成数据训练
+  → 但跨工程/区域的泛化性很少被测试
+```
+
+### 1.3 本文方案
+
+```
+核心思想：医学图像分割的启发
+  → U-Net 在医学上：仅 30 张原始图像 + 数据增强 = 通用分割模型
+  → 本文：仅 10 个微震样本 + 7 种物理增强 = 泛化检测/拾取模型
+
+关键设计：
+  1) 2D U-Net（非 1D）：同时处理多个接收器 → 学习 P/S 时差特征
+  2) 7 种增强方法模拟不同物理因素（速度模型、接收器几何、震源机制等）
+  3) 全自动实时监测流程（NN → 网格搜索定位）
+
+测试策略：
+  训练：Project 1, Stage 14 的开头 10 个事件
+  测试 A：同 Project 1 的 Stage 18（不同深度、不同波形特征）
+  测试 B：完全未知的 Project 2（不同接收器几何、不同速度模型、不同距离）
+
+
+---
+
+## 2. Neural Network and Data Augmentation（方法与数据增强——核心）
+
+### 2.1 U-Net 架构
+
+**输入输出**：
+```
+输入: [12 receivers × 512 time points × 3 components] → 视为 '图像' (12×512×3)
+输出: [12 × 512 × 1] → 高斯分布标签（P/S 到时位置为高斯峰值）
+
+采样率: 1 ms
+窗口长度: 512 ms（保证包含完整 P/S 相位）
+P/S 时差: 50 ms ~ 数百 ms（取决于震中距）
+接收器数量: 最大 12（不足时补零）
+```
+
+**U-Net 结构**（20 层 2D 卷积）：
+```
+输入 (12×512×3)
+  ↓
+┌─ Conv3×3 → Conv3×3 → MaxPool (2×2) ───────┐  通道: 3→64
+├─ Conv3×3 → Conv3×3 → MaxPool (2×2) ───────┤  通道: 64→128
+├─ Conv3×3 → Conv3×3 → MaxPool (2×2) ───────┤  通道: 128→256
+├─ Conv3×3 → Conv3×3 → MaxPool (2×2) ───────┤  通道: 256→512
+├─ Conv3×3 → Conv3×3 ───────────────────────┤  通道: 512→1024，特征图 (16×3)
+├─ UpConv2×2 → Conv3×3 → Conv3×3 ──────────┤  通道: 1024→512
+├─ UpConv2×2 → Conv3×3 → Conv3×3 ──────────┤  通道: 512→256
+├─ UpConv2×2 → Conv3×3 → Conv3×3 ──────────┤  通道: 256→128
+└─ UpConv2×2 → Conv3×3 → Conv3×3 ──────────┘  通道: 128→64 → 1（Sigmoid）
+
+输出 (12×512×1)
+每层都有 Skip Connection（左侧对应深度直接拼接到右侧）
+```
+
+<img width='565' height='360' alt='Image' src='https://github.com/user-attachments/assets/8fd68cbb-b329-40fc-bb67-8f747a999202' />
+
+**与 PhaseNet (Zhu & Beroza 2019) 的关键差异**：
+
+| 维度 | PhaseNet | 本文 |
+|------|:--------:|:----:|
+| 卷积维度 | 1D（单道处理） | **2D（多道同时处理）** |
+| 输入 | 单台站 3C 波形 [3, N] | 多接收器 3C 波形 [N_recv, N_time, 3] |
+| 学习特征 | 单道 P/S 波形特征 | **多道 P/S 时差特征（moveout）** |
+| 标签 | P/S/Noise 三条高斯曲线 | **一条高斯曲线（P+S 共用）** |
+
+**为什么用一条而不是三条高斯标签**（论文讨论部分说明）：
+```
+数据增强后，P 和 S 的波形特征差异被扭曲
+  → 难以区分 P 和 S
+  → 改为学习 P/S 整体的 moveout 曲线
+  → 输出后用到时曲线分析区分 P 和 S
+```
+
+**高斯标签设计**：
+```
+P/S 到时位置 → 高斯峰值，方差 10⁻⁵ s²
+  → 训练时标签有不确定性容忍度
+  → 提高收敛性
+```
+
+### 2.2 7 种数据增强方法——完整流水线
+
+**数据增强的哲学**（论文隐含但明确）：
+
+> 'Data augmentation can yield a training set with more generalized features based on the original samples, and it **might play a more important role than the size of the original training set**.'
+
+#### 增强流程（顺序执行）
+
+```
+[Step 1] 接收器顺序反转（×2）
+  → 模拟事件在接收阵列上方 vs 下方
+  → 10 个原始样本 → 20 个
+
+[Step 2] 分量旋转（×40）
+  → 随机旋转角（ϕ, θ, φ）独立应用于 P 和 S 波
+  → 模拟不同方位角、不同震源机制的偏振变化
+  → 20 → 800 个
+
+[Step 3] P/S 到时移动（×20）
+  → 随机移动首尾到时（±50 ms），插值生成新到时曲线
+  → 保证 P/S 时差 ≥50 ms
+  → 模拟不同速度模型、不同事件位置
+  → 800 → 16,000 个
+
+[Step 4] P 振幅调整（随机从 16,000 选基）
+  → 乘以 0.02–0.8 的随机因子
+  → 模拟不同 P/S 振幅比
+  → 生成 14,400 个
+
+[Step 5] 叠加噪声（随机从之前选基）
+  → 从连续数据截取 200 个噪声窗
+  → 信号/噪声振幅比 = 2–8 随机
+  → 10,400 个
+
+[Step 6] 添加坏道（随机选接收器）
+  → 将选定接收器的波形替换为噪声
+  → 模拟传感器故障
+  → 1,000 个
+
+[Step 7] 剔除接收器（随机数目）
+  → 模拟不同工程接收器数不同的情况
+  → 40,800 个
+
+额外：200 个纯噪声样本 → 增强检测能力
+─────────────────────────────────────
+总计: 20+800+16,000+14,400+10,400+1,000+40,800+200 = 82,800
+```
+
+**对数据增强重要性的验证**（Discussion 段）：
+```
+删掉'分量旋转'增强：仅能检测 182 个事件（vs 506）
+删掉'P/S 到时移动'或'接收器反转'：0 事件（完全失效）
+→ 说明物理合理的增强比样本量更重要
+```
+
+### 2.3 训练设置
+
+| 参数 | 值 |
+|------|:---:|
+| 框架 | TensorFlow |
+| 优化器 | Adam |
+| 学习率 | 10⁻⁴ |
+| 损失函数 | 二值交叉熵 |
+| Epochs | 200 |
+| 验证集 | 15% 随机抽样 |
+| 原始样本 | 10 个事件 |
+
+---
+
+## 3. Real-Time Event Detection and Location Workflow（实时监测流程）
+
+### 3.1 推理过程
+
+```
+连续波形数据
+  ↓ 截取 512 ms 窗口，步长 256 ms（50% 重叠）
+  ↓ 每个接收器：三分量各自除以最大振幅（保留相对幅值）
+  ↓
+U-Net 推理 → 输出 [12, 512, 1] 高斯概率分布
+  ↓
+对每个接收器道：
+  找第一个最大概率 → P 或 S 到时
+  跳过 20 ms（高斯半径）找第二个最大概率 → 另一个到时
+  ↓
+若 >13 个 P/S 到时（12 个接收器共 24 个）的概率 >0.7
+  → 判定为微震事件
+若概率不足 → 判定为噪声或非完整事件
+  ↓
+重复事件去除：比较相邻窗口的到时，保留最早的 P+S 完整事件
+```
+
+### 3.2 网格搜索定位
+
+```
+走时表：根据速度模型 + 接收器几何预计算
+
+垂直监测井 → 2D 网格搜索（深度 + 水平距离）
+  方位角：P 波质点运动估计（SVD, 5–200 Hz 滤波, P 波后 10 ms）
+
+斜井 → 3D 网格搜索
+  粗网格 (20 m) → 找初始位置 → 细网格 (5 m) 精化
+```
+
+### 3.3 实时性能
+
+```
+U-Net 推理: 3.1 s 处理 10 s 连续数据（Intel i7-8565U）
+网格搜索定位: 0.2–18.0 s / 事件
+→ 满足实时监测需求
+```
+
+---
+
+## 4. Applying the Trained Model to Independent Hydraulic Fracturing Stage（结果 1：同工程跨 Stage）
+
+### 4.1 实验设计
+
+```
+训练集: Project 1, Stage 14, 前 10 个事件（距接收阵列 ~510 m）
+测试集 A: Project 1, Stage 18（~367 m，不同深度，不同波形特征）
+测试集 B: Project 1, Stage 14 剩余事件
+```
+
+### 4.2 检测结果
+
+| 测试集 | 检测事件数 |
+|:-----:|:---------:|
+| Stage 14（含训练集） | 1,933 |
+| Stage 18（未见 Stage） | 1,172 |
+
+**最关键的对比例**（论文亮点）：
+```
+用 176 个 Stage 14 事件训练（无数据增强）
+  → 检测 Stage 18 时完全失效
+  → 因为 Stage 14 和 18 的 moveout、偏振、振幅比都不同
+
+用 10 个事件 + 增强训练
+  → Stage 18 成功检测 1,172 个事件
+  → 波形特征差异很大也能泛化
+
+### 4.3 典型波形对比（Fig. 7）
+
+论文展示了两个 Stage 的典型波形，P/S 到时曲线、振幅比、尾波特征均不同 → 模型仍能正确检测和拾取。">
+<meta property="og:title" content="Generalized neural network trained with a small amount of base samples: Application to event detection and phase picking in downhole microseismic monitoring.">
+<meta property="og:description" content="小样本数据增强 + U-Net 微震检测与 PS 拾取
+
+
+## 0. 论文定位表
+
+| 项目 | 内容 |
+|------|------|
+| **任务** | 井下微震事件检测 + P/S 波到时时拾取 |
+| **核心方法** | 2D U-Net + **7 种物理驱动数据增强** |
+| **原始样本量** | **仅 10 个**（水力压裂 Stage 14 起始段） |
+| **增强后样本量** | 82,800 个（增强 8,280 倍） |
+| **测试场景 1** | 同工程不同 Stage（Stage 18, 367m 距接收阵列） |
+| **测试场景 2** | **完全独立的新工程 + 新区域**（Stage 13 of Project 2, 1197m 距，不同速度模型） |
+
+
+---
+
+## 1. Introduction（引言）
+
+### 1.1 大数据的成功与不足（论文前三段）
+
+**大数据的成功案例**（论文列举）：
+```
+Ross et al. (2018): 450 万条三分量记录 → 通用相位检测网络
+Zhu & Beroza (2019) PhaseNet: 234,117 个地震, 889 台站 → U-Net P/S 拾取
+Mousavi et al. (2020): 100 万波形 + 45 万地震 + 30 万噪声 → 检测量翻倍
+```
+
+**困境**（论文第四段核心）：
+
+勘探行业数据不公开 → 没大数据
+  很多应用只能从同一工程获取训练 + 测试数据
+  换工程/区域就得重新训练
+
+两个替代方案：
+ **（1）合成数据训练（Yang & Ma 2019 用有限差分正演）→ 但复杂情况仍需真实数据**
+ **（2）迁移学习（Chai et al. 2020a）→ 需要少量新区域标记数据**
+
+
+
+### 1.2 微震监测的特殊挑战
+
+```
+井下微震监测常用走时网格搜索定位
+  → 事件检测 + P/S 到时拾取是基础步骤
+
+传统 STA/LTA 的问题：
+  → 低 SNR 时效果差
+  → 坏道影响大
+
+已有 ML 方法：
+  → 多为单接收器相位拾取（Ma et al. 2020; Zheng et al. 2020）
+  → 合成数据训练
+  → 但跨工程/区域的泛化性很少被测试
+```
+
+### 1.3 本文方案
+
+```
+核心思想：医学图像分割的启发
+  → U-Net 在医学上：仅 30 张原始图像 + 数据增强 = 通用分割模型
+  → 本文：仅 10 个微震样本 + 7 种物理增强 = 泛化检测/拾取模型
+
+关键设计：
+  1) 2D U-Net（非 1D）：同时处理多个接收器 → 学习 P/S 时差特征
+  2) 7 种增强方法模拟不同物理因素（速度模型、接收器几何、震源机制等）
+  3) 全自动实时监测流程（NN → 网格搜索定位）
+
+测试策略：
+  训练：Project 1, Stage 14 的开头 10 个事件
+  测试 A：同 Project 1 的 Stage 18（不同深度、不同波形特征）
+  测试 B：完全未知的 Project 2（不同接收器几何、不同速度模型、不同距离）
+
+
+---
+
+## 2. Neural Network and Data Augmentation（方法与数据增强——核心）
+
+### 2.1 U-Net 架构
+
+**输入输出**：
+```
+输入: [12 receivers × 512 time points × 3 components] → 视为 '图像' (12×512×3)
+输出: [12 × 512 × 1] → 高斯分布标签（P/S 到时位置为高斯峰值）
+
+采样率: 1 ms
+窗口长度: 512 ms（保证包含完整 P/S 相位）
+P/S 时差: 50 ms ~ 数百 ms（取决于震中距）
+接收器数量: 最大 12（不足时补零）
+```
+
+**U-Net 结构**（20 层 2D 卷积）：
+```
+输入 (12×512×3)
+  ↓
+┌─ Conv3×3 → Conv3×3 → MaxPool (2×2) ───────┐  通道: 3→64
+├─ Conv3×3 → Conv3×3 → MaxPool (2×2) ───────┤  通道: 64→128
+├─ Conv3×3 → Conv3×3 → MaxPool (2×2) ───────┤  通道: 128→256
+├─ Conv3×3 → Conv3×3 → MaxPool (2×2) ───────┤  通道: 256→512
+├─ Conv3×3 → Conv3×3 ───────────────────────┤  通道: 512→1024，特征图 (16×3)
+├─ UpConv2×2 → Conv3×3 → Conv3×3 ──────────┤  通道: 1024→512
+├─ UpConv2×2 → Conv3×3 → Conv3×3 ──────────┤  通道: 512→256
+├─ UpConv2×2 → Conv3×3 → Conv3×3 ──────────┤  通道: 256→128
+└─ UpConv2×2 → Conv3×3 → Conv3×3 ──────────┘  通道: 128→64 → 1（Sigmoid）
+
+输出 (12×512×1)
+每层都有 Skip Connection（左侧对应深度直接拼接到右侧）
+```
+
+<img width='565' height='360' alt='Image' src='https://github.com/user-attachments/assets/8fd68cbb-b329-40fc-bb67-8f747a999202' />
+
+**与 PhaseNet (Zhu & Beroza 2019) 的关键差异**：
+
+| 维度 | PhaseNet | 本文 |
+|------|:--------:|:----:|
+| 卷积维度 | 1D（单道处理） | **2D（多道同时处理）** |
+| 输入 | 单台站 3C 波形 [3, N] | 多接收器 3C 波形 [N_recv, N_time, 3] |
+| 学习特征 | 单道 P/S 波形特征 | **多道 P/S 时差特征（moveout）** |
+| 标签 | P/S/Noise 三条高斯曲线 | **一条高斯曲线（P+S 共用）** |
+
+**为什么用一条而不是三条高斯标签**（论文讨论部分说明）：
+```
+数据增强后，P 和 S 的波形特征差异被扭曲
+  → 难以区分 P 和 S
+  → 改为学习 P/S 整体的 moveout 曲线
+  → 输出后用到时曲线分析区分 P 和 S
+```
+
+**高斯标签设计**：
+```
+P/S 到时位置 → 高斯峰值，方差 10⁻⁵ s²
+  → 训练时标签有不确定性容忍度
+  → 提高收敛性
+```
+
+### 2.2 7 种数据增强方法——完整流水线
+
+**数据增强的哲学**（论文隐含但明确）：
+
+> 'Data augmentation can yield a training set with more generalized features based on the original samples, and it **might play a more important role than the size of the original training set**.'
+
+#### 增强流程（顺序执行）
+
+```
+[Step 1] 接收器顺序反转（×2）
+  → 模拟事件在接收阵列上方 vs 下方
+  → 10 个原始样本 → 20 个
+
+[Step 2] 分量旋转（×40）
+  → 随机旋转角（ϕ, θ, φ）独立应用于 P 和 S 波
+  → 模拟不同方位角、不同震源机制的偏振变化
+  → 20 → 800 个
+
+[Step 3] P/S 到时移动（×20）
+  → 随机移动首尾到时（±50 ms），插值生成新到时曲线
+  → 保证 P/S 时差 ≥50 ms
+  → 模拟不同速度模型、不同事件位置
+  → 800 → 16,000 个
+
+[Step 4] P 振幅调整（随机从 16,000 选基）
+  → 乘以 0.02–0.8 的随机因子
+  → 模拟不同 P/S 振幅比
+  → 生成 14,400 个
+
+[Step 5] 叠加噪声（随机从之前选基）
+  → 从连续数据截取 200 个噪声窗
+  → 信号/噪声振幅比 = 2–8 随机
+  → 10,400 个
+
+[Step 6] 添加坏道（随机选接收器）
+  → 将选定接收器的波形替换为噪声
+  → 模拟传感器故障
+  → 1,000 个
+
+[Step 7] 剔除接收器（随机数目）
+  → 模拟不同工程接收器数不同的情况
+  → 40,800 个
+
+额外：200 个纯噪声样本 → 增强检测能力
+─────────────────────────────────────
+总计: 20+800+16,000+14,400+10,400+1,000+40,800+200 = 82,800
+```
+
+**对数据增强重要性的验证**（Discussion 段）：
+```
+删掉'分量旋转'增强：仅能检测 182 个事件（vs 506）
+删掉'P/S 到时移动'或'接收器反转'：0 事件（完全失效）
+→ 说明物理合理的增强比样本量更重要
+```
+
+### 2.3 训练设置
+
+| 参数 | 值 |
+|------|:---:|
+| 框架 | TensorFlow |
+| 优化器 | Adam |
+| 学习率 | 10⁻⁴ |
+| 损失函数 | 二值交叉熵 |
+| Epochs | 200 |
+| 验证集 | 15% 随机抽样 |
+| 原始样本 | 10 个事件 |
+
+---
+
+## 3. Real-Time Event Detection and Location Workflow（实时监测流程）
+
+### 3.1 推理过程
+
+```
+连续波形数据
+  ↓ 截取 512 ms 窗口，步长 256 ms（50% 重叠）
+  ↓ 每个接收器：三分量各自除以最大振幅（保留相对幅值）
+  ↓
+U-Net 推理 → 输出 [12, 512, 1] 高斯概率分布
+  ↓
+对每个接收器道：
+  找第一个最大概率 → P 或 S 到时
+  跳过 20 ms（高斯半径）找第二个最大概率 → 另一个到时
+  ↓
+若 >13 个 P/S 到时（12 个接收器共 24 个）的概率 >0.7
+  → 判定为微震事件
+若概率不足 → 判定为噪声或非完整事件
+  ↓
+重复事件去除：比较相邻窗口的到时，保留最早的 P+S 完整事件
+```
+
+### 3.2 网格搜索定位
+
+```
+走时表：根据速度模型 + 接收器几何预计算
+
+垂直监测井 → 2D 网格搜索（深度 + 水平距离）
+  方位角：P 波质点运动估计（SVD, 5–200 Hz 滤波, P 波后 10 ms）
+
+斜井 → 3D 网格搜索
+  粗网格 (20 m) → 找初始位置 → 细网格 (5 m) 精化
+```
+
+### 3.3 实时性能
+
+```
+U-Net 推理: 3.1 s 处理 10 s 连续数据（Intel i7-8565U）
+网格搜索定位: 0.2–18.0 s / 事件
+→ 满足实时监测需求
+```
+
+---
+
+## 4. Applying the Trained Model to Independent Hydraulic Fracturing Stage（结果 1：同工程跨 Stage）
+
+### 4.1 实验设计
+
+```
+训练集: Project 1, Stage 14, 前 10 个事件（距接收阵列 ~510 m）
+测试集 A: Project 1, Stage 18（~367 m，不同深度，不同波形特征）
+测试集 B: Project 1, Stage 14 剩余事件
+```
+
+### 4.2 检测结果
+
+| 测试集 | 检测事件数 |
+|:-----:|:---------:|
+| Stage 14（含训练集） | 1,933 |
+| Stage 18（未见 Stage） | 1,172 |
+
+**最关键的对比例**（论文亮点）：
+```
+用 176 个 Stage 14 事件训练（无数据增强）
+  → 检测 Stage 18 时完全失效
+  → 因为 Stage 14 和 18 的 moveout、偏振、振幅比都不同
+
+用 10 个事件 + 增强训练
+  → Stage 18 成功检测 1,172 个事件
+  → 波形特征差异很大也能泛化
+
+### 4.3 典型波形对比（Fig. 7）
+
+论文展示了两个 Stage 的典型波形，P/S 到时曲线、振幅比、尾波特征均不同 → 模型仍能正确检测和拾取。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://Lszidv.github.io/post/Generalized%20neural%20network%20trained%20with%20a%20small%20amount%20of%20base%20samples-%20Application%20to%20event%20detection%20and%20phase%20picking%20in%20downhole%20microseismic%20monitoring..html">
+<meta property="og:image" content="https://avatars.githubusercontent.com/u/160511559?s=400&u=68ec73daff523efd8652079b221d42e446d01cb6&v=4">
+<title>Generalized neural network trained with a small amount of base samples: Application to event detection and phase picking in downhole microseismic monitoring.</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+.copy-feedback {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 50px;
+    color: var(--color-fg-on-emphasis);
+    background-color: var(--color-fg-muted);
+    border-radius: 3px;
+    padding: 5px 8px;
+    font-size: 12px;
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">Generalized neural network trained with a small amount of base samples: Application to event detection and phase picking in downhole microseismic monitoring.</h1>
+<div class="title-right">
+    <a href="https://Lszidv.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/Lszidv/Lszidv.github.io/issues/66" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><p>小样本数据增强 + U-Net 微震检测与 PS 拾取</p>
+<h2>0. 论文定位表</h2>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>任务</strong></td>
+<td>井下微震事件检测 + P/S 波到时时拾取</td>
+</tr>
+<tr>
+<td><strong>核心方法</strong></td>
+<td>2D U-Net + <strong>7 种物理驱动数据增强</strong></td>
+</tr>
+<tr>
+<td><strong>原始样本量</strong></td>
+<td><strong>仅 10 个</strong>（水力压裂 Stage 14 起始段）</td>
+</tr>
+<tr>
+<td><strong>增强后样本量</strong></td>
+<td>82,800 个（增强 8,280 倍）</td>
+</tr>
+<tr>
+<td><strong>测试场景 1</strong></td>
+<td>同工程不同 Stage（Stage 18, 367m 距接收阵列）</td>
+</tr>
+<tr>
+<td><strong>测试场景 2</strong></td>
+<td><strong>完全独立的新工程 + 新区域</strong>（Stage 13 of Project 2, 1197m 距，不同速度模型）</td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<hr>
+<h2>1. Introduction（引言）</h2>
+<h3>1.1 大数据的成功与不足（论文前三段）</h3>
+<p><strong>大数据的成功案例</strong>（论文列举）：</p>
+<pre class="notranslate"><code class="notranslate">Ross et al. (2018): 450 万条三分量记录 → 通用相位检测网络
+Zhu &amp; Beroza (2019) PhaseNet: 234,117 个地震, 889 台站 → U-Net P/S 拾取
+Mousavi et al. (2020): 100 万波形 + 45 万地震 + 30 万噪声 → 检测量翻倍
+</code></pre>
+<p><strong>困境</strong>（论文第四段核心）：</p>
+<p>勘探行业数据不公开 → 没大数据<br>
+很多应用只能从同一工程获取训练 + 测试数据<br>
+换工程/区域就得重新训练</p>
+<p>两个替代方案：<br>
+<strong>（1）合成数据训练（Yang &amp; Ma 2019 用有限差分正演）→ 但复杂情况仍需真实数据</strong><br>
+<strong>（2）迁移学习（Chai et al. 2020a）→ 需要少量新区域标记数据</strong></p>
+<h3>1.2 微震监测的特殊挑战</h3>
+<pre class="notranslate"><code class="notranslate">井下微震监测常用走时网格搜索定位
+  → 事件检测 + P/S 到时拾取是基础步骤
+
+传统 STA/LTA 的问题：
+  → 低 SNR 时效果差
+  → 坏道影响大
+
+已有 ML 方法：
+  → 多为单接收器相位拾取（Ma et al. 2020; Zheng et al. 2020）
+  → 合成数据训练
+  → 但跨工程/区域的泛化性很少被测试
+</code></pre>
+<h3>1.3 本文方案</h3>
+<pre class="notranslate"><code class="notranslate">核心思想：医学图像分割的启发
+  → U-Net 在医学上：仅 30 张原始图像 + 数据增强 = 通用分割模型
+  → 本文：仅 10 个微震样本 + 7 种物理增强 = 泛化检测/拾取模型
+
+关键设计：
+  1) 2D U-Net（非 1D）：同时处理多个接收器 → 学习 P/S 时差特征
+  2) 7 种增强方法模拟不同物理因素（速度模型、接收器几何、震源机制等）
+  3) 全自动实时监测流程（NN → 网格搜索定位）
+
+测试策略：
+  训练：Project 1, Stage 14 的开头 10 个事件
+  测试 A：同 Project 1 的 Stage 18（不同深度、不同波形特征）
+  测试 B：完全未知的 Project 2（不同接收器几何、不同速度模型、不同距离）
+
+
+---
+
+## 2. Neural Network and Data Augmentation（方法与数据增强——核心）
+
+### 2.1 U-Net 架构
+
+**输入输出**：
+</code></pre>
+<p>输入: [12 receivers × 512 time points × 3 components] → 视为 "图像" (12×512×3)<br>
+输出: [12 × 512 × 1] → 高斯分布标签（P/S 到时位置为高斯峰值）</p>
+<p>采样率: 1 ms<br>
+窗口长度: 512 ms（保证包含完整 P/S 相位）<br>
+P/S 时差: 50 ms ~ 数百 ms（取决于震中距）<br>
+接收器数量: 最大 12（不足时补零）</p>
+<pre class="notranslate"><code class="notranslate">
+**U-Net 结构**（20 层 2D 卷积）：
+</code></pre>
+<p>输入 (12×512×3)<br>
+↓<br>
+┌─ Conv3×3 → Conv3×3 → MaxPool (2×2) ───────┐  通道: 3→64<br>
+├─ Conv3×3 → Conv3×3 → MaxPool (2×2) ───────┤  通道: 64→128<br>
+├─ Conv3×3 → Conv3×3 → MaxPool (2×2) ───────┤  通道: 128→256<br>
+├─ Conv3×3 → Conv3×3 → MaxPool (2×2) ───────┤  通道: 256→512<br>
+├─ Conv3×3 → Conv3×3 ───────────────────────┤  通道: 512→1024，特征图 (16×3)<br>
+├─ UpConv2×2 → Conv3×3 → Conv3×3 ──────────┤  通道: 1024→512<br>
+├─ UpConv2×2 → Conv3×3 → Conv3×3 ──────────┤  通道: 512→256<br>
+├─ UpConv2×2 → Conv3×3 → Conv3×3 ──────────┤  通道: 256→128<br>
+└─ UpConv2×2 → Conv3×3 → Conv3×3 ──────────┘  通道: 128→64 → 1（Sigmoid）</p>
+<p>输出 (12×512×1)<br>
+每层都有 Skip Connection（左侧对应深度直接拼接到右侧）</p>
+<pre class="notranslate"><code class="notranslate">
+&lt;img width="565" height="360" alt="Image" src="https://github.com/user-attachments/assets/8fd68cbb-b329-40fc-bb67-8f747a999202" /&gt;
+
+**与 PhaseNet (Zhu &amp; Beroza 2019) 的关键差异**：
+
+| 维度 | PhaseNet | 本文 |
+|------|:--------:|:----:|
+| 卷积维度 | 1D（单道处理） | **2D（多道同时处理）** |
+| 输入 | 单台站 3C 波形 [3, N] | 多接收器 3C 波形 [N_recv, N_time, 3] |
+| 学习特征 | 单道 P/S 波形特征 | **多道 P/S 时差特征（moveout）** |
+| 标签 | P/S/Noise 三条高斯曲线 | **一条高斯曲线（P+S 共用）** |
+
+**为什么用一条而不是三条高斯标签**（论文讨论部分说明）：
+</code></pre>
+<p>数据增强后，P 和 S 的波形特征差异被扭曲<br>
+→ 难以区分 P 和 S<br>
+→ 改为学习 P/S 整体的 moveout 曲线<br>
+→ 输出后用到时曲线分析区分 P 和 S</p>
+<pre class="notranslate"><code class="notranslate">
+**高斯标签设计**：
+</code></pre>
+<p>P/S 到时位置 → 高斯峰值，方差 10⁻⁵ s²<br>
+→ 训练时标签有不确定性容忍度<br>
+→ 提高收敛性</p>
+<pre class="notranslate"><code class="notranslate">
+### 2.2 7 种数据增强方法——完整流水线
+
+**数据增强的哲学**（论文隐含但明确）：
+
+&gt; "Data augmentation can yield a training set with more generalized features based on the original samples, and it **might play a more important role than the size of the original training set**."
+
+#### 增强流程（顺序执行）
+
+</code></pre>
+<p>[Step 1] 接收器顺序反转（×2）<br>
+→ 模拟事件在接收阵列上方 vs 下方<br>
+→ 10 个原始样本 → 20 个</p>
+<p>[Step 2] 分量旋转（×40）<br>
+→ 随机旋转角（ϕ, θ, φ）独立应用于 P 和 S 波<br>
+→ 模拟不同方位角、不同震源机制的偏振变化<br>
+→ 20 → 800 个</p>
+<p>[Step 3] P/S 到时移动（×20）<br>
+→ 随机移动首尾到时（±50 ms），插值生成新到时曲线<br>
+→ 保证 P/S 时差 ≥50 ms<br>
+→ 模拟不同速度模型、不同事件位置<br>
+→ 800 → 16,000 个</p>
+<p>[Step 4] P 振幅调整（随机从 16,000 选基）<br>
+→ 乘以 0.02–0.8 的随机因子<br>
+→ 模拟不同 P/S 振幅比<br>
+→ 生成 14,400 个</p>
+<p>[Step 5] 叠加噪声（随机从之前选基）<br>
+→ 从连续数据截取 200 个噪声窗<br>
+→ 信号/噪声振幅比 = 2–8 随机<br>
+→ 10,400 个</p>
+<p>[Step 6] 添加坏道（随机选接收器）<br>
+→ 将选定接收器的波形替换为噪声<br>
+→ 模拟传感器故障<br>
+→ 1,000 个</p>
+<p>[Step 7] 剔除接收器（随机数目）<br>
+→ 模拟不同工程接收器数不同的情况<br>
+→ 40,800 个</p>
+<p>额外：200 个纯噪声样本 → 增强检测能力<br>
+─────────────────────────────────────<br>
+总计: 20+800+16,000+14,400+10,400+1,000+40,800+200 = 82,800</p>
+<pre class="notranslate"><code class="notranslate">
+**对数据增强重要性的验证**（Discussion 段）：
+</code></pre>
+<p>删掉"分量旋转"增强：仅能检测 182 个事件（vs 506）<br>
+删掉"P/S 到时移动"或"接收器反转"：0 事件（完全失效）<br>
+→ 说明物理合理的增强比样本量更重要</p>
+<pre class="notranslate"><code class="notranslate">
+### 2.3 训练设置
+
+| 参数 | 值 |
+|------|:---:|
+| 框架 | TensorFlow |
+| 优化器 | Adam |
+| 学习率 | 10⁻⁴ |
+| 损失函数 | 二值交叉熵 |
+| Epochs | 200 |
+| 验证集 | 15% 随机抽样 |
+| 原始样本 | 10 个事件 |
+
+---
+
+## 3. Real-Time Event Detection and Location Workflow（实时监测流程）
+
+### 3.1 推理过程
+
+</code></pre>
+<p>连续波形数据<br>
+↓ 截取 512 ms 窗口，步长 256 ms（50% 重叠）<br>
+↓ 每个接收器：三分量各自除以最大振幅（保留相对幅值）<br>
+↓<br>
+U-Net 推理 → 输出 [12, 512, 1] 高斯概率分布<br>
+↓<br>
+对每个接收器道：<br>
+找第一个最大概率 → P 或 S 到时<br>
+跳过 20 ms（高斯半径）找第二个最大概率 → 另一个到时<br>
+↓<br>
+若 &gt;13 个 P/S 到时（12 个接收器共 24 个）的概率 &gt;0.7<br>
+→ 判定为微震事件<br>
+若概率不足 → 判定为噪声或非完整事件<br>
+↓<br>
+重复事件去除：比较相邻窗口的到时，保留最早的 P+S 完整事件</p>
+<pre class="notranslate"><code class="notranslate">
+### 3.2 网格搜索定位
+
+</code></pre>
+<p>走时表：根据速度模型 + 接收器几何预计算</p>
+<p>垂直监测井 → 2D 网格搜索（深度 + 水平距离）<br>
+方位角：P 波质点运动估计（SVD, 5–200 Hz 滤波, P 波后 10 ms）</p>
+<p>斜井 → 3D 网格搜索<br>
+粗网格 (20 m) → 找初始位置 → 细网格 (5 m) 精化</p>
+<pre class="notranslate"><code class="notranslate">
+### 3.3 实时性能
+
+</code></pre>
+<p>U-Net 推理: 3.1 s 处理 10 s 连续数据（Intel i7-8565U）<br>
+网格搜索定位: 0.2–18.0 s / 事件<br>
+→ 满足实时监测需求</p>
+<pre class="notranslate"><code class="notranslate">
+---
+
+## 4. Applying the Trained Model to Independent Hydraulic Fracturing Stage（结果 1：同工程跨 Stage）
+
+### 4.1 实验设计
+
+</code></pre>
+<p>训练集: Project 1, Stage 14, 前 10 个事件（距接收阵列 ~510 m）<br>
+测试集 A: Project 1, Stage 18（~367 m，不同深度，不同波形特征）<br>
+测试集 B: Project 1, Stage 14 剩余事件</p>
+<pre class="notranslate"><code class="notranslate">
+### 4.2 检测结果
+
+| 测试集 | 检测事件数 |
+|:-----:|:---------:|
+| Stage 14（含训练集） | 1,933 |
+| Stage 18（未见 Stage） | 1,172 |
+
+**最关键的对比例**（论文亮点）：
+</code></pre>
+<p>用 176 个 Stage 14 事件训练（无数据增强）<br>
+→ 检测 Stage 18 时完全失效<br>
+→ 因为 Stage 14 和 18 的 moveout、偏振、振幅比都不同</p>
+<p>用 10 个事件 + 增强训练<br>
+→ Stage 18 成功检测 1,172 个事件<br>
+→ 波形特征差异很大也能泛化</p>
+<h3>4.3 典型波形对比（Fig. 7）</h3>
+<p>论文展示了两个 Stage 的典型波形，P/S 到时曲线、振幅比、尾波特征均不同 → 模型仍能正确检测和拾取。</p>
+<hr>
+<h2>5. Applying the Trained Model to an Independent Project and a New Area（结果 2：跨工程跨区域泛化——最关键的实验）</h2>
+<h3>5.1 跨区域差异</h3>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th align="center">维度</th>
+<th align="center">Project 1 (训练)</th>
+<th align="center">Project 2 (测试)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">接收器几何</td>
+<td align="center">垂直井</td>
+<td align="center"><strong>斜井（偏差井）</strong></td>
+</tr>
+<tr>
+<td align="center">距压裂段</td>
+<td align="center">~510 m（Stage 14）</td>
+<td align="center"><strong>~1,197 m</strong></td>
+</tr>
+<tr>
+<td align="center">速度模型</td>
+<td align="center">来自 Project 1 测井</td>
+<td align="center"><strong>不同（来自 Project 2 测井）</strong></td>
+</tr>
+<tr>
+<td align="center">P/S 时差</td>
+<td align="center">较小</td>
+<td align="center"><strong>更大（因距离更远）</strong></td>
+</tr>
+<tr>
+<td align="center">S 尾波</td>
+<td align="center">较强</td>
+<td align="center">较弱</td>
+</tr>
+<tr>
+<td align="center">定位</td>
+<td align="center">2D 网格搜索</td>
+<td align="center"><strong>3D 网格搜索</strong></td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<h3>5.2 检测结果</h3>
+<pre class="notranslate"><code class="notranslate">U-Net 检测: 506 个事件（分布在生产井周围）
+STA/LTA + 手动拾取: 仅 325 个事件（有完整 P/S）
+→ U-Net 检测效率 +56%
+</code></pre>
+<h3>5.3 不同接收器配置的测试（Fig. 10）</h3>
+<pre class="notranslate"><code class="notranslate">测试了 4 种输入配置:
+  (a) 8 个接收器，间距 20 m
+  (b) 5 个接收器，间距 20 m
+  (c) 6 个接收器，间距 40 m
+  (d) 不均匀间距（20 m + 40 m 混合）
+
+→ 所有配置均能正确拾取 P/S
+→ 接收器不足 12 时，补零即可
+</code></pre>
+<h3>5.4 增强方法的逐项验证（Fig. 11–13）</h3>
+<pre class="notranslate"><code class="notranslate">接收器反转（Fig. 11）: 反转后 P/S 到时顺序倒转，模型仍正确拾取
+P 振幅降低（Fig. 12）: P 波几乎不可见时，模型仍能识别
+分量旋转（Fig. 13）: 旋转后偏振变化，模型仍正确
+</code></pre>
+<hr>
+<h2>6. Comparison with Traditional Method（与传统方法对比）</h2>
+<h3>6.1 AR Picker 对比</h3>
+<markdown-accessiblity-table><table role="table">
+<thead>
+<tr>
+<th align="center">指标</th>
+<th align="center">相位</th>
+<th align="center">U-Net</th>
+<th align="center">AR Picker</th>
+<th align="center">提升量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">精确率</td>
+<td align="center">P</td>
+<td align="center"><strong>0.96</strong></td>
+<td align="center">0.66</td>
+<td align="center">+0.30</td>
+</tr>
+<tr>
+<td align="center"></td>
+<td align="center">S</td>
+<td align="center"><strong>0.95</strong></td>
+<td align="center">0.28</td>
+<td align="center"><strong>+0.67</strong></td>
+</tr>
+<tr>
+<td align="center">召回率</td>
+<td align="center">P</td>
+<td align="center"><strong>0.92</strong></td>
+<td align="center">0.86</td>
+<td align="center">+0.06</td>
+</tr>
+<tr>
+<td align="center"></td>
+<td align="center">S</td>
+<td align="center"><strong>0.75</strong></td>
+<td align="center">0.45</td>
+<td align="center"><strong>+0.30</strong></td>
+</tr>
+<tr>
+<td align="center"><strong>F1</strong></td>
+<td align="center">P</td>
+<td align="center"><strong>0.94</strong></td>
+<td align="center">0.75</td>
+<td align="center">+0.19</td>
+</tr>
+<tr>
+<td align="center"></td>
+<td align="center">S</td>
+<td align="center"><strong>0.84</strong></td>
+<td align="center">0.35</td>
+<td align="center"><strong>+0.49</strong></td>
+</tr>
+</tbody>
+</table></markdown-accessiblity-table>
+<p><strong>核心发现</strong>：</p>
+<pre class="notranslate"><code class="notranslate">U-Net 在 S 波拾取上优势最大（F1: 0.84 vs 0.35）
+  → S 波通常 SNR 更低 → 传统 AR 受噪声影响大
+  → U-Net 学到多道 moveout 特征 → 单道 SNR 低时仍可交叉验证
+</code></pre>
+<p><strong>评估标准</strong>：</p>
+<pre class="notranslate"><code class="notranslate">概率阈值 &gt; 0.7 为正拾取
+到时误差 &lt; 5 ms 为真阳性
+</code></pre>
+<hr>
+<h2>7. Discussion（讨论）</h2>
+<h3>7.1 数据增强效果的讨论</h3>
+<p><strong>为什么"分量旋转"、"P/S 移动"、"接收器反转"最关键</strong>：</p>
+<pre class="notranslate"><code class="notranslate">原因：它们模拟了影响波形最基本的物理因素
+  旋转 = 改变偏振（不同的震源方位角/震源机制）
+  P/S 移动 = 改变走时（不同的速度模型/事件位置）
+  反转 = 改变到时顺序（事件在阵列上方或下方）
+
+删掉任何一个 → 检测能力急剧下降或完全丧失
+</code></pre>
+<h3>7.2 合成的局限性</h3>
+<pre class="notranslate"><code class="notranslate">增强产生的样本会"扭曲"真实波形
+  → P 和 S 分隔后分别旋转
+  → 波形拉伸后可能不物理
+
+需进一步研究的场景：
+  → 强反射波和面波
+  → 多井监测
+  → 穿过辐射模式节线的极性反转
+</code></pre>
+<h3>7.3 与其他小样本策略的关系</h3>
+<pre class="notranslate"><code class="notranslate">数据增强（本文）：依赖物理变换模拟变化
+迁移学习（Chai et al. 2020a）：依赖已有预训练模型
+压缩感知（Zhang et al. 2020b）：从稀疏样本预测完整波形集
+图像分割增强（Zhu et al. 2020）：几何/色彩增强
+
+→ 这些方法可互补
+  数据增强 → 基础泛化
+  迁移学习 → 遇到增强无法模拟的新特征时补充
+</code></pre>
+<h3>7.4 高斯标签方差的影响</h3>
+<pre class="notranslate"><code class="notranslate">大方差：容忍训练标签误差 ↑，但预测分辨率 ↓
+小方差：分辨率 ↑，但训练收敛困难
+
+本文用 10⁻⁵ s²：平衡了收敛性和分辨率
+</code></pre>
+<h3>7.5 多事件窗口的问题</h3>
+<pre class="notranslate"><code class="notranslate">512 ms 窗口对大多数井下微震足够
+  → 但窗口内出现多个事件时
+  → 仅保留第一个
+  → 需事件关联方法改进（Ross et al. 2019; Zhang et al. 2019）
+</code></pre>
+<hr>
+<h2>8. Conclusion（结论）</h2>
+<pre class="notranslate"><code class="notranslate">1) 7 种数据增强方法训练 U-Net → 微震检测 + P/S 拾取
+2) 仅 10 个原始样本 → 泛化到不同 Stage（同工程）和不同 Project（跨工程）
+3) NN + 网格搜索 → 全自动实时监测流程（无需人工干预）
+4) U-Net 在 Precision/Recall/F1 上全面优于传统 AR Picker
+5) P 波 F1=0.94, S 波 F1=0.84（AR 仅为 0.75 和 0.35）
+6) 概念可推广到其他数据有限的地球物理应用
+</code></pre></div>
+<div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://Lszidv.github.io">芜尽</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行 "+diffDay+" 天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z', 'copy': 'M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z', 'check': 'M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.disabled=true;
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","Lszidv/Lszidv.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const createClipboardHTML = (codeContent, additionalClasses = '') => `
+        <pre class="notranslate"><code class="notranslate">${codeContent}</code></pre>
+        <div class="clipboard-container position-absolute right-0 top-0 ${additionalClasses}">
+            <clipboard-copy class="ClipboardButton btn m-2 p-0" role="button" style="display: inherit;">
+                <svg height="16" width="16" class="octicon octicon-copy m-2"><path d="${IconList["copy"]}"></path></svg>
+                <svg height="16" width="16" class="octicon octicon-check color-fg-success m-2 d-none"><path d="${IconList["check"]}"></path></svg>
+            </clipboard-copy>
+            <div class="copy-feedback">Copied!</div>
+        </div>
+    `;
+
+    const handleCodeElements = (selector = '') => {
+        document.querySelectorAll(selector).forEach(codeElement => {
+            const codeContent = codeElement.innerHTML;
+            const newStructure = document.createElement('div');
+            newStructure.className = 'snippet-clipboard-content position-relative overflow-auto';
+            newStructure.innerHTML = createClipboardHTML(codeContent);
+
+            const parentElement = codeElement.parentElement;
+            if (selector.includes('highlight')) {
+                parentElement.insertBefore(newStructure, codeElement.nextSibling);
+                parentElement.removeChild(codeElement);
+            } else {
+                parentElement.parentElement.replaceChild(newStructure, parentElement);
+            }
+        });
+    };
+
+    handleCodeElements('pre.notranslate > code.notranslate');
+    handleCodeElements('div.highlight > pre.notranslate');
+
+    let currentFeedback = null;
+    document.querySelectorAll('clipboard-copy').forEach(copyButton => {
+        copyButton.addEventListener('click', () => {
+            const codeContent = copyButton.closest('.snippet-clipboard-content').innerText;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = codeContent;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            const copyIcon = copyButton.querySelector('.octicon-copy');
+            const checkIcon = copyButton.querySelector('.octicon-check');
+            const copyFeedback = copyButton.nextElementSibling;
+
+            if (currentFeedback && currentFeedback !== copyFeedback) {currentFeedback.style.display = 'none';}
+            currentFeedback = copyFeedback;
+
+            copyIcon.classList.add('d-none');
+            checkIcon.classList.remove('d-none');
+            copyFeedback.style.display = 'block';
+            copyButton.style.borderColor = 'var(--color-success-fg)';
+
+            setTimeout(() => {
+                copyIcon.classList.remove('d-none');
+                checkIcon.classList.add('d-none');
+                copyFeedback.style.display = 'none';
+                copyButton.style.borderColor = '';
+            }, 2000);
+        });
+    });
+});
+
+</script>
+
+
+</html>
