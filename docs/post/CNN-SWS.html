@@ -675,7 +675,10 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
     font-size: 12px;
 }
 </style>
-
+<style>
+#postBody{background: rgba(255,255,255,.55); backdrop-filter: blur(14px) saturate(180%); -webkit-backdrop-filter: blur(14px) saturate(180%); border:1px solid rgba(255,255,255,.6); border-radius:18px; padding:28px 32px; box-shadow:0 8px 32px rgba(0,0,0,.08); border-bottom:none;}
+[data-color-mode='dark'] #postBody{background: rgba(255,255,255,.03); border-color:rgba(255,255,255,.08);}
+</style>
 
 
 
@@ -994,7 +997,7 @@ model.save_weights('CNN_XKS.h5')
 print('Finish')
 
 </code></pre></div>
-<div style="font-size:small;margin-top:8px;float:right;">转载请注明出处</div>
+<div style="font-size:small;margin-top:8px;float:right;">本文章首发于芜尽，转载请注明出处</div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
 <div class="comments" id="comments"></div>
@@ -1158,6 +1161,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 </script>
-
+<script>
+(function(){var d=document;var css=d.createElement('style');css.innerHTML='.gmk-progress{position:fixed;top:0;left:0;height:3px;width:0%;background:linear-gradient(90deg,#667eea,#764ba2);z-index:9999;transition:width .1s linear;}.gmk-top{position:fixed;right:20px;bottom:24px;width:42px;height:42px;border-radius:50%;border:1px solid rgba(0,0,0,.1);background:rgba(255,255,255,.65);backdrop-filter:blur(10px);color:#57606a;font-size:18px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.12);z-index:9999;display:none;transition:.25s ease;opacity:.85;}[data-color-mode=\'dark\'] .gmk-top{background:rgba(30,35,50,.6);border-color:rgba(255,255,255,.15);color:#e6edf3;}.gmk-top:hover{opacity:1;transform:translateY(-2px);}';d.head.appendChild(css);var p=d.createElement('div');p.className='gmk-progress';d.body.appendChild(p);var b=d.createElement('button');b.className='gmk-top';b.setAttribute('aria-label','back to top');b.innerHTML='&uarr;';d.body.appendChild(b);function onScroll(){var h=d.documentElement;var max=h.scrollHeight-h.clientHeight;var s=h.scrollTop||d.body.scrollTop;p.style.width=(max>0?(s/max*100):0)+'%';b.style.display=s>400?'block':'none';}window.addEventListener('scroll',onScroll,{passive:true});onScroll();b.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'});});})();
+</script>
 
 </html>
